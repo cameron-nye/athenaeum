@@ -745,3 +745,26 @@
 - test: pass (198 tests total)
 - lint: pass
 - build: pass
+
+## Phase 2 Status Summary
+
+**All automated requirements completed (39/40)**
+
+**Remaining: REQ-2-040 - Manual verification of complete calendar sync flow**
+
+This requirement cannot be completed automatically as it requires:
+- Running npm run dev
+- Real Google account with Google Cloud OAuth credentials configured
+- Manual testing of the full OAuth flow, calendar selection, sync, and view
+
+To complete manually:
+1. Set up Google Cloud Console project with OAuth 2.0 credentials
+2. Add credentials to .env.local (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI)
+3. Run npm run dev and navigate to /calendars
+4. Click "Add Calendar" to initiate OAuth
+5. Complete Google consent and verify callback creates calendar_source
+6. Select calendars on /calendars/connect page
+7. Verify events appear on /calendars/view
+8. Test view switching (month/week/day)
+9. Test event detail modal
+10. Test manual sync button
