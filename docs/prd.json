@@ -555,7 +555,7 @@
         "Includes multi-day event examples",
         "Seed applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-040",

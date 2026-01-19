@@ -703,3 +703,27 @@
 - typecheck: pass
 - test: pass (198 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-039 - Add calendar events to seed data
+
+**Completed**: Created seed.sql with sample calendar data
+
+**Contents**:
+- Demo household + user
+- 3 calendar_sources (Work, Family, Personal) with distinct colors
+- Work events: standup, sprint planning, project review, workshop
+- Family events: dinner, soccer tournament (all-day), vacation (multi-day)
+- Personal events: gym, dentist, birthday (all-day)
+- Uses current date calculations for realistic data
+
+**Files created**:
+- supabase/seed.sql
+
+**Notes**:
+- Requires Phase 1 migrations (households, users) to exist
+- Uses ON CONFLICT DO NOTHING for idempotent re-runs
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
