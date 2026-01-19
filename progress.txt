@@ -28,3 +28,22 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-003 - Create calendar_sources table migration
+
+**Completed**: Created PostgreSQL migration for calendar_sources table
+
+**Decisions**:
+- References households(id) and users(id) - requires Phase 1 migrations to run first
+- Added CHECK constraint for provider ('google', 'ical')
+- Added UNIQUE constraint on (household_id, provider, external_id)
+- Added indexes for household lookup and sync queries
+- Included encrypted token columns for OAuth security
+
+**Files changed**:
+- supabase/migrations/20260119080810_create_calendar_sources.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
