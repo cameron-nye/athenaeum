@@ -480,3 +480,27 @@
 - typecheck: pass
 - test: pass (135 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-024 - Create calendar view page with view switcher
+
+**Completed**: Created calendar view page with animated view switching
+
+**Features**:
+- View switcher: Month/Week/Day with hover animations
+- View preference persisted to localStorage + URL params
+- Today button jumps to current date
+- Date picker dropdown for navigation
+- Fetches events via /api/calendars/events endpoint
+- Loading skeleton shimmer animation
+- AnimatePresence for smooth view transitions
+- Day click in month view switches to day view
+
+**Files changed**:
+- app/(dashboard)/calendars/view/page.tsx (new)
+- app/api/calendars/events/route.ts (new)
+- docs/prd.json (marked REQ-2-024 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (135 tests total)
+- lint: pass
