@@ -99,3 +99,21 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-007 - Create RLS policies for events table
+
+**Completed**: Created RLS policies for events table
+
+**Decisions**:
+- Joins through calendar_sources to check household membership
+- Uses EXISTS subquery pattern for security
+- SELECT/INSERT/UPDATE/DELETE all check calendar_source->household relation
+- UPDATE uses both USING and WITH CHECK to prevent changing calendar_source_id to other household
+
+**Files changed**:
+- supabase/migrations/20260119120000_events_rls.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
