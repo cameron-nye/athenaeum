@@ -1,0 +1,17 @@
+# Progress Log
+
+## 2026-01-19: REQ-1-002 - Install Supabase dependencies
+
+**Completed**: Installed @supabase/supabase-js, @supabase/ssr (runtime deps), supabase CLI (devDep)
+
+**Decisions**:
+- Used npm (not pnpm) to match existing project setup
+
+**Files changed**:
+- package.json (added dependencies)
+- package-lock.json (updated)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
