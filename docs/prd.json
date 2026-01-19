@@ -302,7 +302,7 @@
         "Day cells use staggered fade-in animation on initial render",
         "Events animate in with subtle spring physics"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-022",
@@ -492,7 +492,7 @@
         "All-day events handled correctly across timezones",
         "Timezone info preserved from Google Calendar"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-035",
@@ -517,7 +517,7 @@
         "Recurrence info shown in event detail",
         "Exception instances handled correctly"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-037",

@@ -385,3 +385,50 @@
 - typecheck: pass
 - test: pass (103 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-034 - Timezone handling (already implemented)
+
+**Completed**: Already implemented in date utilities and calendar sync
+
+**Notes**:
+- Events stored in UTC via toISOString() in mapGoogleEventToDbEvent
+- formatDate/formatTime accept timezone param, default to local
+- All-day events stored as midnight UTC with all_day flag
+- raw_data preserves original Google event with timezone info
+
+**Files**: No changes needed (lib/utils/dates.ts, lib/google/calendar.ts already handle this)
+
+## 2026-01-19: REQ-2-036 - Recurring events (already implemented)
+
+**Completed**: Already implemented in calendar sync utility
+
+**Notes**:
+- singleEvents=true in fetchGoogleEvents expands recurring events
+- Individual instances stored in events table
+- recurrence_rule stored for display
+- Exception handling done by Google API (singleEvents mode)
+
+## 2026-01-19: REQ-2-021 - Create month calendar view component
+
+**Completed**: Created MonthView component with framer-motion animations
+
+**Features**:
+- 6-week grid display (42 cells)
+- Events grouped by date, sorted by all-day then start time
+- Event chips colored by calendar source
+- Prev/next month navigation with slide animation (300ms)
+- Staggered fade-in for day cells (10ms stagger)
+- Spring physics for event chips (stiffness: 400, damping: 25)
+- Current day highlighted
+- Loading skeleton state
+- Accessible: keyboard navigation, aria-labels
+
+**Files changed**:
+- components/calendar/MonthView.tsx (new)
+- components/calendar/MonthView.test.tsx (new, 10 tests)
+- docs/prd.json (marked REQ-2-021, REQ-2-034, REQ-2-036 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (113 tests total)
+- lint: pass
