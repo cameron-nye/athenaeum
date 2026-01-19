@@ -21,6 +21,17 @@ export interface CalendarEvent {
 }
 
 /**
+ * Error types for categorizing Google API failures.
+ */
+export type GoogleApiErrorType =
+  | 'auth' // 401 - Authentication/authorization failure
+  | 'not_found' // 404 - Calendar doesn't exist
+  | 'rate_limit' // 429 - Too many requests
+  | 'server_error' // 5xx - Google server error
+  | 'network' // Network connectivity issues
+  | 'unknown'; // Unknown error
+
+/**
  * Result of a calendar sync operation
  */
 export interface SyncResult {
@@ -29,8 +40,12 @@ export interface SyncResult {
   eventsDeleted: number;
   newSyncToken: string | null;
   error?: string;
+  /** Categorized error type for UI handling */
+  errorType?: GoogleApiErrorType;
   /** True if the calendar was disconnected due to token revocation */
   disconnected?: boolean;
+  /** True if the error is retryable */
+  retryable?: boolean;
 }
 
 /**
@@ -296,6 +311,94 @@ async function markCalendarDisconnected(
 }
 
 /**
+ * Categorizes a Google API error and determines if it's retryable.
+ *
+ * @param error - The error from the Google API
+ * @returns Object with error type, message, and retryable flag
+ */
+export function categorizeGoogleApiError(error: unknown): {
+  type: GoogleApiErrorType;
+  message: string;
+  retryable: boolean;
+} {
+  if (!(error instanceof Error)) {
+    return { type: 'unknown', message: 'Unknown error', retryable: false };
+  }
+
+  // Check for HTTP status codes from GaxiosError
+  const code = 'code' in error ? (error as { code?: number | string }).code : undefined;
+  const status = 'status' in error ? (error as { status?: number }).status : undefined;
+  const httpCode = typeof code === 'number' ? code : status;
+
+  // Check for network errors
+  if (
+    error.message.includes('ENOTFOUND') ||
+    error.message.includes('ECONNREFUSED') ||
+    error.message.includes('ETIMEDOUT') ||
+    error.message.includes('network')
+  ) {
+    return {
+      type: 'network',
+      message: 'Network error. Please check your internet connection.',
+      retryable: true,
+    };
+  }
+
+  // Categorize by HTTP status code
+  switch (httpCode) {
+    case 401:
+      return {
+        type: 'auth',
+        message: 'Authentication failed. Please reconnect your calendar.',
+        retryable: false,
+      };
+    case 403: {
+      // Could be rate limit or permissions
+      const lowerMessage = error.message.toLowerCase();
+      if (lowerMessage.includes('rate limit') || lowerMessage.includes('quota')) {
+        return {
+          type: 'rate_limit',
+          message: 'Rate limit exceeded. Please try again later.',
+          retryable: true,
+        };
+      }
+      return {
+        type: 'auth',
+        message: 'Permission denied. Please reconnect your calendar.',
+        retryable: false,
+      };
+    }
+    case 404:
+      return {
+        type: 'not_found',
+        message: 'Calendar not found. It may have been deleted.',
+        retryable: false,
+      };
+    case 429:
+      return {
+        type: 'rate_limit',
+        message: 'Too many requests. Please try again later.',
+        retryable: true,
+      };
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return {
+        type: 'server_error',
+        message: 'Google Calendar is temporarily unavailable. Please try again later.',
+        retryable: true,
+      };
+    default:
+      return {
+        type: 'unknown',
+        message: error.message || 'An unexpected error occurred.',
+        retryable: false,
+      };
+  }
+}
+
+/**
  * Syncs events from a Google Calendar to the database.
  *
  * Uses incremental sync with syncToken when available.
@@ -383,8 +486,8 @@ export async function syncCalendarEvents(
       newSyncToken: nextSyncToken,
     };
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`Sync failed for calendar ${calendarSource.id}:`, errorMessage);
+    // Log the full error for debugging
+    console.error(`Sync failed for calendar ${calendarSource.id}:`, error);
 
     // Check if this is a token revocation error
     if (error instanceof TokenRevocationError) {
@@ -395,7 +498,27 @@ export async function syncCalendarEvents(
         eventsDeleted: 0,
         newSyncToken: null,
         error: 'Calendar disconnected: authentication expired. Please reconnect.',
+        errorType: 'auth',
         disconnected: true,
+        retryable: false,
+      };
+    }
+
+    // Categorize the error for UI handling
+    const { type, message, retryable } = categorizeGoogleApiError(error);
+
+    // Mark calendar as disconnected for 404 errors (calendar deleted)
+    if (type === 'not_found') {
+      await markCalendarDisconnected(supabase, calendarSource.id);
+      return {
+        success: false,
+        eventsUpserted: 0,
+        eventsDeleted: 0,
+        newSyncToken: null,
+        error: message,
+        errorType: type,
+        disconnected: true,
+        retryable: false,
       };
     }
 
@@ -404,7 +527,9 @@ export async function syncCalendarEvents(
       eventsUpserted: 0,
       eventsDeleted: 0,
       newSyncToken: null,
-      error: errorMessage,
+      error: message,
+      errorType: type,
+      retryable,
     };
   }
 }

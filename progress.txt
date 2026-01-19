@@ -609,3 +609,26 @@
 - typecheck: pass
 - test: pass (173 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-038 - Create error handling for Google API failures
+
+**Completed**: Added comprehensive Google API error categorization
+
+**Features**:
+- GoogleApiErrorType: auth, not_found, rate_limit, server_error, network, unknown
+- categorizeGoogleApiError: maps HTTP codes + message patterns to error types
+- SyncResult: errorType, retryable flags for UI handling
+- 404 errors auto-disconnect calendar (deleted on Google side)
+- Network errors (ENOTFOUND, ECONNREFUSED, ETIMEDOUT) marked retryable
+- 5xx server errors marked retryable
+- Full error logged for debugging
+
+**Files changed**:
+- lib/google/calendar.ts (GoogleApiErrorType, categorizeGoogleApiError)
+- lib/google/calendar.test.ts (+15 tests for error categorization)
+- docs/prd.json (marked REQ-2-038 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass

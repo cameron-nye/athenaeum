@@ -542,7 +542,7 @@
         "Network errors show retry option",
         "Errors logged for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-039",
