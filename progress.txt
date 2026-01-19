@@ -235,3 +235,26 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-014 + REQ-2-015 - Create Google Calendar sync utility
+
+**Completed**: Created calendar sync utility with event upsert function
+
+**Decisions**:
+- lib/google/calendar.ts exports: mapGoogleEventToDbEvent, upsertEvents, deleteEvents, syncCalendarEvents
+- Uses syncToken for incremental sync, falls back to full sync on 410 error
+- Time range for full sync: 30 days ago to 90 days ahead
+- singleEvents=true expands recurring events into instances (REQ-2-036)
+- Handles pagination (maxResults=250 per page)
+- Cancelled events deleted from DB (status='cancelled')
+- Auto-refreshes tokens via getValidOAuth2Client callback
+- Updates sync_token + last_synced_at after successful sync
+
+**Files changed**:
+- lib/google/calendar.ts (new)
+- lib/google/calendar.test.ts (new, 9 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (38 tests total)
+- lint: pass
