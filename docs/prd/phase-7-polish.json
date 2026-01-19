@@ -1,0 +1,535 @@
+{
+  "phase": 7,
+  "name": "Polish",
+  "description": "Final polish including display customization, multiple displays, performance optimization, and offline support",
+  "requirements": [
+    {
+      "id": "REQ-7-001",
+      "title": "Create display settings schema expansion",
+      "description": "Expand display settings to include all customization options",
+      "acceptance_criteria": [
+        "TypeScript interface updated for all settings",
+        "Settings include: theme (light/dark/auto)",
+        "Settings include: layout (default/compact/focus)",
+        "Settings include: widgets (clock, weather, chores, meals)",
+        "Settings include: slideshow settings",
+        "Settings include: refresh interval",
+        "Settings include: burn-in prevention",
+        "Default values defined for all settings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-002",
+      "title": "Create display theme implementation",
+      "description": "Implement multiple theme options for display",
+      "acceptance_criteria": [
+        "Light theme with readable colors",
+        "Dark theme with appropriate contrast",
+        "Auto theme follows system/time of day",
+        "Theme applied via CSS classes",
+        "Smooth transition between themes",
+        "All components respect theme"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-003",
+      "title": "Create display layout options",
+      "description": "Implement multiple layout configurations",
+      "acceptance_criteria": [
+        "Default layout with all widgets",
+        "Compact layout for smaller displays",
+        "Focus layout emphasizing calendar",
+        "Photo layout for slideshow focus",
+        "Layout affects component arrangement",
+        "Layouts work at 1920x1080"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-004",
+      "title": "Create widget toggles in settings",
+      "description": "Allow enabling/disabling individual widgets",
+      "acceptance_criteria": [
+        "Toggle for clock widget",
+        "Toggle for chores widget",
+        "Toggle for meals widget",
+        "Toggle for upcoming events widget",
+        "Toggle for photo slideshow",
+        "Disabled widgets not rendered"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-005",
+      "title": "Create display settings UI in dashboard",
+      "description": "Create comprehensive settings editor for displays",
+      "acceptance_criteria": [
+        "Page at src/app/(dashboard)/settings/displays/[id]/page.tsx",
+        "Theme selector (radio or dropdown)",
+        "Layout selector",
+        "Widget toggle switches",
+        "Slideshow settings section",
+        "Preview of display layout",
+        "Save and cancel buttons",
+        "Changes apply to display in real-time"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-006",
+      "title": "Create multiple display support",
+      "description": "Support different settings per display device",
+      "acceptance_criteria": [
+        "Each display has independent settings",
+        "Dashboard shows list of all displays",
+        "Can name displays (Kitchen, Living Room)",
+        "Each display can have different theme/layout",
+        "Display ID in URL for per-display routes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-007",
+      "title": "Create display naming and identification",
+      "description": "Allow meaningful names for display devices",
+      "acceptance_criteria": [
+        "Display name editable in settings",
+        "Name shown in dashboard display list",
+        "Name shown on display debug overlay",
+        "Default name is 'Display 1', 'Display 2', etc."
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-008",
+      "title": "Install next-pwa for service worker",
+      "description": "Install and configure PWA package",
+      "acceptance_criteria": [
+        "next-pwa or similar package installed",
+        "Service worker generated on build",
+        "PWA manifest configured",
+        "Icons included for PWA"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-009",
+      "title": "Create service worker configuration",
+      "description": "Configure service worker for offline caching",
+      "acceptance_criteria": [
+        "App shell precached",
+        "Static assets cached (CSS, JS, images)",
+        "API responses cached with stale-while-revalidate",
+        "Image cache with expiration",
+        "Cache cleanup on update"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-010",
+      "title": "Create offline fallback page",
+      "description": "Create page shown when completely offline",
+      "acceptance_criteria": [
+        "Fallback page exists",
+        "Shows cached data if available",
+        "Shows offline message",
+        "Retry button to check connection",
+        "Styled appropriately"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-011",
+      "title": "Create offline indicator component",
+      "description": "Show indicator when network connection lost",
+      "acceptance_criteria": [
+        "Component detects online/offline",
+        "Shows warning badge when offline",
+        "Badge positioned non-intrusively",
+        "Hides when back online",
+        "Works on both dashboard and display"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-012",
+      "title": "Implement IndexedDB caching",
+      "description": "Cache critical data in IndexedDB for offline",
+      "acceptance_criteria": [
+        "Events cached in IndexedDB",
+        "Chores cached in IndexedDB",
+        "Meals cached in IndexedDB",
+        "Cache updated on data changes",
+        "Falls back to cache when offline"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-013",
+      "title": "Create lazy loading for dashboard routes",
+      "description": "Implement code splitting for dashboard",
+      "acceptance_criteria": [
+        "Dashboard routes use dynamic imports",
+        "Loading states during route load",
+        "Reduced initial bundle size",
+        "Measured improvement in load time"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-014",
+      "title": "Create image lazy loading",
+      "description": "Lazy load images in dashboard views",
+      "acceptance_criteria": [
+        "Images use loading='lazy' or intersection observer",
+        "Placeholder shown while loading",
+        "Smooth image appearance",
+        "Implemented in photo grid, recipe images"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-015",
+      "title": "Create performance monitoring",
+      "description": "Add basic performance tracking",
+      "acceptance_criteria": [
+        "Core Web Vitals tracked",
+        "Page load times measured",
+        "Error tracking implemented",
+        "Data sent to analytics or logged"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-016",
+      "title": "Optimize database queries",
+      "description": "Review and optimize slow queries",
+      "acceptance_criteria": [
+        "Indexes used for common queries",
+        "No N+1 query patterns",
+        "Pagination implemented where needed",
+        "Query performance acceptable"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-017",
+      "title": "Create error boundaries for display",
+      "description": "Implement React error boundaries for display",
+      "acceptance_criteria": [
+        "Error boundary wraps display components",
+        "Shows error UI on component crash",
+        "Auto-recovery attempt after timeout",
+        "Error logged for debugging",
+        "Prevents white screen of death"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-018",
+      "title": "Create error toast notifications",
+      "description": "Show user-friendly error messages",
+      "acceptance_criteria": [
+        "Toast component for notifications",
+        "Shows on API errors",
+        "Shows on validation errors",
+        "Dismissible after timeout",
+        "Styled for visibility"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-019",
+      "title": "Create success notifications",
+      "description": "Show feedback on successful actions",
+      "acceptance_criteria": [
+        "Success toast on save",
+        "Success toast on delete",
+        "Success toast on sync",
+        "Consistent styling with errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-020",
+      "title": "Create loading skeletons",
+      "description": "Implement skeleton loading states",
+      "acceptance_criteria": [
+        "Skeleton for calendar grid",
+        "Skeleton for photo grid",
+        "Skeleton for chore list",
+        "Skeleton for meal calendar",
+        "Smooth transition to content"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-021",
+      "title": "Implement optimistic updates",
+      "description": "Update UI optimistically before server confirms",
+      "acceptance_criteria": [
+        "Chore completion is optimistic",
+        "Grocery check-off is optimistic",
+        "Revert on server error",
+        "Improves perceived performance"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-022",
+      "title": "Create keyboard shortcuts",
+      "description": "Add keyboard navigation for power users",
+      "acceptance_criteria": [
+        "Keyboard shortcuts documented",
+        "Navigation shortcuts (g c for calendar)",
+        "Action shortcuts (n for new)",
+        "Escape to close modals",
+        "Help modal showing shortcuts"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-023",
+      "title": "Improve accessibility (a11y)",
+      "description": "Audit and improve accessibility",
+      "acceptance_criteria": [
+        "All interactive elements keyboard accessible",
+        "Proper ARIA labels",
+        "Color contrast meets WCAG AA",
+        "Focus indicators visible",
+        "Screen reader tested"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-024",
+      "title": "Create responsive dashboard layout",
+      "description": "Ensure dashboard works on mobile devices",
+      "acceptance_criteria": [
+        "Dashboard usable on tablet",
+        "Dashboard usable on phone",
+        "Navigation becomes mobile menu",
+        "Tables become cards on mobile",
+        "Touch targets appropriately sized"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-025",
+      "title": "Create mobile navigation menu",
+      "description": "Create hamburger menu for mobile",
+      "acceptance_criteria": [
+        "Hamburger icon on mobile",
+        "Slide-out or overlay menu",
+        "All navigation links accessible",
+        "Close on link click or outside click",
+        "Smooth animation"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-026",
+      "title": "Implement touch gestures",
+      "description": "Add touch gestures for mobile/touchscreen",
+      "acceptance_criteria": [
+        "Swipe to navigate weeks/months",
+        "Pull to refresh on mobile",
+        "Swipe to complete chores (optional)",
+        "Smooth gesture handling"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-027",
+      "title": "Create user profile settings",
+      "description": "Allow users to update their profile",
+      "acceptance_criteria": [
+        "Profile settings page",
+        "Edit display name",
+        "Upload avatar",
+        "Change password",
+        "Delete account (with confirmation)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-028",
+      "title": "Create notification preferences",
+      "description": "Allow users to configure notifications",
+      "acceptance_criteria": [
+        "Notification settings page",
+        "Email notification toggles",
+        "Push notification setup (future)",
+        "Reminder preferences for chores"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-029",
+      "title": "Create data export functionality",
+      "description": "Allow users to export their data",
+      "acceptance_criteria": [
+        "Export button in settings",
+        "Exports recipes as JSON or CSV",
+        "Exports meal plans",
+        "Exports chores",
+        "GDPR compliance support"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-030",
+      "title": "Create help/documentation section",
+      "description": "Create in-app help documentation",
+      "acceptance_criteria": [
+        "Help section accessible from nav",
+        "Getting started guide",
+        "Feature documentation",
+        "FAQ section",
+        "Contact/feedback option"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-031",
+      "title": "Create onboarding flow",
+      "description": "Guide new users through setup",
+      "acceptance_criteria": [
+        "Onboarding shown for new users",
+        "Step-by-step household setup",
+        "Explains main features",
+        "Prompts to add first calendar",
+        "Can be skipped or dismissed"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-032",
+      "title": "Add weather widget option",
+      "description": "Optional weather display on Pi",
+      "acceptance_criteria": [
+        "Weather widget toggleable",
+        "Location configuration",
+        "Current temperature and conditions",
+        "Simple forecast",
+        "Weather API integration"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-033",
+      "title": "Create display screensaver mode",
+      "description": "Dim display during night hours",
+      "acceptance_criteria": [
+        "Screensaver/dim mode at night",
+        "Configurable start/end times",
+        "Dimmed clock only or blank",
+        "Motion/interaction wakes display (if touchscreen)",
+        "Reduces burn-in risk"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-034",
+      "title": "Implement display memory management",
+      "description": "Prevent memory leaks on display",
+      "acceptance_criteria": [
+        "Event listeners properly cleaned up",
+        "No accumulating DOM nodes",
+        "Interval/timeout cleanup",
+        "Memory usage stable over 24 hours",
+        "Scheduled page reload as backup"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-035",
+      "title": "Create 24-hour operation test",
+      "description": "Test display stability over extended period",
+      "acceptance_criteria": [
+        "Display runs for 24+ hours",
+        "Memory usage remains stable",
+        "Real-time updates continue working",
+        "No visible degradation",
+        "Automatic recovery from errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-036",
+      "title": "Optimize bundle size",
+      "description": "Reduce JavaScript bundle size",
+      "acceptance_criteria": [
+        "Bundle analyzed (webpack-bundle-analyzer)",
+        "Unused dependencies removed",
+        "Dynamic imports for heavy components",
+        "Tree shaking effective",
+        "Total bundle size documented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-037",
+      "title": "Create deployment documentation",
+      "description": "Document deployment process",
+      "acceptance_criteria": [
+        "Vercel deployment documented",
+        "Environment variables listed",
+        "Supabase production setup documented",
+        "Domain configuration documented",
+        "Monitoring setup documented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-038",
+      "title": "Create complete Pi setup guide",
+      "description": "Comprehensive Raspberry Pi documentation",
+      "acceptance_criteria": [
+        "Hardware shopping list",
+        "OS installation steps",
+        "Kiosk configuration steps",
+        "Network/WiFi setup",
+        "Troubleshooting section",
+        "Photos/screenshots helpful"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-039",
+      "title": "Create security audit",
+      "description": "Review and document security measures",
+      "acceptance_criteria": [
+        "RLS policies reviewed",
+        "No exposed secrets",
+        "HTTPS enforced",
+        "OAuth tokens encrypted",
+        "Display tokens secure",
+        "Security measures documented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-7-040",
+      "title": "Create final end-to-end test",
+      "description": "Complete system verification",
+      "acceptance_criteria": [
+        "Fresh user can sign up",
+        "Can create household and invite family",
+        "Can connect Google Calendar",
+        "Events sync and display correctly",
+        "Can upload and manage photos",
+        "Can create and assign chores",
+        "Can plan meals and generate grocery list",
+        "Display shows all data correctly",
+        "Real-time updates work throughout",
+        "System stable over extended use",
+        "Performance acceptable",
+        "Mobile experience functional"
+      ],
+      "completed": false
+    }
+  ]
+}

@@ -1,0 +1,486 @@
+{
+  "phase": 4,
+  "name": "Photos",
+  "description": "Implement photo upload, storage, and slideshow functionality with elegant transitions and animations",
+  "requirements": [
+    {
+      "id": "REQ-4-001",
+      "title": "Create photos table migration",
+      "description": "Create PostgreSQL migration for photo metadata storage",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table photos created with columns: id, household_id, uploaded_by, storage_path, filename, width, height, taken_at, album, enabled, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "uploaded_by references users(id) ON DELETE SET NULL",
+        "enabled defaults to true",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-002",
+      "title": "Create RLS policies for photos table",
+      "description": "Create Row Level Security policies for photos",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on photos table",
+        "SELECT policy allows viewing photos in own household",
+        "INSERT policy allows adding photos to own household",
+        "UPDATE policy allows updating own household's photos",
+        "DELETE policy allows deleting own household's photos",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-003",
+      "title": "Create Supabase Storage bucket for photos",
+      "description": "Create storage bucket for photo files",
+      "acceptance_criteria": [
+        "Migration creates 'photos' bucket",
+        "Bucket is private (not public)",
+        "File size limit set (e.g., 10MB)",
+        "Allowed MIME types: image/jpeg, image/png, image/webp, image/gif"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-004",
+      "title": "Create storage RLS policies",
+      "description": "Create Row Level Security policies for storage bucket",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "SELECT policy allows reading photos from own household folder",
+        "INSERT policy allows uploading to own household folder",
+        "DELETE policy allows deleting from own household folder",
+        "Folder structure: photos/{household_id}/{filename}",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-005",
+      "title": "Create photos dashboard page",
+      "description": "Create main photos management page",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/photos/page.tsx",
+        "Shows grid of uploaded photos",
+        "Thumbnail images optimized for grid",
+        "Shows photo count",
+        "Upload button prominent",
+        "Empty state for no photos",
+        "Pagination or infinite scroll for many photos"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-006",
+      "title": "Create photo upload component",
+      "description": "Create component for uploading photos",
+      "acceptance_criteria": [
+        "Component exists at src/components/photos/PhotoUpload.tsx",
+        "Drag and drop support",
+        "Click to select files",
+        "Multiple file selection",
+        "Shows upload progress for each file",
+        "Validates file type before upload",
+        "Validates file size before upload",
+        "Shows error messages for invalid files"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-007",
+      "title": "Implement photo upload API",
+      "description": "Create server action or API for photo upload",
+      "acceptance_criteria": [
+        "Accepts multipart/form-data with files",
+        "Uploads to Supabase Storage in household folder",
+        "Generates unique filename to prevent collisions",
+        "Extracts image dimensions",
+        "Extracts EXIF taken_at date if available",
+        "Creates photos table record",
+        "Returns created photo object",
+        "Handles errors gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-008",
+      "title": "Create photo thumbnail generation",
+      "description": "Generate thumbnails for photo grid display",
+      "acceptance_criteria": [
+        "Uses Supabase image transforms",
+        "Thumbnail size: 300x300 or similar",
+        "Maintains aspect ratio (crop or fit)",
+        "Transforms applied via URL parameters",
+        "Thumbnails cached by Supabase"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-009",
+      "title": "Create photo detail modal with animations",
+      "description": "Create animated modal to view full-size photo",
+      "acceptance_criteria": [
+        "Modal component exists",
+        "Modal animates in with fade + scale (opacity 0→1, scale 0.95→1)",
+        "Backdrop has blur effect and fades in",
+        "Shows full-size image",
+        "Image crossfades when navigating (300ms)",
+        "Shows filename and upload date",
+        "Shows taken_at date if available",
+        "Previous/next navigation with slide animation",
+        "Keyboard navigation (arrow keys, Escape)",
+        "Close button",
+        "Exit animation using AnimatePresence"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-010",
+      "title": "Create photo delete functionality",
+      "description": "Allow deleting photos from the system",
+      "acceptance_criteria": [
+        "Delete button on photo detail modal",
+        "Confirmation dialog before deletion",
+        "Deletes file from Supabase Storage",
+        "Deletes record from photos table",
+        "Shows success message",
+        "Refreshes photo grid after deletion"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-011",
+      "title": "Create photo enable/disable toggle",
+      "description": "Allow excluding photos from slideshow without deleting",
+      "acceptance_criteria": [
+        "Toggle on photo detail or grid",
+        "Updates photos.enabled in database",
+        "Disabled photos shown with overlay in grid",
+        "Disabled photos excluded from slideshow"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-012",
+      "title": "Create album management",
+      "description": "Allow organizing photos into albums",
+      "acceptance_criteria": [
+        "Album dropdown/selector on photos page",
+        "Can create new album",
+        "Can assign photos to album",
+        "Can filter grid by album",
+        "Album selector on slideshow settings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-013",
+      "title": "Create slideshow component for display",
+      "description": "Create photo slideshow component for Pi display with elegant transitions",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/Slideshow.tsx",
+        "Fetches enabled photos for household",
+        "Full-screen image display",
+        "Crossfade transitions between photos (800-1200ms ease-in-out)",
+        "No jarring cuts or flashes between photos",
+        "Configurable interval (default 10 seconds)",
+        "Randomized or sequential order option",
+        "Transitions are buttery smooth at 60fps"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-014",
+      "title": "Implement slideshow image preloading",
+      "description": "Preload upcoming images to prevent loading flicker",
+      "acceptance_criteria": [
+        "Preloads next 2-3 images",
+        "Uses ring buffer pattern",
+        "Cleans up old preloaded images",
+        "Reduces visible loading time between slides"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-015",
+      "title": "Create display-optimized image URLs",
+      "description": "Generate image URLs optimized for display resolution",
+      "acceptance_criteria": [
+        "Function generates transform URL",
+        "Resizes to 1920x1080 max",
+        "Uses 'contain' resize mode",
+        "Quality set to 85%",
+        "Progressive JPEG format"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-016",
+      "title": "Implement Ken Burns effect",
+      "description": "Add elegant slow pan/zoom animation to slideshow",
+      "acceptance_criteria": [
+        "CSS animation for slow zoom/pan (scale 1.0→1.1 or similar)",
+        "Different start/end positions per image (randomized)",
+        "Smooth animation using CSS transform (GPU accelerated)",
+        "Animation duration matches slide interval (10s default)",
+        "Can be disabled in settings",
+        "Combined with crossfade for elegant photo transitions",
+        "Effect feels cinematic and calming"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-017",
+      "title": "Create idle detection for slideshow trigger",
+      "description": "Start slideshow with smooth transition after calendar inactivity",
+      "acceptance_criteria": [
+        "Detects no upcoming events in near future",
+        "Configurable idle timeout",
+        "Transitions to slideshow mode with elegant fade (800ms)",
+        "Returns to calendar when events upcoming",
+        "Transition between modes is seamless",
+        "No jarring visual changes during mode switch"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-018",
+      "title": "Create slideshow mode toggle",
+      "description": "Allow manual toggle between calendar and slideshow",
+      "acceptance_criteria": [
+        "Toggle control on display (hidden keyboard shortcut)",
+        "Setting in dashboard for default mode",
+        "Can set to always calendar, always photos, or auto"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-019",
+      "title": "Create slideshow settings in display config",
+      "description": "Add slideshow settings to display settings",
+      "acceptance_criteria": [
+        "Settings include: enabled, interval, album filter",
+        "Settings include: kenBurns enabled, order (random/sequential)",
+        "Settings include: showPhotoInfo (date, filename)",
+        "Settings stored in displays.settings JSON"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-020",
+      "title": "Display photo info overlay with animations",
+      "description": "Optionally show photo information during slideshow with smooth animations",
+      "acceptance_criteria": [
+        "Optional overlay with photo date",
+        "Shows photo filename or album",
+        "Semi-transparent background with subtle blur",
+        "Positioned in corner (bottom left or right)",
+        "Fade in with slide (delay 500ms after image appears)",
+        "Fade out before next slide (300ms before transition)",
+        "Uses soft pastel colors matching theme",
+        "Typography readable but not distracting"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-021",
+      "title": "Handle slideshow with no photos",
+      "description": "Graceful fallback when no photos available",
+      "acceptance_criteria": [
+        "Does not crash with empty photo set",
+        "Shows calendar or placeholder",
+        "Logs warning for debugging"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-022",
+      "title": "Add Google Photos OAuth scope",
+      "description": "Add Google Photos API scope to OAuth flow",
+      "acceptance_criteria": [
+        "photoslibrary.readonly scope added",
+        "Scope only requested if user wants Google Photos",
+        "Separate consent from Calendar if possible"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-023",
+      "title": "Create Google Photos album list fetch",
+      "description": "Fetch user's Google Photos albums",
+      "acceptance_criteria": [
+        "Function fetches albums from Google Photos API",
+        "Returns album id, title, cover photo",
+        "Handles pagination for many albums",
+        "Handles API errors gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-024",
+      "title": "Create Google Photos album sync",
+      "description": "Sync photos from selected Google Photos album",
+      "acceptance_criteria": [
+        "Fetches photos from specified album",
+        "Downloads and uploads to Supabase Storage",
+        "Creates photos table records",
+        "Tracks sync status",
+        "Handles incremental updates"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-025",
+      "title": "Create Google Photos connection page",
+      "description": "Create page to connect and select Google Photos albums",
+      "acceptance_criteria": [
+        "Page at src/app/(dashboard)/photos/google/page.tsx",
+        "Button to initiate Google Photos OAuth",
+        "Lists available albums after auth",
+        "Checkbox to select albums to sync",
+        "Button to start sync",
+        "Shows sync progress"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-026",
+      "title": "Create photos_sources table for Google Photos",
+      "description": "Track connected Google Photos sources",
+      "acceptance_criteria": [
+        "Migration creates photo_sources table",
+        "Columns: id, household_id, provider, album_id, album_name, tokens, last_synced_at",
+        "RLS policies for household access",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-027",
+      "title": "Create photo sync background job",
+      "description": "Create cron job for periodic Google Photos sync",
+      "acceptance_criteria": [
+        "Route at src/app/api/cron/photos/route.ts",
+        "Syncs photo sources that are stale",
+        "Adds new photos, removes deleted ones",
+        "Updates last_synced_at",
+        "Cron configured in vercel.json (hourly or daily)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-028",
+      "title": "Handle photo storage quota",
+      "description": "Implement storage limits per household",
+      "acceptance_criteria": [
+        "Track storage usage per household",
+        "Show usage in dashboard",
+        "Warn when approaching limit",
+        "Prevent uploads over limit",
+        "Configurable limit per plan (future)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-029",
+      "title": "Create bulk photo actions",
+      "description": "Allow selecting and acting on multiple photos",
+      "acceptance_criteria": [
+        "Selection mode in photo grid",
+        "Select all / deselect all",
+        "Bulk delete selected",
+        "Bulk enable/disable selected",
+        "Bulk assign to album"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-030",
+      "title": "Optimize photo grid loading with smooth animations",
+      "description": "Lazy load photos in grid with smooth appearance animations",
+      "acceptance_criteria": [
+        "Intersection observer for lazy loading",
+        "Shimmer skeleton placeholder while loading",
+        "Images load as user scrolls",
+        "Images fade in smoothly when loaded (300ms ease-out)",
+        "Skeleton uses soft pastel colors",
+        "No layout shift when images load"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-031",
+      "title": "Create photo upload progress indicator",
+      "description": "Show progress for multi-file uploads",
+      "acceptance_criteria": [
+        "Progress bar for each uploading file",
+        "Overall progress indicator",
+        "Success/error status per file",
+        "Cancel upload option"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-032",
+      "title": "Handle image orientation (EXIF)",
+      "description": "Correctly handle rotated images",
+      "acceptance_criteria": [
+        "EXIF orientation read on upload",
+        "Images displayed with correct orientation",
+        "Supabase transforms handle orientation",
+        "Thumbnails and full-size both correct"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-033",
+      "title": "Add photos to realtime subscription",
+      "description": "Display receives photo updates in real-time",
+      "acceptance_criteria": [
+        "Realtime subscription includes photos table",
+        "New photos appear in slideshow",
+        "Deleted photos removed from slideshow",
+        "Disabled photos excluded from slideshow"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-034",
+      "title": "Add photos to seed data",
+      "description": "Include sample photos in development seed",
+      "acceptance_criteria": [
+        "Seed script includes sample photo records",
+        "Sample images uploaded to storage",
+        "Photos linked to sample household",
+        "Various albums represented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-035",
+      "title": "Verify photo functionality end-to-end",
+      "description": "Manual verification of complete photo system including animations",
+      "acceptance_criteria": [
+        "Can upload photos via dashboard",
+        "Photos appear in grid with thumbnails",
+        "Photo grid uses lazy loading with shimmer skeletons",
+        "Photos fade in smoothly when loaded",
+        "Can view full-size photo in modal",
+        "Modal animates in with fade + scale",
+        "Can delete photos",
+        "Can enable/disable photos",
+        "Slideshow shows enabled photos on display",
+        "Slideshow transitions are buttery smooth (800-1200ms crossfade)",
+        "Ken Burns effect is elegant and calming",
+        "No jarring cuts or flashes between photos",
+        "Idle detection triggers slideshow with smooth transition",
+        "Photo updates reflect in real-time on display",
+        "All animations run at 60fps"
+      ],
+      "completed": false
+    }
+  ]
+}

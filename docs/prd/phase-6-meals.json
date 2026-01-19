@@ -1,0 +1,606 @@
+{
+  "phase": 6,
+  "name": "Meal Planning",
+  "description": "Implement recipe storage, meal calendar, and grocery list generation",
+  "requirements": [
+    {
+      "id": "REQ-6-001",
+      "title": "Create recipes table migration",
+      "description": "Create PostgreSQL migration for recipe storage",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table recipes created with columns: id, household_id, title, description, instructions, servings, prep_time_minutes, cook_time_minutes, image_path, tags, created_by, created_at, updated_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "created_by references users(id) ON DELETE SET NULL",
+        "instructions is JSONB defaulting to '[]'",
+        "tags is TEXT[] defaulting to '{}'",
+        "servings defaults to 4",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-002",
+      "title": "Create recipe_ingredients table migration",
+      "description": "Create PostgreSQL migration for recipe ingredients",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table recipe_ingredients created with columns: id, recipe_id, name, quantity, unit, notes, sort_order",
+        "recipe_id references recipes(id) ON DELETE CASCADE",
+        "quantity is DECIMAL allowing null",
+        "sort_order defaults to 0",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-003",
+      "title": "Create meal_plans table migration",
+      "description": "Create PostgreSQL migration for meal planning",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table meal_plans created with columns: id, household_id, recipe_id, date, meal_type, custom_title, notes, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "recipe_id references recipes(id) ON DELETE SET NULL",
+        "date is DATE type NOT NULL",
+        "meal_type has CHECK constraint for 'breakfast', 'lunch', 'dinner', 'snack'",
+        "UNIQUE constraint on (household_id, date, meal_type)",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-004",
+      "title": "Create grocery_items table migration",
+      "description": "Create PostgreSQL migration for grocery list items",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table grocery_items created with columns: id, household_id, name, quantity, unit, category, checked, meal_plan_id, added_by, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "meal_plan_id references meal_plans(id) ON DELETE SET NULL",
+        "added_by references users(id) ON DELETE SET NULL",
+        "category has CHECK constraint for valid categories",
+        "checked defaults to false",
+        "category defaults to 'other'",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-005",
+      "title": "Create meal_plans index",
+      "description": "Create performance index for meal plan queries",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Index idx_meal_plans_date on (household_id, date)",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-006",
+      "title": "Create grocery_items index",
+      "description": "Create performance index for grocery queries",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Index idx_grocery_items_household on (household_id, checked)",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-007",
+      "title": "Create RLS policies for recipes table",
+      "description": "Create Row Level Security policies for recipes",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on recipes table",
+        "SELECT policy allows viewing recipes in own household",
+        "INSERT policy allows adding recipes to own household",
+        "UPDATE policy allows updating own household's recipes",
+        "DELETE policy allows deleting own household's recipes",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-008",
+      "title": "Create RLS policies for recipe_ingredients table",
+      "description": "Create Row Level Security policies for ingredients",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on recipe_ingredients table",
+        "Policies join through recipes to check household",
+        "All CRUD operations restricted to own household",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-009",
+      "title": "Create RLS policies for meal_plans table",
+      "description": "Create Row Level Security policies for meal plans",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on meal_plans table",
+        "SELECT policy allows viewing plans in own household",
+        "INSERT policy allows adding plans to own household",
+        "UPDATE policy allows updating own household's plans",
+        "DELETE policy allows deleting own household's plans",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-010",
+      "title": "Create RLS policies for grocery_items table",
+      "description": "Create Row Level Security policies for grocery items",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on grocery_items table",
+        "All CRUD operations restricted to own household",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-011",
+      "title": "Create meals dashboard page",
+      "description": "Create main meal planning page",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/meals/page.tsx",
+        "Shows weekly meal calendar view",
+        "Rows for each meal type (breakfast, lunch, dinner)",
+        "Columns for days of current week",
+        "Navigation to previous/next week",
+        "Shows planned meals in cells",
+        "Click cell to add/edit meal"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-012",
+      "title": "Create weekly meal calendar component",
+      "description": "Create calendar grid for meal planning",
+      "acceptance_criteria": [
+        "Component exists at src/components/meals/WeeklyCalendar.tsx",
+        "7-column grid for days",
+        "3-4 rows for meal types",
+        "Date headers with day name and date",
+        "Current day highlighted",
+        "Cells show meal title or 'Add meal'",
+        "Responsive layout"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-013",
+      "title": "Create meal cell component",
+      "description": "Create component for individual meal cell",
+      "acceptance_criteria": [
+        "Shows meal title if planned",
+        "Shows recipe name if linked",
+        "Clickable to open meal editor",
+        "Drag target for drag-and-drop",
+        "Visual feedback on hover"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-014",
+      "title": "Create recipes list page",
+      "description": "Create page to manage recipes",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/meals/recipes/page.tsx",
+        "Lists all recipes for household",
+        "Shows recipe title, description preview",
+        "Shows prep/cook time",
+        "Search/filter functionality",
+        "Button to add new recipe",
+        "Click to view/edit recipe"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-015",
+      "title": "Create recipe creation form",
+      "description": "Create form to add new recipes",
+      "acceptance_criteria": [
+        "Page or modal for recipe creation",
+        "Title input (required)",
+        "Description textarea",
+        "Servings number input",
+        "Prep time input (minutes)",
+        "Cook time input (minutes)",
+        "Image upload (optional)",
+        "Tags input (comma-separated or chips)",
+        "Submit creates recipe record"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-016",
+      "title": "Create ingredients list editor",
+      "description": "Create component to manage recipe ingredients",
+      "acceptance_criteria": [
+        "Dynamic list of ingredient rows",
+        "Each row: quantity, unit, ingredient name, notes",
+        "Add new ingredient button",
+        "Remove ingredient button per row",
+        "Reorder ingredients (drag or arrows)",
+        "Unit dropdown (cups, tbsp, oz, etc.)",
+        "Saves to recipe_ingredients table"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-017",
+      "title": "Create instructions editor",
+      "description": "Create component to edit recipe instructions",
+      "acceptance_criteria": [
+        "Ordered list of instruction steps",
+        "Add new step button",
+        "Remove step button per step",
+        "Reorder steps (drag or arrows)",
+        "Saves as JSONB array of strings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-018",
+      "title": "Create recipe detail page",
+      "description": "Create page to view full recipe",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/meals/recipes/[id]/page.tsx",
+        "Shows all recipe details",
+        "Shows ingredient list formatted",
+        "Shows instructions as numbered steps",
+        "Edit button (opens edit form)",
+        "Delete button with confirmation",
+        "Add to meal plan button"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-019",
+      "title": "Create recipe edit form",
+      "description": "Create form to edit existing recipes",
+      "acceptance_criteria": [
+        "Pre-fills all existing data",
+        "Same fields as creation form",
+        "Preserves existing ingredients",
+        "Preserves existing instructions",
+        "Submit updates recipe",
+        "Cancel returns without saving"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-020",
+      "title": "Create meal assignment modal",
+      "description": "Create modal to assign recipe to date/meal",
+      "acceptance_criteria": [
+        "Opens when clicking meal cell",
+        "Recipe search/select dropdown",
+        "Or quick-add custom meal title",
+        "Notes field (optional)",
+        "Date and meal type pre-filled from cell",
+        "Submit creates/updates meal_plan record",
+        "Clear button to remove meal plan"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-021",
+      "title": "Create recipe search component",
+      "description": "Create searchable recipe selector",
+      "acceptance_criteria": [
+        "Search input with autocomplete",
+        "Searches recipe titles and tags",
+        "Shows matching recipes as options",
+        "Select to choose recipe",
+        "Recent recipes shown first",
+        "Clear search button"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-022",
+      "title": "Implement drag-and-drop meal assignment",
+      "description": "Allow dragging recipes to calendar cells",
+      "acceptance_criteria": [
+        "Recipes draggable from recipe list sidebar",
+        "Meal cells are drop targets",
+        "Visual feedback during drag",
+        "Drop creates meal_plan record",
+        "Existing meals can be dragged to move",
+        "Uses React DnD or similar library"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-023",
+      "title": "Create grocery list page",
+      "description": "Create page for grocery list management",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/meals/grocery/page.tsx",
+        "Shows current grocery list items",
+        "Items grouped by category",
+        "Checkbox to mark items checked",
+        "Checked items move to bottom or separate section",
+        "Add manual item button",
+        "Generate from meal plan button"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-024",
+      "title": "Create grocery item component",
+      "description": "Create component for individual grocery item",
+      "acceptance_criteria": [
+        "Shows item name and quantity/unit",
+        "Checkbox for checked state",
+        "Strikethrough when checked",
+        "Shows source recipes (if from meal plan)",
+        "Delete button to remove item",
+        "Edit button for manual items"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-025",
+      "title": "Create add grocery item form",
+      "description": "Create form to manually add grocery items",
+      "acceptance_criteria": [
+        "Item name input (required)",
+        "Quantity input (optional)",
+        "Unit selector (optional)",
+        "Category selector",
+        "Submit adds to grocery_items table",
+        "Quick-add inline form option"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-026",
+      "title": "Create ingredient aggregation utility",
+      "description": "Create utility to aggregate ingredients from meal plans",
+      "acceptance_criteria": [
+        "File exists at src/lib/utils/ingredients.ts",
+        "Function aggregates ingredients from date range",
+        "Normalizes ingredient names (lowercase, singular)",
+        "Combines same ingredients (adds quantities)",
+        "Handles unit conversion where possible",
+        "Returns categorized ingredient list",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-027",
+      "title": "Create ingredient categorization utility",
+      "description": "Create utility to categorize ingredients",
+      "acceptance_criteria": [
+        "Function categorizes ingredient by name",
+        "Categories: produce, dairy, meat, pantry, frozen, bakery, beverages, other",
+        "Uses keyword matching",
+        "Returns 'other' as fallback",
+        "Extensible for custom rules"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-028",
+      "title": "Create unit conversion utility",
+      "description": "Create utility for converting between units",
+      "acceptance_criteria": [
+        "Conversion map for common units",
+        "Volume: tsp, tbsp, cup, ml, l",
+        "Weight: oz, lb, g, kg",
+        "Converts when possible",
+        "Returns original if no conversion"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-029",
+      "title": "Create generate grocery list feature",
+      "description": "Generate grocery list from current meal plan",
+      "acceptance_criteria": [
+        "Button on grocery page to generate",
+        "Select date range (this week default)",
+        "Aggregates ingredients from meal plans",
+        "Creates grocery_items records",
+        "Links items to source meal_plan",
+        "Option to clear existing first or merge"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-030",
+      "title": "Create grocery list clear functionality",
+      "description": "Allow clearing grocery list",
+      "acceptance_criteria": [
+        "Clear all button with confirmation",
+        "Clear checked items only option",
+        "Deletes grocery_items records",
+        "Refreshes list after clearing"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-031",
+      "title": "Create display meal widget",
+      "description": "Create meal display for Pi wall display",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/TodayMeals.tsx",
+        "Shows today's planned meals",
+        "Shows meal type and title/recipe",
+        "Large, readable typography",
+        "Shows 'What's for dinner?' prominently",
+        "Shows upcoming meals if space"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-032",
+      "title": "Integrate meals into display layout",
+      "description": "Add meal widget to display page",
+      "acceptance_criteria": [
+        "Meals visible on main display",
+        "Positioned appropriately in layout",
+        "Toggleable in display settings",
+        "Responsive to available space"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-033",
+      "title": "Add meals to realtime subscription",
+      "description": "Display receives meal updates in real-time",
+      "acceptance_criteria": [
+        "Realtime subscription includes meal_plans table",
+        "New meal plans appear on display",
+        "Updated meals reflected on display",
+        "Changes from dashboard visible within seconds"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-034",
+      "title": "Create quick-add meal feature",
+      "description": "Allow adding meal without full recipe",
+      "acceptance_criteria": [
+        "Option to type custom meal name",
+        "Creates meal_plan with custom_title only",
+        "recipe_id is null",
+        "Shows custom title in calendar and display",
+        "Can later link to recipe if created"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-035",
+      "title": "Create recipe image upload",
+      "description": "Allow uploading image for recipes",
+      "acceptance_criteria": [
+        "Image upload on recipe form",
+        "Stores in Supabase Storage",
+        "Saves path to recipes.image_path",
+        "Shows thumbnail in recipe list",
+        "Shows larger image in recipe detail"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-036",
+      "title": "Create recipe tags functionality",
+      "description": "Allow tagging recipes for organization",
+      "acceptance_criteria": [
+        "Tag input on recipe form",
+        "Multiple tags per recipe",
+        "Filter recipes by tag",
+        "Show tags on recipe cards",
+        "Common tag suggestions"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-037",
+      "title": "Create copy recipe functionality",
+      "description": "Allow duplicating existing recipes",
+      "acceptance_criteria": [
+        "Copy/duplicate button on recipe",
+        "Creates new recipe with same data",
+        "Copies all ingredients and instructions",
+        "Opens edit form for new copy",
+        "Title prefixed with 'Copy of'"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-038",
+      "title": "Create recipe serving scaling",
+      "description": "Scale ingredient quantities by servings",
+      "acceptance_criteria": [
+        "Serving adjuster on recipe detail",
+        "Recalculates ingredient quantities",
+        "Shows scaled values",
+        "Original recipe unchanged",
+        "Useful for grocery list generation"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-039",
+      "title": "Create meal plan copy week feature",
+      "description": "Copy meal plan from one week to another",
+      "acceptance_criteria": [
+        "Copy week button on meal calendar",
+        "Select source week",
+        "Select destination week",
+        "Copies all meal_plan records with new dates",
+        "Option to overwrite or skip existing"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-040",
+      "title": "Create grocery list sharing",
+      "description": "Allow sharing grocery list outside app",
+      "acceptance_criteria": [
+        "Share button on grocery page",
+        "Generates shareable text list",
+        "Copy to clipboard option",
+        "Or share via native share API",
+        "Grouped by category in output"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-041",
+      "title": "Create meals empty states",
+      "description": "Show helpful UI when no meals/recipes",
+      "acceptance_criteria": [
+        "Empty state for no recipes",
+        "Empty state for empty meal calendar",
+        "Empty state for empty grocery list",
+        "Helpful messages and call-to-action",
+        "Styled consistently with app"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-042",
+      "title": "Add meals to seed data",
+      "description": "Include sample meal data in development seed",
+      "acceptance_criteria": [
+        "supabase/seed.sql includes sample recipes",
+        "Includes sample recipe ingredients",
+        "Includes sample meal plans",
+        "Includes sample grocery items",
+        "Various categories represented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-6-043",
+      "title": "Verify meal planning end-to-end",
+      "description": "Manual verification of complete meal system",
+      "acceptance_criteria": [
+        "Can create recipe with ingredients and instructions",
+        "Can edit and delete recipes",
+        "Can assign recipe to meal calendar",
+        "Can add quick meal without recipe",
+        "Drag-and-drop works for meal assignment",
+        "Can generate grocery list from meal plan",
+        "Ingredient aggregation works correctly",
+        "Can manually add grocery items",
+        "Can check off grocery items",
+        "Today's meals appear on display",
+        "Real-time updates work"
+      ],
+      "completed": false
+    }
+  ]
+}

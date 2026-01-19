@@ -1,0 +1,675 @@
+{
+  "phase": 1,
+  "name": "Foundation",
+  "description": "Set up the core project infrastructure including Next.js, Supabase, authentication, household management, and the design system with animations",
+  "requirements": [
+    {
+      "id": "REQ-1-001",
+      "title": "Initialize Next.js project with TypeScript and Tailwind",
+      "description": "Create a new Next.js 14+ project with App Router, TypeScript, Tailwind CSS, and src directory structure",
+      "acceptance_criteria": [
+        "Project created with pnpm create next-app",
+        "TypeScript configuration (tsconfig.json) exists and is valid",
+        "Tailwind CSS configuration (tailwind.config.ts) exists",
+        "App Router structure exists at src/app/",
+        "pnpm dev starts the development server at localhost:3000",
+        "No TypeScript or ESLint errors on fresh project"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-002",
+      "title": "Install Supabase dependencies",
+      "description": "Install @supabase/supabase-js, @supabase/ssr, and supabase CLI as dev dependency",
+      "acceptance_criteria": [
+        "@supabase/supabase-js is in package.json dependencies",
+        "@supabase/ssr is in package.json dependencies",
+        "supabase is in package.json devDependencies",
+        "All packages install without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-003",
+      "title": "Install Framer Motion",
+      "description": "Install framer-motion library for buttery smooth animations",
+      "acceptance_criteria": [
+        "framer-motion is in package.json dependencies",
+        "Package installs without errors",
+        "Motion components can be imported and used"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-004",
+      "title": "Configure Tailwind with pastel color palette",
+      "description": "Set up soft, calming pastel colors in Tailwind config",
+      "acceptance_criteria": [
+        "tailwind.config.ts includes primary palette (soft lavender: #f5f3ff to #8b5cf6)",
+        "tailwind.config.ts includes accent palette (soft coral: #fff7ed to #fb923c)",
+        "tailwind.config.ts includes calm palette (soft sage: #f0fdf4 to #86efac)",
+        "tailwind.config.ts includes warm palette (soft blush: #fff1f2 to #fda4af)",
+        "Custom border-radius values added (xl: 1rem, 2xl: 1.5rem, 3xl: 2rem)",
+        "Custom soft shadow values added (shadow-soft, shadow-soft-lg)",
+        "Shimmer animation keyframes defined",
+        "Colors work in both light and dark modes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-005",
+      "title": "Create animation variants module",
+      "description": "Create reusable Framer Motion animation variants",
+      "acceptance_criteria": [
+        "File exists at src/components/animations/variants.ts",
+        "Exports staggered container variant (staggerChildren: 0.05)",
+        "Exports item reveal variant (fade + slide up with spring physics)",
+        "Exports page transition variant (fade + subtle y movement)",
+        "Exports button tap variant (scale: 0.98 with spring)",
+        "Exports modal variant (fade + scale with backdrop)",
+        "All animations use spring physics where appropriate",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-006",
+      "title": "Create page transition wrapper component",
+      "description": "Create component for smooth page transitions using AnimatePresence",
+      "acceptance_criteria": [
+        "File exists at src/components/animations/transitions.tsx",
+        "Exports PageTransition component wrapping children with motion.div",
+        "Uses page transition variants (fade in 0.3s, fade out 0.2s)",
+        "Integrates with Next.js App Router",
+        "Handles exit animations properly with AnimatePresence"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-007",
+      "title": "Create animated Button component",
+      "description": "Create a button component with smooth hover and tap animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/button.tsx",
+        "Uses Framer Motion for animations",
+        "Hover state: subtle lift (y: -1px) and shadow increase",
+        "Tap state: scale down (0.98) with spring physics",
+        "Supports variants: primary, secondary, destructive, ghost",
+        "Supports sizes: sm, md, lg",
+        "Loading state shows animated spinner",
+        "Disabled state prevents animations",
+        "Uses pastel colors from theme",
+        "Rounded corners (radius-xl or larger)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-008",
+      "title": "Create animated Input component",
+      "description": "Create an input component with focus animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/input.tsx",
+        "Focus state: soft glow animation (not harsh ring)",
+        "Label floats or transitions smoothly",
+        "Error state: gentle shake animation",
+        "Uses soft border colors from pastel palette",
+        "Rounded corners (radius-lg or larger)",
+        "Forwards ref properly",
+        "Fully typed with TypeScript"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-009",
+      "title": "Create animated Card component",
+      "description": "Create a card component with hover elevation",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/card.tsx",
+        "Hover state: subtle lift and shadow increase",
+        "Uses soft shadows (shadow-soft)",
+        "Large rounded corners (radius-2xl or larger)",
+        "Exports Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter",
+        "Smooth transition duration (200-300ms)",
+        "Uses Framer Motion for animations"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-010",
+      "title": "Create animated Modal component",
+      "description": "Create a modal with fade, scale, and backdrop blur animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/modal.tsx",
+        "Uses AnimatePresence for enter/exit animations",
+        "Modal fades in with scale (0.95 to 1)",
+        "Backdrop blurs and fades in",
+        "Exit animation reverses smoothly",
+        "Closes on Escape key",
+        "Closes on backdrop click",
+        "Traps focus within modal",
+        "Duration: 300-400ms"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-011",
+      "title": "Create Skeleton loading component with shimmer",
+      "description": "Create a skeleton component with smooth shimmer animation",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/skeleton.tsx",
+        "Uses CSS shimmer animation (gradient moving left to right)",
+        "Shimmer is subtle and calming (not harsh flash)",
+        "Supports different shapes: rectangle, circle, text lines",
+        "Animation duration: 2s linear infinite",
+        "Uses neutral-200/neutral-300 colors",
+        "Rounded corners match content being loaded"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-012",
+      "title": "Create animated Toggle/Switch component",
+      "description": "Create a toggle switch with smooth state transitions",
+      "acceptance_criteria": [
+        "Component exists at src/components/ui/toggle.tsx",
+        "Thumb slides smoothly between states (spring physics)",
+        "Background color transitions smoothly",
+        "Uses primary pastel color when active",
+        "Uses neutral color when inactive",
+        "Satisfying tactile feel on interaction",
+        "Accessible with keyboard"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-013",
+      "title": "Initialize Supabase project",
+      "description": "Initialize Supabase configuration for local development",
+      "acceptance_criteria": [
+        "supabase/ directory exists with config.toml",
+        "supabase/migrations/ directory exists",
+        "supabase/seed.sql file exists (can be empty)",
+        "pnpm supabase start launches local Supabase containers"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-014",
+      "title": "Create Supabase browser client utility",
+      "description": "Create a reusable Supabase client for browser/client components",
+      "acceptance_criteria": [
+        "File exists at src/lib/supabase/client.ts",
+        "Exports a createClient function that returns a Supabase client",
+        "Uses @supabase/ssr createBrowserClient",
+        "Reads NEXT_PUBLIC_SUPABASE_URL from environment",
+        "Reads NEXT_PUBLIC_SUPABASE_ANON_KEY from environment",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-015",
+      "title": "Create Supabase server client utility",
+      "description": "Create a reusable Supabase client for server components and API routes",
+      "acceptance_criteria": [
+        "File exists at src/lib/supabase/server.ts",
+        "Exports a createClient function for server components",
+        "Uses @supabase/ssr createServerClient",
+        "Properly handles cookies for session management",
+        "Works with Next.js cookies() function",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-016",
+      "title": "Create environment variables template",
+      "description": "Create .env.local.example with all required environment variables",
+      "acceptance_criteria": [
+        "File .env.local.example exists in project root",
+        "Contains NEXT_PUBLIC_SUPABASE_URL placeholder",
+        "Contains NEXT_PUBLIC_SUPABASE_ANON_KEY placeholder",
+        "Contains SUPABASE_SERVICE_ROLE_KEY placeholder",
+        ".env.local is in .gitignore"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-017",
+      "title": "Create households table migration",
+      "description": "Create PostgreSQL migration for households table",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table households created with columns: id (UUID PK), name (TEXT NOT NULL), invite_code (TEXT UNIQUE), created_at (TIMESTAMPTZ)",
+        "id has default gen_random_uuid()",
+        "invite_code has default for generating short codes",
+        "created_at defaults to now()",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-018",
+      "title": "Create users table migration",
+      "description": "Create PostgreSQL migration for users table linked to Supabase Auth",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table users created with columns: id (UUID PK), household_id (UUID FK), display_name (TEXT NOT NULL), avatar_url (TEXT), role (TEXT), created_at (TIMESTAMPTZ)",
+        "id references auth.users(id) ON DELETE CASCADE",
+        "household_id references households(id) ON DELETE SET NULL",
+        "role has CHECK constraint for 'admin', 'member', 'child'",
+        "role defaults to 'member'",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-019",
+      "title": "Create displays table migration",
+      "description": "Create PostgreSQL migration for display devices (Pi units)",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table displays created with columns: id (UUID PK), household_id (UUID FK NOT NULL), name (TEXT NOT NULL), auth_token (TEXT UNIQUE NOT NULL), last_seen_at (TIMESTAMPTZ), settings (JSONB), created_at (TIMESTAMPTZ)",
+        "household_id references households(id) ON DELETE CASCADE",
+        "auth_token defaults to encode(gen_random_bytes(32), 'hex')",
+        "settings defaults to '{}'::jsonb",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-020",
+      "title": "Create get_user_household_id helper function",
+      "description": "Create PostgreSQL function to get current user's household ID for RLS policies",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Function get_user_household_id() created",
+        "Returns UUID",
+        "Queries users table using auth.uid()",
+        "Marked as SECURITY DEFINER",
+        "Marked as STABLE",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-021",
+      "title": "Enable RLS on core tables",
+      "description": "Enable Row Level Security on households, users, and displays tables",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on households table",
+        "RLS enabled on users table",
+        "RLS enabled on displays table",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-022",
+      "title": "Create RLS policies for households table",
+      "description": "Create Row Level Security policies for households access",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "SELECT policy allows users to view their own household",
+        "INSERT policy allows authenticated users to create households",
+        "UPDATE policy allows household admins to update their household",
+        "Policies use get_user_household_id() helper",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-023",
+      "title": "Create RLS policies for users table",
+      "description": "Create Row Level Security policies for users access",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "SELECT policy allows viewing users in same household",
+        "INSERT policy allows creating own user profile",
+        "UPDATE policy allows updating own profile",
+        "Policies properly scope to household membership",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-024",
+      "title": "Create RLS policies for displays table",
+      "description": "Create Row Level Security policies for displays access",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "SELECT policy allows viewing displays in own household",
+        "INSERT policy allows household admins to create displays",
+        "UPDATE policy allows household admins to update displays",
+        "DELETE policy allows household admins to delete displays",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-025",
+      "title": "Generate TypeScript types from Supabase schema",
+      "description": "Generate and configure TypeScript types from database schema",
+      "acceptance_criteria": [
+        "File exists at src/types/database.ts",
+        "Types generated using supabase gen types typescript",
+        "Types include households, users, displays tables",
+        "TypeScript compiles without errors",
+        "npm script exists for regenerating types"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-026",
+      "title": "Create auth middleware",
+      "description": "Create Next.js middleware for authentication protection",
+      "acceptance_criteria": [
+        "File exists at src/middleware.ts",
+        "Middleware refreshes Supabase auth session",
+        "Redirects unauthenticated users from /dashboard/* to /auth/login",
+        "Allows public access to /auth/* routes",
+        "Allows public access to /display/* routes",
+        "Matcher config excludes static files and images",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-027",
+      "title": "Create login page with animations",
+      "description": "Create the login page with email/password authentication and smooth animations",
+      "acceptance_criteria": [
+        "Page exists at src/app/auth/login/page.tsx",
+        "Form uses animated Input components",
+        "Form uses animated Button component",
+        "Page content fades in on load (staggered animation)",
+        "Form validation errors animate in smoothly",
+        "Shows loading state with animated spinner during submission",
+        "Redirects to /dashboard on successful login",
+        "Uses pastel color scheme throughout",
+        "Card container uses soft shadows"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-028",
+      "title": "Create signup page with animations",
+      "description": "Create the signup page with email/password registration and smooth animations",
+      "acceptance_criteria": [
+        "Page exists at src/app/auth/signup/page.tsx",
+        "Form uses animated Input and Button components",
+        "Page content fades in with staggered animation",
+        "Password strength indicator animates smoothly",
+        "Error messages animate in/out",
+        "Success message animates in after signup",
+        "Uses pastel color scheme throughout"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-029",
+      "title": "Create auth callback route",
+      "description": "Create the OAuth callback handler for email confirmation",
+      "acceptance_criteria": [
+        "Route exists at src/app/auth/callback/route.ts",
+        "Handles code exchange for session",
+        "Redirects to /dashboard on success",
+        "Redirects to /auth/login with error on failure",
+        "Works with email confirmation links"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-030",
+      "title": "Create password reset request page",
+      "description": "Create page to request password reset email with animations",
+      "acceptance_criteria": [
+        "Page exists at src/app/auth/forgot-password/page.tsx",
+        "Uses animated form components",
+        "Success message fades in smoothly",
+        "Uses pastel color scheme"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-031",
+      "title": "Create password reset confirmation page",
+      "description": "Create page to set new password after reset",
+      "acceptance_criteria": [
+        "Page exists at src/app/auth/reset-password/page.tsx",
+        "Uses animated form components",
+        "Password confirmation validation animates",
+        "Success redirect is smooth"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-032",
+      "title": "Create user profile trigger function",
+      "description": "Create PostgreSQL trigger to create user profile on auth signup",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Function handle_new_user() created",
+        "Trigger on_auth_user_created exists on auth.users",
+        "Trigger fires AFTER INSERT",
+        "Creates entry in public.users with id and display_name from metadata",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-033",
+      "title": "Create dashboard route group layout with navigation",
+      "description": "Create the dashboard layout with animated navigation sidebar",
+      "acceptance_criteria": [
+        "Layout exists at src/app/(dashboard)/layout.tsx",
+        "Navigation items animate on hover (subtle lift)",
+        "Active navigation item has animated indicator",
+        "Navigation includes links to: Dashboard, Calendars, Photos, Chores, Meals, Settings",
+        "Shows current user info in navigation",
+        "Logout button with hover animation",
+        "Mobile menu slides in with animation",
+        "Uses pastel colors and soft shadows"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-034",
+      "title": "Create dashboard home page with animations",
+      "description": "Create the main dashboard page with staggered content reveal",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/page.tsx",
+        "Content cards animate in with staggered delay",
+        "Welcome message with user's display name",
+        "Household name displayed if user has one",
+        "Empty state animates in if no household",
+        "Uses PageTransition wrapper",
+        "Loading skeleton shows during data fetch"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-035",
+      "title": "Create household creation form with animations",
+      "description": "Create animated form component for creating a new household",
+      "acceptance_criteria": [
+        "Component uses animated Modal if in modal mode",
+        "Form fields animate in sequence",
+        "Submit button shows loading animation",
+        "Success state animates smoothly",
+        "Error messages animate in/out"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-036",
+      "title": "Create household join form with animations",
+      "description": "Create animated form component for joining an existing household",
+      "acceptance_criteria": [
+        "Form uses animated components",
+        "Invite code input with animated validation feedback",
+        "Success animation on valid join",
+        "Error shake animation on invalid code"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-037",
+      "title": "Create household settings page with animations",
+      "description": "Create settings page with smooth interactions",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/settings/page.tsx",
+        "Member list items animate in with stagger",
+        "Copy invite code shows animated confirmation",
+        "Role change dropdown animates",
+        "Remove member shows confirmation modal with animation"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-038",
+      "title": "Create logout functionality",
+      "description": "Implement logout button and handler",
+      "acceptance_criteria": [
+        "Logout button in navigation triggers signOut",
+        "Calls supabase.auth.signOut()",
+        "Redirects to /auth/login after logout",
+        "Clears all session cookies",
+        "Works without JavaScript errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-039",
+      "title": "Create global CSS styles with pastel theme",
+      "description": "Set up global styles and CSS variables for pastel theme",
+      "acceptance_criteria": [
+        "src/app/globals.css includes Tailwind directives",
+        "CSS variables defined for pastel color theming",
+        "Smooth focus styles (glow instead of harsh ring)",
+        "Scrollbar styled to match theme (subtle)",
+        "Selection color uses primary pastel",
+        "Body background uses warm neutral-50"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-040",
+      "title": "Create root layout with metadata and fonts",
+      "description": "Configure the root layout with proper metadata and warm fonts",
+      "acceptance_criteria": [
+        "Layout exists at src/app/layout.tsx",
+        "Metadata includes title 'Skylight'",
+        "Metadata includes description",
+        "Warm, readable font loaded (e.g., Plus Jakarta Sans, DM Sans, or similar)",
+        "Font applied to body",
+        "HTML lang attribute set",
+        "Viewport meta configured"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-041",
+      "title": "Create loading states with animated skeletons",
+      "description": "Create loading UI with shimmer skeleton animations",
+      "acceptance_criteria": [
+        "Loading file exists at src/app/(dashboard)/loading.tsx",
+        "Shows shimmer skeleton matching page layout",
+        "Loading file exists at src/app/auth/loading.tsx",
+        "Skeleton animation is smooth and subtle",
+        "Skeletons match the shape of actual content"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-042",
+      "title": "Create error boundary pages with animations",
+      "description": "Create error handling pages with smooth animations",
+      "acceptance_criteria": [
+        "Error file exists at src/app/(dashboard)/error.tsx",
+        "Error content animates in smoothly",
+        "Retry button has hover/tap animations",
+        "Uses calming pastel colors (not harsh red)",
+        "Not-found page has friendly animated illustration"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-043",
+      "title": "Create nanoid utility for invite codes",
+      "description": "Create or install utility for generating short invite codes",
+      "acceptance_criteria": [
+        "nanoid package installed OR custom implementation exists",
+        "Can generate 8-character alphanumeric codes",
+        "Codes are URL-safe",
+        "Function is usable in database migrations"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-044",
+      "title": "Create seed data for development",
+      "description": "Create seed.sql with sample data for local development",
+      "acceptance_criteria": [
+        "supabase/seed.sql contains sample households",
+        "Contains sample users linked to households",
+        "Contains sample display devices",
+        "Seed data applies without errors",
+        "Includes comments explaining sample data"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-045",
+      "title": "Document Phase 1 setup in README",
+      "description": "Update README with setup instructions",
+      "acceptance_criteria": [
+        "README.md includes project description",
+        "Includes prerequisites (Node.js, pnpm, Docker)",
+        "Includes step-by-step setup instructions",
+        "Includes environment variable setup",
+        "Includes commands to start local Supabase",
+        "Includes commands to run migrations",
+        "Includes commands to start dev server"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-046",
+      "title": "Verify complete auth flow end-to-end",
+      "description": "Manual verification that the entire auth flow works",
+      "acceptance_criteria": [
+        "Can create new account via signup form",
+        "Email confirmation link works",
+        "Can log in with created account",
+        "Dashboard shows user info",
+        "Can create a new household",
+        "Can see household in settings",
+        "Can copy invite code",
+        "Can log out successfully",
+        "Can log in again",
+        "Protected routes redirect when not authenticated"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-1-047",
+      "title": "Verify design system and animations",
+      "description": "Manual verification that UI design and animations work correctly",
+      "acceptance_criteria": [
+        "Pastel color palette is applied throughout (no harsh colors)",
+        "All buttons have smooth hover lift and tap scale animations",
+        "Page transitions animate smoothly (300-400ms fade + slide)",
+        "Loading states show shimmer skeleton animations",
+        "Modals fade in with scale and backdrop blur",
+        "Form inputs have soft focus glow (not harsh ring)",
+        "All animations run at 60fps with no jank",
+        "Interactive elements respond within 100ms",
+        "Card components have soft shadows and rounded corners",
+        "Overall feel is calm and inviting"
+      ],
+      "completed": false
+    }
+  ]
+}
