@@ -432,3 +432,27 @@
 - typecheck: pass
 - test: pass (113 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-022 - Create week calendar view component
+
+**Completed**: Created WeekView component with framer-motion animations
+
+**Features**:
+- 7-day view with hourly grid (60px per hour)
+- All-day events in separate top section
+- Timed events positioned by time + duration
+- Current time indicator (red line)
+- Prev/next week navigation with slide animation (300ms)
+- Staggered reveal for events (50ms stagger)
+- Auto-scroll to current hour on mount
+- Loading skeleton state
+
+**Files changed**:
+- components/calendar/WeekView.tsx (new)
+- components/calendar/WeekView.test.tsx (new, 10 tests)
+- docs/prd.json (marked REQ-2-022 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (123 tests total)
+- lint: pass
