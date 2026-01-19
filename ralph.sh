@@ -34,14 +34,7 @@ When choosing the next task, prioritize in this order:
 2. Integration points between modules
 3. Unknown unknowns and spike work
 4. Standard features and implementation
-5. Polish, cleanup, and quick wins
-Fail fast on risky work. Save easy wins for later. \
-3. Keep changes small and focused:
-- One logical change per commit
-- If a task feels too large, break it into subtasks
-- Prefer multiple small commits over one large commit
-- Run feedback loops after each change, not at the end
-Quality over speed. Small steps compound into big progress. \
+5. Polish, cleanup, and quick wins \
 4. After completing each task, mark the item in the PRD as completed and append to progress.txt:
 - Task completed and PRD item reference
 - Key decisions made and reasoning
@@ -55,8 +48,7 @@ Keep entries concise. Sacrifice grammar for the sake of concision. This file hel
 - Use agent-browser to test the UI features you have implemented.
 Do NOT commit if any feedback loop fails. Fix issues first.
 - Make a git commit of that feature. \
-If, while implementing the feature, you notice that all work
-is complete, output <promise>COMPLETE</promise>. \
+If, while implementing the feature, you notice that all work in the PRD is complete, output <promise>COMPLETE</promise>. \
 ")
 
   echo "$result"
