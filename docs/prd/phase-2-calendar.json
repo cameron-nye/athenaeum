@@ -1,0 +1,579 @@
+{
+  "phase": 2,
+  "name": "Calendar Integration",
+  "description": "Integrate with Google Calendar API for syncing and displaying calendar events with smooth animations",
+  "requirements": [
+    {
+      "id": "REQ-2-001",
+      "title": "Install Google API dependencies",
+      "description": "Install googleapis package for Google Calendar API access",
+      "acceptance_criteria": [
+        "googleapis package is in package.json dependencies",
+        "Package installs without errors",
+        "TypeScript types are available"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-002",
+      "title": "Create Google OAuth environment variables",
+      "description": "Add Google OAuth credentials to environment configuration",
+      "acceptance_criteria": [
+        ".env.local.example includes GOOGLE_CLIENT_ID",
+        ".env.local.example includes GOOGLE_CLIENT_SECRET",
+        ".env.local.example includes GOOGLE_REDIRECT_URI",
+        "Variables documented in README"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-003",
+      "title": "Create calendar_sources table migration",
+      "description": "Create PostgreSQL migration for storing connected calendar accounts",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table calendar_sources created with all columns from schema",
+        "Columns: id, household_id, user_id, provider, external_id, name, color, access_token_encrypted, refresh_token_encrypted, sync_token, last_synced_at, enabled, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "user_id references users(id) ON DELETE SET NULL",
+        "provider has CHECK constraint for 'google', 'ical'",
+        "UNIQUE constraint on (household_id, provider, external_id)",
+        "enabled defaults to true",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-004",
+      "title": "Create events table migration",
+      "description": "Create PostgreSQL migration for cached calendar events",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table events created with all columns from schema",
+        "Columns: id, calendar_source_id, external_id, title, description, location, start_time, end_time, all_day, recurrence_rule, raw_data, created_at, updated_at",
+        "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
+        "UNIQUE constraint on (calendar_source_id, external_id)",
+        "all_day defaults to false",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-005",
+      "title": "Create events table indexes",
+      "description": "Create performance indexes for events table queries",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Index idx_events_calendar_time on (calendar_source_id, start_time)",
+        "Index idx_events_time_range on (start_time, end_time)",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-006",
+      "title": "Create RLS policies for calendar_sources table",
+      "description": "Create Row Level Security policies for calendar sources",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on calendar_sources table",
+        "SELECT policy allows viewing sources in own household",
+        "INSERT policy allows adding sources to own household",
+        "UPDATE policy allows updating own household's sources",
+        "DELETE policy allows deleting own household's sources",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-007",
+      "title": "Create RLS policies for events table",
+      "description": "Create Row Level Security policies for events",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on events table",
+        "SELECT policy allows viewing events from own household's calendars",
+        "INSERT policy allows adding events to own household's calendars",
+        "UPDATE policy allows updating own household's events",
+        "DELETE policy allows deleting own household's events",
+        "Policies join through calendar_sources to check household",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-008",
+      "title": "Create Google OAuth utility module",
+      "description": "Create utility for Google OAuth client initialization",
+      "acceptance_criteria": [
+        "File exists at src/lib/google/auth.ts",
+        "Exports function to create OAuth2 client",
+        "Uses environment variables for credentials",
+        "Handles token refresh logic",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-009",
+      "title": "Create token encryption utility",
+      "description": "Create utility for encrypting/decrypting OAuth tokens at rest",
+      "acceptance_criteria": [
+        "File exists at src/lib/crypto.ts",
+        "Exports encrypt function for tokens",
+        "Exports decrypt function for tokens",
+        "Uses AES-256-GCM or similar secure algorithm",
+        "Uses ENCRYPTION_KEY from environment",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-010",
+      "title": "Create Google OAuth initiation route",
+      "description": "Create API route to start Google Calendar OAuth flow",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/google/auth/route.ts",
+        "GET handler generates OAuth URL with calendar scopes",
+        "Scopes include calendar.readonly at minimum",
+        "State parameter includes CSRF protection",
+        "Redirects user to Google OAuth consent page",
+        "Only accessible to authenticated users"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-011",
+      "title": "Create Google OAuth callback route",
+      "description": "Create API route to handle Google OAuth callback",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/google/callback/route.ts",
+        "GET handler exchanges code for tokens",
+        "Validates state parameter for CSRF",
+        "Encrypts and stores refresh token in database",
+        "Creates calendar_source record",
+        "Fetches list of user's calendars",
+        "Redirects to calendar selection page on success",
+        "Handles errors gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-012",
+      "title": "Create calendar selection page",
+      "description": "Create page to select which Google calendars to sync",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/calendars/connect/page.tsx",
+        "Displays list of available Google calendars",
+        "Shows calendar name and color",
+        "Checkbox to enable/disable each calendar",
+        "Submit button to save selection",
+        "Stores selected calendars in calendar_sources",
+        "Redirects to calendars list on success"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-013",
+      "title": "Create calendars list page",
+      "description": "Create page showing all connected calendar sources",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/calendars/page.tsx",
+        "Lists all calendar_sources for household",
+        "Shows calendar name, provider, enabled status",
+        "Shows last synced time",
+        "Button to add new calendar connection",
+        "Toggle to enable/disable each calendar",
+        "Button to disconnect (delete) calendar",
+        "Shows sync status indicator"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-014",
+      "title": "Create Google Calendar sync utility",
+      "description": "Create utility function to sync events from Google Calendar",
+      "acceptance_criteria": [
+        "File exists at src/lib/google/calendar.ts",
+        "Exports syncCalendarEvents function",
+        "Uses syncToken for incremental sync when available",
+        "Falls back to full sync on 410 error (token expired)",
+        "Handles pagination for large calendars",
+        "Upserts events to database",
+        "Updates sync_token after successful sync",
+        "Updates last_synced_at timestamp",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-015",
+      "title": "Create event upsert function",
+      "description": "Create database function to upsert calendar events",
+      "acceptance_criteria": [
+        "Function exists in src/lib/google/calendar.ts or separate file",
+        "Handles INSERT or UPDATE based on external_id",
+        "Maps Google Calendar event fields to database schema",
+        "Handles all-day events correctly",
+        "Stores raw_data for debugging",
+        "Handles event deletion (cancelled events)",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-016",
+      "title": "Create manual sync trigger API",
+      "description": "Create API route to manually trigger calendar sync",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/calendars/sync/route.ts",
+        "POST handler triggers sync for specified calendar_source_id",
+        "Validates user has access to calendar",
+        "Returns sync status and event count",
+        "Handles errors and returns appropriate status codes",
+        "Rate limited to prevent abuse"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-017",
+      "title": "Create cron sync API route",
+      "description": "Create API route for Vercel cron to trigger background sync",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/cron/sync/route.ts",
+        "GET handler validates CRON_SECRET authorization",
+        "Queries calendar_sources that need sync (stale > 5 min)",
+        "Syncs all stale calendars in parallel",
+        "Returns count of synced calendars",
+        "Handles partial failures gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-018",
+      "title": "Create vercel.json with cron configuration",
+      "description": "Configure Vercel cron job for background sync",
+      "acceptance_criteria": [
+        "vercel.json exists in project root",
+        "Cron job configured for /api/cron/sync",
+        "Schedule set to every 5 minutes (*/5 * * * *)",
+        "Configuration is valid JSON"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-019",
+      "title": "Add CRON_SECRET environment variable",
+      "description": "Add cron secret for securing cron endpoints",
+      "acceptance_criteria": [
+        ".env.local.example includes CRON_SECRET",
+        "Documentation explains how to set in Vercel",
+        "Cron route validates against this secret"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-020",
+      "title": "Create calendar view data fetching",
+      "description": "Create server-side function to fetch events for calendar view",
+      "acceptance_criteria": [
+        "Function exists to fetch events for date range",
+        "Accepts start_date and end_date parameters",
+        "Filters by household's enabled calendars only",
+        "Returns events sorted by start_time",
+        "Includes calendar source info (name, color)",
+        "TypeScript types defined for return value"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-021",
+      "title": "Create month calendar view component",
+      "description": "Create calendar component showing month view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/MonthView.tsx",
+        "Displays month grid with day cells",
+        "Shows events in each day cell",
+        "Events show title and time",
+        "Events colored by calendar source",
+        "Navigation to previous/next month with slide animation (300-400ms)",
+        "Current day highlighted",
+        "Responsive layout for different screen sizes",
+        "Day cells use staggered fade-in animation on initial render",
+        "Events animate in with subtle spring physics"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-022",
+      "title": "Create week calendar view component",
+      "description": "Create calendar component showing week view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/WeekView.tsx",
+        "Displays 7-day week with hourly grid",
+        "Events positioned by time and duration",
+        "Events show title",
+        "Events colored by calendar source",
+        "Navigation to previous/next week with slide animation (300-400ms)",
+        "Current day/time highlighted",
+        "Handles all-day events section",
+        "Events animate in with staggered reveal (50ms stagger)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-023",
+      "title": "Create day calendar view component",
+      "description": "Create calendar component showing single day view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/DayView.tsx",
+        "Displays single day with hourly grid",
+        "Events positioned by time and duration",
+        "Events show title and details",
+        "Events colored by calendar source",
+        "Navigation to previous/next day with slide animation (300-400ms)",
+        "Current time indicator line with subtle pulse animation",
+        "Handles all-day events section",
+        "Events animate in with spring physics (stiffness: 300, damping: 24)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-024",
+      "title": "Create calendar view page with view switcher",
+      "description": "Create main calendar page with animated view selection",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/calendars/view/page.tsx",
+        "Toggle buttons for Month/Week/Day views with hover animations",
+        "View preference persisted (localStorage or URL)",
+        "Today button to jump to current date",
+        "Date picker for navigation",
+        "Fetches events for current view range",
+        "Loading state shows shimmer skeleton animation",
+        "View transitions use AnimatePresence for smooth switching"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-025",
+      "title": "Create event detail modal/panel",
+      "description": "Create animated component to show event details when clicked",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/EventDetail.tsx",
+        "Modal animates in with fade + scale (opacity 0→1, scale 0.95→1)",
+        "Backdrop has blur effect and fades in",
+        "Shows event title, description, location",
+        "Shows start and end time/date",
+        "Shows calendar source name",
+        "Shows recurrence info if applicable",
+        "Close button to dismiss",
+        "Keyboard accessible (Escape to close)",
+        "Exit animation (fade out, scale down) using AnimatePresence"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-026",
+      "title": "Create calendar color picker component",
+      "description": "Create component to change calendar display color",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/ColorPicker.tsx",
+        "Shows palette of predefined colors",
+        "Current color is highlighted",
+        "Clicking color updates calendar_source.color",
+        "Changes reflected immediately in UI"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-027",
+      "title": "Create Google Calendar webhook receiver",
+      "description": "Create API route to receive Google Calendar push notifications",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/webhooks/google/route.ts",
+        "POST handler validates X-Goog-Resource-ID header",
+        "Looks up channel in database",
+        "Triggers sync for affected calendar",
+        "Returns 200 OK quickly (before sync completes)",
+        "Logs webhook receipt for debugging"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-028",
+      "title": "Create webhook channel table migration",
+      "description": "Create table to store Google Calendar webhook channels",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table webhook_channels created",
+        "Columns: id, calendar_source_id, channel_id, resource_id, expiration, created_at",
+        "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-029",
+      "title": "Create webhook registration function",
+      "description": "Create function to register Google Calendar push notifications",
+      "acceptance_criteria": [
+        "Function exists in src/lib/google/calendar.ts",
+        "Creates watch on calendar events",
+        "Stores channel info in webhook_channels table",
+        "Sets expiration to 7 days",
+        "Returns channel details"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-030",
+      "title": "Create webhook renewal cron job",
+      "description": "Create cron job to renew expiring webhook channels",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/cron/webhooks/route.ts",
+        "Queries channels expiring within 24 hours",
+        "Renews each channel with Google API",
+        "Updates expiration in database",
+        "Handles errors gracefully",
+        "Cron configured in vercel.json (daily)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-031",
+      "title": "Create token refresh mechanism",
+      "description": "Implement automatic OAuth token refresh",
+      "acceptance_criteria": [
+        "Token refresh triggered when access token expires",
+        "Uses stored encrypted refresh token",
+        "Updates access token in memory/cache",
+        "Handles refresh token revocation gracefully",
+        "Marks calendar_source as disconnected on failure"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-032",
+      "title": "Handle calendar disconnect",
+      "description": "Create functionality to disconnect a calendar source",
+      "acceptance_criteria": [
+        "Delete button on calendar list page",
+        "Confirmation dialog before deletion",
+        "Deletes calendar_source record",
+        "Cascade deletes associated events",
+        "Stops webhook channel",
+        "Shows success message"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-033",
+      "title": "Create date utility functions",
+      "description": "Create utility functions for date manipulation",
+      "acceptance_criteria": [
+        "File exists at src/lib/utils/dates.ts",
+        "Function to get start/end of week",
+        "Function to get start/end of month",
+        "Function to format dates for display",
+        "Function to check if date is today",
+        "Function to calculate event duration",
+        "Handles timezone considerations",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-034",
+      "title": "Add timezone handling",
+      "description": "Properly handle timezones for events",
+      "acceptance_criteria": [
+        "Events stored in UTC in database",
+        "Events displayed in user's local timezone",
+        "All-day events handled correctly across timezones",
+        "Timezone info preserved from Google Calendar"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-035",
+      "title": "Create calendar sync status indicator",
+      "description": "Show sync status in calendar UI",
+      "acceptance_criteria": [
+        "Component shows last sync time",
+        "Shows syncing spinner during sync",
+        "Shows error indicator on sync failure",
+        "Manual refresh button visible",
+        "Updates automatically after sync"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-036",
+      "title": "Handle recurring events",
+      "description": "Properly display recurring events from Google Calendar",
+      "acceptance_criteria": [
+        "Recurring events expanded by Google (singleEvents=true)",
+        "Individual instances stored in events table",
+        "Recurrence info shown in event detail",
+        "Exception instances handled correctly"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-037",
+      "title": "Create empty state for calendars page",
+      "description": "Show helpful UI when no calendars connected",
+      "acceptance_criteria": [
+        "Empty state shown when no calendar_sources exist",
+        "Explains what connecting a calendar does",
+        "Prominent button to connect first calendar",
+        "Styled consistently with app design"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-038",
+      "title": "Create error handling for Google API failures",
+      "description": "Gracefully handle Google API errors",
+      "acceptance_criteria": [
+        "Auth errors (401) trigger token refresh",
+        "Rate limit errors (429) show user message",
+        "Calendar not found (404) marks source as disconnected",
+        "Network errors show retry option",
+        "Errors logged for debugging"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-039",
+      "title": "Add calendar events to seed data",
+      "description": "Add sample calendar events for development",
+      "acceptance_criteria": [
+        "supabase/seed.sql includes sample calendar_source",
+        "Includes sample events spanning different dates",
+        "Includes all-day event examples",
+        "Includes multi-day event examples",
+        "Seed applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-040",
+      "title": "Verify complete calendar sync flow",
+      "description": "Manual verification of calendar integration",
+      "acceptance_criteria": [
+        "Can initiate Google OAuth from calendar page",
+        "Google consent screen appears with correct scopes",
+        "Callback creates calendar_source record",
+        "Calendar selection shows available calendars",
+        "Initial sync populates events in database",
+        "Events appear in calendar view",
+        "View switching works (month/week/day)",
+        "Event details show when clicked",
+        "Manual sync button triggers sync",
+        "Sync status updates correctly"
+      ],
+      "completed": false
+    }
+  ]
+}

@@ -1,0 +1,437 @@
+{
+  "phase": 5,
+  "name": "Chores",
+  "description": "Implement chore management with assignments, recurring schedules, and display integration",
+  "requirements": [
+    {
+      "id": "REQ-5-001",
+      "title": "Create chores table migration",
+      "description": "Create PostgreSQL migration for chore definitions",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table chores created with columns: id, household_id, title, description, icon, points, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "points defaults to 0",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-002",
+      "title": "Create chore_assignments table migration",
+      "description": "Create PostgreSQL migration for chore assignments",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Table chore_assignments created with columns: id, chore_id, assigned_to, due_date, recurrence_rule, completed_at, created_at",
+        "chore_id references chores(id) ON DELETE CASCADE",
+        "assigned_to references users(id) ON DELETE SET NULL",
+        "due_date is DATE type NOT NULL",
+        "recurrence_rule is optional TEXT for RRULE format",
+        "completed_at is nullable TIMESTAMPTZ",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-003",
+      "title": "Create chore_assignments index",
+      "description": "Create performance index for chore queries",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Index idx_chore_assignments_due on (due_date, completed_at)",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-004",
+      "title": "Create RLS policies for chores table",
+      "description": "Create Row Level Security policies for chores",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on chores table",
+        "SELECT policy allows viewing chores in own household",
+        "INSERT policy allows adding chores to own household",
+        "UPDATE policy allows updating own household's chores",
+        "DELETE policy allows deleting own household's chores",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-005",
+      "title": "Create RLS policies for chore_assignments table",
+      "description": "Create Row Level Security policies for assignments",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on chore_assignments table",
+        "SELECT policy allows viewing assignments for own household's chores",
+        "INSERT policy allows creating assignments for own household's chores",
+        "UPDATE policy allows updating own household's assignments",
+        "DELETE policy allows deleting own household's assignments",
+        "Policy joins through chores to check household",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-006",
+      "title": "Install rrule dependency",
+      "description": "Install rrule library for recurrence parsing",
+      "acceptance_criteria": [
+        "rrule package is in package.json dependencies",
+        "Package installs without errors",
+        "TypeScript types available"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-007",
+      "title": "Create chores dashboard page",
+      "description": "Create main chores management page",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/chores/page.tsx",
+        "Lists all chores for household",
+        "Shows chore title, icon, points",
+        "Shows next due date and assignee",
+        "Button to add new chore",
+        "Click chore to view/edit",
+        "Empty state when no chores"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-008",
+      "title": "Create chore creation form",
+      "description": "Create form to add new chores",
+      "acceptance_criteria": [
+        "Form component or modal exists",
+        "Title input field (required)",
+        "Description textarea (optional)",
+        "Icon selector (emoji or icon set)",
+        "Points input (number, default 0)",
+        "Submit creates chore record",
+        "Shows validation errors",
+        "Success redirects or closes modal"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-009",
+      "title": "Create chore edit form",
+      "description": "Create form to edit existing chores",
+      "acceptance_criteria": [
+        "Page or modal for editing",
+        "Pre-fills existing chore data",
+        "Same fields as creation form",
+        "Submit updates chore record",
+        "Cancel returns without saving",
+        "Delete option available"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-010",
+      "title": "Create chore delete functionality",
+      "description": "Allow deleting chores",
+      "acceptance_criteria": [
+        "Delete button on chore edit page",
+        "Confirmation dialog before deletion",
+        "Cascade deletes associated assignments",
+        "Shows success message",
+        "Redirects to chores list"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-011",
+      "title": "Create assignment creation form",
+      "description": "Create form to assign chore to family member",
+      "acceptance_criteria": [
+        "Form accessible from chore detail",
+        "Family member dropdown (users in household)",
+        "Due date picker (required)",
+        "Recurrence selector (optional)",
+        "Submit creates chore_assignment record",
+        "Shows validation errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-012",
+      "title": "Create recurrence selector component",
+      "description": "Create UI for selecting recurring schedule",
+      "acceptance_criteria": [
+        "Component exists for recurrence selection",
+        "Options: None, Daily, Weekly, Biweekly, Monthly",
+        "Weekly shows day-of-week selector",
+        "Monthly shows day-of-month selector",
+        "Generates RRULE string from selection",
+        "Parses RRULE for display"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-013",
+      "title": "Create recurrence expansion utility",
+      "description": "Create utility to expand RRULE into dates",
+      "acceptance_criteria": [
+        "Function uses rrule library",
+        "Expands rule to next N occurrences",
+        "Handles all supported recurrence patterns",
+        "Returns array of Date objects",
+        "Handles null recurrence_rule (single occurrence)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-014",
+      "title": "Create assignments list view",
+      "description": "Create view showing all chore assignments",
+      "acceptance_criteria": [
+        "View accessible from chores page (tab or toggle)",
+        "Shows upcoming assignments by due date",
+        "Groups by day or week",
+        "Shows chore title, assignee, due date",
+        "Shows completed status",
+        "Filter by family member",
+        "Filter by date range"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-015",
+      "title": "Create assignment completion toggle",
+      "description": "Allow marking assignments as complete/incomplete",
+      "acceptance_criteria": [
+        "Checkbox or toggle on assignment",
+        "Updates completed_at timestamp",
+        "Setting to null marks incomplete",
+        "Visual distinction for completed",
+        "Points awarded on completion (future)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-016",
+      "title": "Create my chores view",
+      "description": "Create view showing current user's assignments",
+      "acceptance_criteria": [
+        "View shows only current user's assignments",
+        "Sorted by due date",
+        "Shows overdue items prominently",
+        "Quick complete button",
+        "Accessible from navigation"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-017",
+      "title": "Create chore chart/schedule view",
+      "description": "Create weekly chart showing who does what",
+      "acceptance_criteria": [
+        "Calendar or grid layout",
+        "Rows for family members",
+        "Columns for days of week",
+        "Cells show assigned chores",
+        "Color-coded by chore or status",
+        "Interactive for management"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-018",
+      "title": "Create display chore list component",
+      "description": "Create chore display for Pi wall display",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/ChoreList.tsx",
+        "Shows today's chores with assignees",
+        "Shows overdue chores highlighted",
+        "Shows upcoming chores (next few days)",
+        "Large, readable typography",
+        "Color-coded by status or assignee"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-019",
+      "title": "Integrate chores into display layout",
+      "description": "Add chore list to display page",
+      "acceptance_criteria": [
+        "Chores visible on main display",
+        "Positioned appropriately in layout",
+        "Toggleable in display settings",
+        "Responsive to available space"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-020",
+      "title": "Add chores to realtime subscription",
+      "description": "Display receives chore updates in real-time",
+      "acceptance_criteria": [
+        "Realtime subscription includes chores table",
+        "Realtime subscription includes chore_assignments table",
+        "New assignments appear on display",
+        "Completed chores update on display",
+        "Changes from dashboard visible within seconds"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-021",
+      "title": "Create chore icon selector component",
+      "description": "Create component to pick icon for chore",
+      "acceptance_criteria": [
+        "Grid of available icons/emojis",
+        "Searchable or filterable",
+        "Current selection highlighted",
+        "Click to select",
+        "Common chore icons included (broom, dishes, etc.)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-022",
+      "title": "Create overdue chores indicator",
+      "description": "Highlight overdue chores in all views",
+      "acceptance_criteria": [
+        "Overdue identified by due_date < today AND completed_at IS NULL",
+        "Red or warning color for overdue",
+        "Overdue count shown in navigation",
+        "Overdue shown first in lists"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-023",
+      "title": "Create chore completion history",
+      "description": "Track and display chore completion history",
+      "acceptance_criteria": [
+        "View showing past completed chores",
+        "Filter by date range",
+        "Filter by family member",
+        "Shows completion date and chore",
+        "Useful for accountability"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-024",
+      "title": "Create recurring assignment auto-creation",
+      "description": "Automatically create next occurrence when recurring chore completed",
+      "acceptance_criteria": [
+        "On completion of recurring assignment",
+        "Calculate next occurrence from RRULE",
+        "Create new assignment for next date",
+        "Same assignee by default",
+        "Or rotate through family members (future)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-025",
+      "title": "Create chore points summary",
+      "description": "Show points earned per family member",
+      "acceptance_criteria": [
+        "Summary view shows total points",
+        "Grouped by family member",
+        "Time period filter (week, month, all)",
+        "Leaderboard style display",
+        "Motivational for children"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-026",
+      "title": "Create chore assignment edit",
+      "description": "Allow editing existing assignments",
+      "acceptance_criteria": [
+        "Can change due date",
+        "Can change assignee",
+        "Can change recurrence",
+        "Can delete single assignment",
+        "Deleting recurring asks about future occurrences"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-027",
+      "title": "Create quick-assign from chore list",
+      "description": "Quick way to assign chore from main list",
+      "acceptance_criteria": [
+        "Assign button or dropdown on chore card",
+        "Quick-assign to family member",
+        "Default due date is today or tomorrow",
+        "No modal needed for simple assignment"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-028",
+      "title": "Create family member avatars",
+      "description": "Show family member avatars in chore views",
+      "acceptance_criteria": [
+        "Avatar shown next to assignments",
+        "Uses user's avatar_url if set",
+        "Falls back to initials",
+        "Consistent size and style"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-029",
+      "title": "Handle unassigned chores",
+      "description": "Support chores without specific assignee",
+      "acceptance_criteria": [
+        "assigned_to can be null",
+        "Shows 'Unassigned' or 'Anyone' label",
+        "Anyone in household can complete",
+        "Claim button to self-assign"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-030",
+      "title": "Create chores empty state",
+      "description": "Show helpful UI when no chores exist",
+      "acceptance_criteria": [
+        "Friendly message explaining chores",
+        "Suggestions for common chores",
+        "Button to create first chore",
+        "Styled consistently with app"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-031",
+      "title": "Add chores to seed data",
+      "description": "Include sample chores in development seed",
+      "acceptance_criteria": [
+        "supabase/seed.sql includes sample chores",
+        "Includes sample assignments",
+        "Various recurrence patterns represented",
+        "Some completed, some pending"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-5-032",
+      "title": "Verify chore functionality end-to-end",
+      "description": "Manual verification of complete chore system",
+      "acceptance_criteria": [
+        "Can create new chore with all fields",
+        "Can edit existing chore",
+        "Can delete chore",
+        "Can assign chore to family member",
+        "Can set recurring schedule",
+        "Can mark assignment complete",
+        "Recurring creates next occurrence",
+        "Chores appear on display",
+        "Real-time updates work",
+        "Overdue chores highlighted"
+      ],
+      "completed": false
+    }
+  ]
+}

@@ -1,0 +1,512 @@
+{
+  "phase": 3,
+  "name": "Display Route",
+  "description": "Create the full-screen display route for Raspberry Pi with real-time updates, smooth animations, and calming pastel design",
+  "requirements": [
+    {
+      "id": "REQ-3-001",
+      "title": "Create display route group layout",
+      "description": "Create the full-screen layout for display routes with calming design",
+      "acceptance_criteria": [
+        "Layout exists at src/app/(display)/layout.tsx",
+        "Layout is full-screen (h-screen w-screen)",
+        "No navigation or chrome elements",
+        "Uses soft pastel color palette (not harsh black/white)",
+        "Dark mode uses warm neutral-800/900 (not pure black)",
+        "Light mode uses neutral-50/100 (warm off-white)",
+        "Overflow hidden to prevent scrolling",
+        "Applies to all child routes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-002",
+      "title": "Create display device authentication",
+      "description": "Implement authentication for display devices using tokens",
+      "acceptance_criteria": [
+        "Display layout checks for display_token cookie",
+        "Validates token against displays table auth_token",
+        "Returns 404 if token invalid or missing",
+        "Updates last_seen_at on each request",
+        "Fetches household data for valid display"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-003",
+      "title": "Create display registration page in dashboard",
+      "description": "Create page to register new display devices",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/settings/displays/page.tsx",
+        "Lists all registered displays for household",
+        "Shows display name and last seen time",
+        "Form to add new display with name",
+        "Generates unique auth_token on creation",
+        "Shows setup URL with token for new displays"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-004",
+      "title": "Create display setup/pairing page",
+      "description": "Create page shown on Pi to authenticate display",
+      "acceptance_criteria": [
+        "Page exists at src/app/(display)/setup/page.tsx",
+        "Accepts token query parameter",
+        "Validates token exists in displays table",
+        "Sets display_token cookie on success",
+        "Redirects to main display route",
+        "Shows error for invalid tokens"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-005",
+      "title": "Create main display page",
+      "description": "Create the primary display view showing calendar",
+      "acceptance_criteria": [
+        "Page exists at src/app/(display)/[displayId]/page.tsx",
+        "Server component fetches today's events",
+        "Fetches household settings",
+        "Renders display-optimized calendar view",
+        "Handles loading state",
+        "Handles error state"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-006",
+      "title": "Create display calendar component",
+      "description": "Create calendar view optimized for 1080p wall display with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/Calendar.tsx",
+        "Large, readable typography (minimum 24px body text)",
+        "Shows current date prominently",
+        "Lists today's events with times",
+        "Shows upcoming events (next 7 days sidebar)",
+        "High contrast but soft colors (pastel palette)",
+        "No interactive elements (view only)",
+        "Events animate in with staggered fade (50ms stagger)",
+        "Content updates animate smoothly (no jarring changes)",
+        "Uses warm, calming colors that feel like ambient art"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-007",
+      "title": "Create display clock component",
+      "description": "Create clock display for current time",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/Clock.tsx",
+        "Shows current time in large font",
+        "Updates every second (or minute)",
+        "Shows current date",
+        "Client component with useEffect for updates"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-008",
+      "title": "Create Supabase Realtime provider for display",
+      "description": "Create component to handle real-time subscriptions",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/RealtimeProvider.tsx",
+        "Client component ('use client')",
+        "Creates single channel for household",
+        "Subscribes to events table changes",
+        "Subscribes to chore_assignments table changes",
+        "Subscribes to meal_plans table changes",
+        "Properly cleans up on unmount",
+        "Provides callbacks for data updates"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-009",
+      "title": "Create display data context",
+      "description": "Create React context to manage display data state",
+      "acceptance_criteria": [
+        "Context exists at src/components/display/DisplayContext.tsx",
+        "Holds current events, chores, meals data",
+        "Provides update functions for real-time updates",
+        "Wraps display page components",
+        "TypeScript types for context value"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-010",
+      "title": "Implement real-time event updates with smooth animations",
+      "description": "Display updates automatically when calendar events change with smooth transitions",
+      "acceptance_criteria": [
+        "New events appear without page refresh",
+        "New events animate in with fade + slide (300ms ease-out)",
+        "Updated events reflect changes with subtle highlight animation",
+        "Deleted events animate out (fade + collapse)",
+        "Changes from dashboard visible on display within seconds",
+        "List reorders smoothly using layout animations",
+        "No jarring content shifts or flashes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-011",
+      "title": "Create display settings schema",
+      "description": "Define JSON schema for display settings",
+      "acceptance_criteria": [
+        "TypeScript interface for DisplaySettings",
+        "Settings include: theme, layout, widgetsEnabled, refreshInterval",
+        "Settings stored in displays.settings JSONB column",
+        "Default settings defined"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-012",
+      "title": "Create display settings editor",
+      "description": "Create UI to customize individual display settings",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/settings/displays/[id]/page.tsx",
+        "Form to edit display name",
+        "Theme selector (light/dark/auto)",
+        "Layout options selection",
+        "Widget toggles (clock, weather, etc.)",
+        "Save button updates displays.settings",
+        "Changes reflected on display"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-013",
+      "title": "Create display theme support with smooth transitions",
+      "description": "Implement light/dark theme switching for display with calming colors",
+      "acceptance_criteria": [
+        "Display respects theme setting from settings",
+        "Light theme uses soft pastel colors (warm off-whites, soft lavender accents)",
+        "Dark theme uses warm neutrals (neutral-800/900, not pure black)",
+        "Auto option follows system preference or time of day",
+        "Theme applied via CSS classes or variables",
+        "Theme transitions animate smoothly (500ms ease-in-out)",
+        "All components respect current theme",
+        "Colors feel calming and non-intrusive"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-014",
+      "title": "Create Pi kiosk setup script",
+      "description": "Create shell script for Raspberry Pi kiosk configuration",
+      "acceptance_criteria": [
+        "Script exists at scripts/pi-setup.sh",
+        "Installs chromium-browser if needed",
+        "Installs unclutter for cursor hiding",
+        "Disables screen blanking/DPMS",
+        "Creates kiosk.sh launcher script",
+        "Configures autostart on boot",
+        "Sets up daily restart cron for memory management",
+        "Sets up watchdog cron for crash recovery",
+        "Script is executable and documented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-015",
+      "title": "Create Pi watchdog script",
+      "description": "Create watchdog to restart Chromium if it becomes unresponsive",
+      "acceptance_criteria": [
+        "Script checks if Chromium/display is responsive",
+        "Restarts Chromium if frozen",
+        "Logs restart events",
+        "Runs via cron every 5 minutes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-016",
+      "title": "Implement scheduled page reload",
+      "description": "Add daily page reload to prevent memory leaks",
+      "acceptance_criteria": [
+        "Page reloads automatically at configured time (3 AM default)",
+        "Implemented via client-side JavaScript",
+        "Or via cron xdotool F5 command",
+        "Configurable reload time in settings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-017",
+      "title": "Create display loading state with skeleton animations",
+      "description": "Show animated loading indicator while display data loads",
+      "acceptance_criteria": [
+        "Loading component exists",
+        "Shows pulsing skeleton (shimmer effect, not spinner)",
+        "Skeleton matches layout of actual content",
+        "Uses soft pastel colors for skeleton",
+        "Displays on initial load",
+        "Displays during data refresh",
+        "Smooth transition from skeleton to content (fade)",
+        "Shimmer animation uses 2s linear infinite timing"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-018",
+      "title": "Create display error state",
+      "description": "Show error message when display encounters errors",
+      "acceptance_criteria": [
+        "Error component exists",
+        "Shows user-friendly error message",
+        "Shows retry button",
+        "Logs errors for debugging",
+        "Auto-retries after timeout"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-019",
+      "title": "Create offline indicator component",
+      "description": "Show indicator when display loses network connection",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/OfflineIndicator.tsx",
+        "Detects online/offline status",
+        "Shows warning badge when offline",
+        "Hides when back online",
+        "Client component with event listeners"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-020",
+      "title": "Implement screen burn-in prevention",
+      "description": "Add subtle animations to prevent static burn-in",
+      "acceptance_criteria": [
+        "Subtle pixel shift implemented (1-2px)",
+        "Shifts every few minutes",
+        "Not noticeable during normal use",
+        "Applied to static elements",
+        "Can be disabled in settings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-021",
+      "title": "Create date/time header component",
+      "description": "Create header showing current date and time prominently",
+      "acceptance_criteria": [
+        "Component shows day of week",
+        "Shows full date (Month Day, Year)",
+        "Shows current time",
+        "Updates in real-time",
+        "Large, readable typography",
+        "Positioned at top of display"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-022",
+      "title": "Create today's events list component",
+      "description": "Create scrollable list of today's events",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/TodayEvents.tsx",
+        "Lists all events for current day",
+        "Shows event time and title",
+        "Color-coded by calendar source",
+        "Current/next event highlighted",
+        "Empty state when no events"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-023",
+      "title": "Create upcoming events sidebar",
+      "description": "Create sidebar showing next 7 days of events",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/UpcomingEvents.tsx",
+        "Groups events by date",
+        "Shows date headers",
+        "Shows event time and title",
+        "Scrollable if many events",
+        "Compact layout to fit sidebar"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-024",
+      "title": "Create event time formatting utility",
+      "description": "Create utility for formatting event times for display",
+      "acceptance_criteria": [
+        "Function formats time in 12h or 24h format",
+        "Handles all-day events ('All Day')",
+        "Handles multi-day events",
+        "Handles ongoing events ('Now')",
+        "Returns human-readable strings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-025",
+      "title": "Create display layout grid",
+      "description": "Create CSS grid layout for display components",
+      "acceptance_criteria": [
+        "Grid accommodates header, main content, sidebar",
+        "Responsive to different aspect ratios",
+        "Optimized for 1920x1080 resolution",
+        "Gaps and padding appropriate for viewing distance"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-026",
+      "title": "Create display typography scale",
+      "description": "Define typography sizes for wall display viewing",
+      "acceptance_criteria": [
+        "Heading sizes readable from 6+ feet",
+        "Body text readable from 4+ feet",
+        "Time/clock extra large",
+        "Consistent vertical rhythm",
+        "Tailwind classes or CSS custom properties"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-027",
+      "title": "Create RLS policy for display device access",
+      "description": "Allow displays to read their household's data",
+      "acceptance_criteria": [
+        "Migration file exists in supabase/migrations/",
+        "Events readable by display via auth_token",
+        "Uses request header x-display-token or cookie",
+        "Joins through calendar_sources and displays tables",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-028",
+      "title": "Create Supabase client for display",
+      "description": "Create Supabase client that works with display token auth",
+      "acceptance_criteria": [
+        "Client passes display token in requests",
+        "Works for both server and client components",
+        "Token extracted from cookie",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-029",
+      "title": "Create display heartbeat mechanism",
+      "description": "Implement periodic heartbeat to update last_seen_at",
+      "acceptance_criteria": [
+        "Client sends heartbeat every 5 minutes",
+        "Updates displays.last_seen_at in database",
+        "Dashboard shows online/offline status based on last_seen_at",
+        "Heartbeat continues even when idle"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-030",
+      "title": "Create display QR code generator",
+      "description": "Generate QR code for easy display setup",
+      "acceptance_criteria": [
+        "QR code shown on display registration page",
+        "QR code contains setup URL with token",
+        "Scannable by phone to verify URL",
+        "Clear instructions for Pi setup"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-031",
+      "title": "Handle display token invalidation",
+      "description": "Allow regenerating display token for security",
+      "acceptance_criteria": [
+        "Button to regenerate token in dashboard",
+        "Confirmation dialog warns about disconnection",
+        "Old token invalidated immediately",
+        "New setup URL provided",
+        "Display shows error until re-paired"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-032",
+      "title": "Create display debug overlay",
+      "description": "Create hidden debug overlay for troubleshooting",
+      "acceptance_criteria": [
+        "Triggered by keyboard shortcut (e.g., Ctrl+D)",
+        "Shows connection status",
+        "Shows last sync time",
+        "Shows display ID and household",
+        "Shows realtime subscription status",
+        "Shows memory usage",
+        "Overlay dismissible"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-033",
+      "title": "Implement graceful reconnection",
+      "description": "Handle Supabase realtime disconnection gracefully",
+      "acceptance_criteria": [
+        "Detects realtime connection loss",
+        "Shows reconnecting indicator",
+        "Attempts automatic reconnection",
+        "Exponential backoff on failures",
+        "Full data refresh on reconnection"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-034",
+      "title": "Create Pi installation documentation",
+      "description": "Document Raspberry Pi setup process",
+      "acceptance_criteria": [
+        "Documentation in docs/ or README",
+        "Lists required Raspberry Pi model",
+        "Lists required OS (Raspberry Pi OS)",
+        "Step-by-step setup instructions",
+        "Troubleshooting section",
+        "Screenshots or photos if helpful"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-035",
+      "title": "Create ambient background animations",
+      "description": "Add subtle ambient animations to create calm, living feel",
+      "acceptance_criteria": [
+        "Optional subtle gradient animation in background (2000-4000ms)",
+        "Gradient uses soft pastel colors (calm-100, primary-100)",
+        "Animation is very slow and non-distracting",
+        "Can be disabled in display settings",
+        "CPU usage minimal (< 1% for animation)",
+        "Works well with both light and dark themes"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-3-036",
+      "title": "Verify display route end-to-end",
+      "description": "Manual verification of complete display functionality including animations",
+      "acceptance_criteria": [
+        "Can register new display in dashboard",
+        "Setup URL shown with token",
+        "Navigating to setup URL on new browser authenticates display",
+        "Display shows calendar data for household",
+        "Real-time updates work (add event in dashboard, appears on display)",
+        "Event updates animate smoothly (no jarring changes)",
+        "Display handles network loss gracefully",
+        "Display resumes after network restored",
+        "1920x1080 resolution renders correctly",
+        "Typography readable at distance (6+ feet)",
+        "Colors feel calming and ambient (soft pastels)",
+        "Skeleton loading states animate with shimmer",
+        "Theme transitions are smooth",
+        "All animations run at 60fps"
+      ],
+      "completed": false
+    }
+  ]
+}
