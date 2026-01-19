@@ -47,3 +47,22 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-004 - Create events table migration
+
+**Completed**: Created PostgreSQL migration for events table
+
+**Decisions**:
+- References calendar_sources(id) ON DELETE CASCADE
+- UNIQUE constraint on (calendar_source_id, external_id)
+- all_day defaults to false
+- raw_data stored as JSONB for provider debugging
+- updated_at column for tracking modifications
+
+**Files changed**:
+- supabase/migrations/20260119090000_create_events.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
