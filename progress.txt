@@ -117,3 +117,19 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-001 - Install Google API dependencies
+
+**Completed**: Installed googleapis v170.1.0 for Google Calendar API access
+
+**Decisions**:
+- googleapis includes bundled TypeScript types (no separate @types needed)
+
+**Files changed**:
+- package.json (added googleapis)
+- package-lock.json (updated)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
