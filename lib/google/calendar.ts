@@ -1,6 +1,7 @@
 import { google, calendar_v3 } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
 import { getValidOAuth2Client, TokenRevocationError } from './auth';
 import { encrypt, decrypt } from '../crypto';
 
@@ -531,5 +532,193 @@ export async function syncCalendarEvents(
       errorType: type,
       retryable,
     };
+  }
+}
+
+/**
+ * Result of a webhook registration operation.
+ */
+export interface WebhookRegistrationResult {
+  success: boolean;
+  channelId?: string;
+  resourceId?: string;
+  expiration?: Date;
+  error?: string;
+}
+
+/**
+ * Registers a webhook channel for a calendar to receive push notifications.
+ * The channel will expire after 7 days and needs to be renewed.
+ *
+ * REQ-2-029: Create webhook registration function
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ * @param webhookUrl - URL where Google will send notifications
+ * @returns Registration result with channel details
+ */
+export async function registerWebhookChannel(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource,
+  webhookUrl: string
+): Promise<WebhookRegistrationResult> {
+  try {
+    const tokens = getTokensFromSource(calendarSource);
+
+    // Get valid OAuth client
+    const auth = await getValidOAuth2Client(tokens, async (newTokens) => {
+      await updateCalendarSourceTokens(supabase, calendarSource.id, newTokens);
+    });
+
+    const calendarApi = google.calendar({ version: 'v3', auth });
+
+    // Generate a unique channel ID
+    const channelId = randomUUID();
+
+    // Calculate expiration (7 days from now, which is Google's max)
+    const expirationMs = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    // Create the watch on the calendar
+    const response = await calendarApi.events.watch({
+      calendarId: calendarSource.external_id,
+      requestBody: {
+        id: channelId,
+        type: 'web_hook',
+        address: webhookUrl,
+        expiration: String(expirationMs),
+      },
+    });
+
+    const resourceId = response.data.resourceId;
+    const expiration = response.data.expiration
+      ? new Date(parseInt(response.data.expiration, 10))
+      : new Date(expirationMs);
+
+    if (!resourceId) {
+      throw new Error('No resource ID returned from Google');
+    }
+
+    // Store the channel in the database
+    const { error: dbError } = await supabase.from('webhook_channels').insert({
+      calendar_source_id: calendarSource.id,
+      channel_id: channelId,
+      resource_id: resourceId,
+      expiration: expiration.toISOString(),
+    });
+
+    if (dbError) {
+      // Try to stop the channel since we couldn't store it
+      console.error('Failed to store webhook channel:', dbError);
+      try {
+        await calendarApi.channels.stop({
+          requestBody: { id: channelId, resourceId },
+        });
+      } catch {
+        // Ignore errors when stopping
+      }
+      throw new Error(`Failed to store webhook channel: ${dbError.message}`);
+    }
+
+    console.log(
+      `Webhook registered: calendar=${calendarSource.id}, channel=${channelId}, expires=${expiration.toISOString()}`
+    );
+
+    return {
+      success: true,
+      channelId,
+      resourceId,
+      expiration,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`Webhook registration failed for calendar ${calendarSource.id}:`, errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
+
+/**
+ * Stops a webhook channel and removes it from the database.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ * @param channelId - The channel ID to stop
+ * @param resourceId - The resource ID from Google
+ * @returns True if successful
+ */
+export async function stopWebhookChannel(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource,
+  channelId: string,
+  resourceId: string
+): Promise<boolean> {
+  try {
+    const tokens = getTokensFromSource(calendarSource);
+
+    const auth = await getValidOAuth2Client(tokens, async (newTokens) => {
+      await updateCalendarSourceTokens(supabase, calendarSource.id, newTokens);
+    });
+
+    const calendarApi = google.calendar({ version: 'v3', auth });
+
+    // Stop the channel with Google
+    await calendarApi.channels.stop({
+      requestBody: {
+        id: channelId,
+        resourceId: resourceId,
+      },
+    });
+
+    console.log(`Webhook stopped: channel=${channelId}`);
+  } catch (error) {
+    // Log but don't fail - the channel might already be expired/stopped
+    console.warn(`Failed to stop webhook channel ${channelId}:`, error);
+  }
+
+  // Always remove from database even if Google call failed
+  const { error: dbError } = await supabase
+    .from('webhook_channels')
+    .delete()
+    .eq('channel_id', channelId);
+
+  if (dbError) {
+    console.error(`Failed to delete webhook channel from database:`, dbError);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Stops all webhook channels for a calendar source.
+ * Used when disconnecting a calendar.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ */
+export async function stopAllWebhookChannels(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource
+): Promise<void> {
+  // Get all channels for this calendar
+  const { data: channels, error } = await supabase
+    .from('webhook_channels')
+    .select('channel_id, resource_id')
+    .eq('calendar_source_id', calendarSource.id);
+
+  if (error) {
+    console.error('Failed to fetch webhook channels:', error);
+    return;
+  }
+
+  if (!channels || channels.length === 0) {
+    return;
+  }
+
+  // Stop each channel
+  for (const channel of channels) {
+    await stopWebhookChannel(supabase, calendarSource, channel.channel_id, channel.resource_id);
   }
 }

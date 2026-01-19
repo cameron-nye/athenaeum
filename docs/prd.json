@@ -397,7 +397,7 @@
         "Returns 200 OK quickly (before sync completes)",
         "Logs webhook receipt for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-028",
@@ -410,7 +410,7 @@
         "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-029",
@@ -423,7 +423,7 @@
         "Sets expiration to 7 days",
         "Returns channel details"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-030",
@@ -437,7 +437,7 @@
         "Handles errors gracefully",
         "Cron configured in vercel.json (daily)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-031",

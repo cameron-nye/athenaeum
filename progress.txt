@@ -632,3 +632,30 @@
 - typecheck: pass
 - test: pass (188 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-027-030 - Google Calendar webhook system
+
+**Completed**: Full webhook push notification system
+
+**Features**:
+- webhook_channels table: stores channel_id, resource_id, expiration
+- /api/webhooks/google: receives push notifications, triggers sync
+- registerWebhookChannel: creates watch on calendar, 7-day expiration
+- stopWebhookChannel/stopAllWebhookChannels: cleanup functions
+- /api/cron/webhooks: daily job renews channels expiring in 24h
+- vercel.json updated with daily cron
+
+**Files created**:
+- supabase/migrations/20260119210438_create_webhook_channels.sql
+- app/api/webhooks/google/route.ts
+- app/api/cron/webhooks/route.ts
+
+**Files modified**:
+- lib/google/calendar.ts (+registerWebhookChannel, +stopWebhookChannel, +stopAllWebhookChannels)
+- vercel.json (added daily webhook cron)
+- docs/prd.json (marked REQ-2-027,028,029,030 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass
