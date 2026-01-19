@@ -213,3 +213,25 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-011 - Create Google OAuth callback route
+
+**Completed**: Created API route to handle Google OAuth callback
+
+**Decisions**:
+- Route at app/api/google/callback/route.ts (matching existing pattern)
+- Validates CSRF state (userId:randomToken format)
+- Exchanges code for tokens via existing auth utility
+- Encrypts access + refresh tokens before storage
+- Fetches Google Calendar list and stores all calendars (enabled=false)
+- Uses upsert to handle reconnection scenarios
+- Redirects to /calendars/connect for calendar selection
+- Error redirects to /calendars?error={type}
+
+**Files changed**:
+- app/api/google/callback/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
