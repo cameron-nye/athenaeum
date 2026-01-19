@@ -556,3 +556,30 @@
 - typecheck: pass
 - test: pass (160 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-013 - Create calendars list page
+
+**Completed**: Created calendars list page with management UI
+
+**Features**:
+- Lists all calendar_sources with name, color, provider badge
+- Human-readable last synced time (e.g., "5m ago", "Never synced")
+- Toggle switch to enable/disable calendars (optimistic update)
+- Sync button per calendar with loading/success/error states
+- Delete button with confirmation dialog
+- Add Calendar button redirects to Google OAuth
+- Empty state with call-to-action
+- Error alerts for OAuth callback errors
+- Link to calendar view page
+
+**Files changed**:
+- app/(dashboard)/calendars/page.tsx (new)
+- app/(dashboard)/calendars/page.test.tsx (new, 11 tests)
+- app/api/calendars/sources/route.ts (updated GET to support ?all=true)
+- app/api/calendars/sources/[id]/route.ts (new - DELETE)
+- docs/prd.json (marked REQ-2-013 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (171 tests total)
+- lint: pass

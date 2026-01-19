@@ -6,9 +6,12 @@ import { createClient } from '@/lib/supabase/server';
  *
  * Fetches all calendar sources for the current user's household.
  * Returns calendars with their enabled status for selection UI.
+ * Use ?all=true to include last_synced_at field.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const supabase = await createClient();
+  const { searchParams } = new URL(request.url);
+  const includeAll = searchParams.get('all') === 'true';
 
   // Verify user is authenticated
   const {
@@ -22,9 +25,13 @@ export async function GET() {
 
   try {
     // RLS policies handle household scoping
+    const selectFields = includeAll
+      ? 'id, name, color, provider, enabled, last_synced_at'
+      : 'id, name, color, provider, enabled';
+
     const { data, error } = await supabase
       .from('calendar_sources')
-      .select('id, name, color, provider, enabled')
+      .select(selectFields)
       .order('name', { ascending: true });
 
     if (error) {

@@ -187,7 +187,7 @@
         "Button to disconnect (delete) calendar",
         "Shows sync status indicator"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-014",
