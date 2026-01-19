@@ -316,3 +316,37 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-033 - Create date utility functions
+
+**Completed**: Created comprehensive date utilities for calendar views
+
+**Decisions**:
+- Created lib/utils/dates.ts (matches existing lib/ pattern, not src/lib/)
+- All calculations use UTC for consistency
+- Timezone param optional on display functions (uses local by default)
+- Week starts on Sunday (US standard)
+- getMonthCalendarDates returns 42 dates (6 weeks) for grid display
+- parseISO for consistent ISO string parsing
+
+**Functions created**:
+- getStartOfWeek, getEndOfWeek - week boundaries
+- getStartOfMonth, getEndOfMonth - month boundaries
+- getStartOfDay, getEndOfDay - day boundaries
+- isToday, isSameDay, isSameMonth - date comparisons
+- getEventDurationMinutes, getEventDurationHours - duration calc
+- formatDate, formatFullDate, formatShortDate, formatTime, formatDateTime, formatMonthYear, formatDayOfWeek - display formatting
+- addDays, addWeeks, addMonths - date arithmetic
+- getDaysInMonth, getMonthCalendarDates, getWeekDates, getDayHours - calendar grid helpers
+- formatEventDuration - human-readable duration
+- parseISO, getNow - date creation
+- isMultiDayEvent, isWithinRange, doRangesOverlap - range utilities
+
+**Files changed**:
+- lib/utils/dates.ts (new)
+- lib/utils/dates.test.ts (new, 52 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (90 tests total)
+- lint: pass
