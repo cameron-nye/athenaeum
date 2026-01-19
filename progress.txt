@@ -15,3 +15,16 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-1-003 - Install Framer Motion
+
+**Completed**: Installed framer-motion v12.27.0 for smooth animations
+
+**Files changed**:
+- package.json (added framer-motion)
+- package-lock.json (updated)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
