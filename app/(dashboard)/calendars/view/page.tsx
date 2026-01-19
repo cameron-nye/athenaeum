@@ -12,6 +12,7 @@ import { Calendar, CalendarDays, CalendarRange, ChevronDown } from 'lucide-react
 import { MonthView } from '@/components/calendar/MonthView';
 import { WeekView } from '@/components/calendar/WeekView';
 import { DayView } from '@/components/calendar/DayView';
+import { EventDetail } from '@/components/calendar/EventDetail';
 import {
   getStartOfMonth,
   getEndOfMonth,
@@ -225,7 +226,6 @@ export default function CalendarViewPage() {
 
   const [events, setEvents] = useState<CalendarViewEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedEvent, setSelectedEvent] = useState<CalendarViewEvent | null>(null);
 
   // Calculate date range based on view mode
@@ -306,7 +306,6 @@ export default function CalendarViewPage() {
 
   const handleEventClick = (event: CalendarViewEvent) => {
     setSelectedEvent(event);
-    // TODO: Open event detail modal (REQ-2-025)
   };
 
   const handleDayClick = (date: Date) => {
@@ -387,6 +386,9 @@ export default function CalendarViewPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Event detail modal */}
+      <EventDetail event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </div>
   );
 }

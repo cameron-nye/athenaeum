@@ -370,7 +370,7 @@
         "Keyboard accessible (Escape to close)",
         "Exit animation (fade out, scale down) using AnimatePresence"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-026",

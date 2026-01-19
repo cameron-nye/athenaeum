@@ -504,3 +504,28 @@
 - typecheck: pass
 - test: pass (135 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-025 - Create event detail modal/panel
+
+**Completed**: Created animated event detail modal with framer-motion
+
+**Features**:
+- Backdrop blur + fade animation
+- Modal scale (0.95→1) + fade transition
+- Shows title, time, location, description
+- Shows calendar source name with color indicator
+- Parses RRULE for human-readable recurrence display
+- Close button + backdrop click + Escape key to dismiss
+- Exit animation via AnimatePresence
+- Full ARIA accessibility (dialog, modal, labelledby)
+
+**Files changed**:
+- components/calendar/EventDetail.tsx (new)
+- components/calendar/EventDetail.test.tsx (new, 14 tests)
+- app/(dashboard)/calendars/view/page.tsx (integrated EventDetail)
+- docs/prd.json (marked REQ-2-025 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (149 tests total)
+- lint: pass
