@@ -82,3 +82,20 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-006 - Create RLS policies for calendar_sources table
+
+**Completed**: Created RLS policies for calendar_sources
+
+**Decisions**:
+- Uses get_user_household_id() helper (from Phase 1) for household scoping
+- SELECT/INSERT/UPDATE/DELETE all scoped to user's household
+- Follows same pattern as Phase 1 RLS policies
+
+**Files changed**:
+- supabase/migrations/20260119110000_calendar_sources_rls.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
