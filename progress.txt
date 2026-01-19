@@ -66,3 +66,19 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-005 - Create events table indexes
+
+**Completed**: Created performance indexes for events table
+
+**Decisions**:
+- idx_events_calendar_time: composite index on (calendar_source_id, start_time) for calendar queries
+- idx_events_time_range: composite index on (start_time, end_time) for date range queries
+
+**Files changed**:
+- supabase/migrations/20260119100000_create_events_indexes.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
