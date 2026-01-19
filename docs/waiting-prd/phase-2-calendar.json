@@ -12,7 +12,7 @@
         "Package installs without errors",
         "TypeScript types are available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-002",
@@ -24,7 +24,7 @@
         ".env.local.example includes GOOGLE_REDIRECT_URI",
         "Variables documented in README"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-003",
@@ -41,7 +41,7 @@
         "enabled defaults to true",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-004",
@@ -56,7 +56,7 @@
         "all_day defaults to false",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-005",
@@ -68,7 +68,7 @@
         "Index idx_events_time_range on (start_time, end_time)",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-006",
@@ -83,7 +83,7 @@
         "DELETE policy allows deleting own household's sources",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-007",
@@ -99,7 +99,7 @@
         "Policies join through calendar_sources to check household",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-008",
@@ -112,7 +112,7 @@
         "Handles token refresh logic",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-009",
@@ -126,7 +126,7 @@
         "Uses ENCRYPTION_KEY from environment",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-010",
@@ -140,7 +140,7 @@
         "Redirects user to Google OAuth consent page",
         "Only accessible to authenticated users"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-011",
@@ -156,7 +156,7 @@
         "Redirects to calendar selection page on success",
         "Handles errors gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-012",
@@ -204,7 +204,7 @@
         "Updates last_synced_at timestamp",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-015",
@@ -219,7 +219,7 @@
         "Handles event deletion (cancelled events)",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-016",
@@ -233,7 +233,7 @@
         "Handles errors and returns appropriate status codes",
         "Rate limited to prevent abuse"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-017",
@@ -247,7 +247,7 @@
         "Returns count of synced calendars",
         "Handles partial failures gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-018",
@@ -259,7 +259,7 @@
         "Schedule set to every 5 minutes (*/5 * * * *)",
         "Configuration is valid JSON"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-019",
@@ -270,7 +270,7 @@
         "Documentation explains how to set in Vercel",
         "Cron route validates against this secret"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-020",
@@ -480,7 +480,7 @@
         "Handles timezone considerations",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-034",
