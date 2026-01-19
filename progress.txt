@@ -154,3 +154,42 @@
 - typecheck: pass
 - test: pass (11 tests)
 - lint: pass
+
+## 2026-01-19: REQ-2-002 - Add Google OAuth environment variables
+
+**Completed**: Created .env.local.example with Google OAuth credentials
+
+**Decisions**:
+- Created .env.local.example (not .env.example) to follow Next.js conventions
+- Added exception to .gitignore for .env.local.example
+- Documented Google Calendar setup in README
+
+**Files changed**:
+- .env.local.example (new)
+- README.md (added env var docs)
+- .gitignore (added exception for .env.local.example)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-008 - Create Google OAuth utility module
+
+**Completed**: Created OAuth2 client utility for Google Calendar API
+
+**Decisions**:
+- Created lib/google/auth.ts (matches existing lib/ pattern, not src/lib/ from PRD)
+- Uses google-auth-library (from googleapis package)
+- Exports: createOAuth2Client, createOAuth2ClientWithTokens, generateAuthUrl, exchangeCodeForTokens, refreshAccessToken, checkTokenStatus, getValidOAuth2Client
+- 5-minute buffer for token expiry checks
+- getValidOAuth2Client auto-refreshes and calls onTokenRefresh callback
+
+**Files changed**:
+- lib/google/auth.ts (new)
+- lib/google/auth.test.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass (16 tests)
+- lint: pass
