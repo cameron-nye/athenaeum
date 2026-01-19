@@ -363,3 +363,25 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-020 - Create calendar view data fetching
+
+**Completed**: Created server-side functions to fetch events for calendar views
+
+**Decisions**:
+- Created lib/calendar/queries.ts (matches existing lib/ pattern)
+- fetchEventsForDateRange: joins events with calendar_sources, filters by enabled=true
+- Uses overlapping range query (start < rangeEnd AND end > rangeStart)
+- Returns denormalized CalendarViewEvent type with calendar_source info
+- fetchEnabledCalendarSources + fetchAllCalendarSources for calendar list views
+- RLS handles household scoping automatically
+
+**Files changed**:
+- lib/calendar/queries.ts (new)
+- lib/calendar/queries.test.ts (new, 13 tests)
+- docs/prd.json (marked 19 requirements as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (103 tests total)
+- lint: pass
