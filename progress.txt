@@ -193,3 +193,23 @@
 - typecheck: pass
 - test: pass (16 tests)
 - lint: pass
+
+## 2026-01-19: REQ-2-010 - Create Google OAuth initiation route
+
+**Completed**: Created API route to start Google Calendar OAuth flow
+
+**Decisions**:
+- Created lib/supabase/server.ts as prerequisite (Phase 1 client utility)
+- Route at app/api/google/auth/route.ts (not src/app as PRD - matching codebase pattern)
+- CSRF state format: userId:randomToken for verification in callback
+- Scopes: calendar.readonly + calendar.events.readonly
+- Redirects to Google consent page (302 redirect)
+
+**Files changed**:
+- lib/supabase/server.ts (new)
+- app/api/google/auth/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
