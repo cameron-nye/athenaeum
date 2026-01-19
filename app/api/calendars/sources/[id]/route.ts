@@ -3,6 +3,66 @@ import { createClient } from '@/lib/supabase/server';
 import { stopAllWebhookChannels } from '@/lib/google/calendar';
 
 /**
+ * PATCH /api/calendars/sources/[id]
+ *
+ * Updates a calendar source's properties (color, name).
+ */
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  // Verify user is authenticated
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  if (!id) {
+    return NextResponse.json({ error: 'Calendar ID is required' }, { status: 400 });
+  }
+
+  try {
+    const body = await request.json();
+    const { color } = body;
+
+    // Validate color if provided (hex color format)
+    if (color !== undefined) {
+      if (typeof color !== 'string' || !/^#[0-9A-Fa-f]{6}$/.test(color)) {
+        return NextResponse.json(
+          { error: 'Invalid color format. Use hex (#RRGGBB)' },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Build update object with only allowed fields
+    const updates: Record<string, string> = {};
+    if (color) updates.color = color;
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+    }
+
+    // RLS policies ensure user can only update their household's calendars
+    const { error } = await supabase.from('calendar_sources').update(updates).eq('id', id);
+
+    if (error) {
+      console.error('Error updating calendar source:', error);
+      return NextResponse.json({ error: 'Failed to update calendar' }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error('Error in PATCH /api/calendars/sources/[id]:', err);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+/**
  * DELETE /api/calendars/sources/[id]
  *
  * Deletes a calendar source and all its associated events.

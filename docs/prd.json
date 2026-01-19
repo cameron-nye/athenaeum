@@ -383,7 +383,7 @@
         "Clicking color updates calendar_source.color",
         "Changes reflected immediately in UI"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-027",

@@ -677,3 +677,29 @@
 - typecheck: pass
 - test: pass (188 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-026 - Create calendar color picker component
+
+**Completed**: Color picker dropdown with 16 predefined colors
+
+**Features**:
+- CALENDAR_COLORS: 16 distinct, accessible colors
+- Trigger button shows current color
+- Dropdown grid of color swatches
+- Check icon on selected color
+- Framer-motion animations (scale, fade)
+- Full accessibility (listbox/option roles)
+- PATCH /api/calendars/sources/[id] for color update
+
+**Files created**:
+- components/calendar/ColorPicker.tsx
+- components/calendar/ColorPicker.test.tsx (10 tests)
+
+**Files modified**:
+- app/api/calendars/sources/[id]/route.ts (added PATCH handler)
+- docs/prd.json (marked REQ-2-026 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
