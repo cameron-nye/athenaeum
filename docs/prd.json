@@ -171,7 +171,7 @@
         "Stores selected calendars in calendar_sources",
         "Redirects to calendars list on success"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-013",

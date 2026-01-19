@@ -529,3 +529,30 @@
 - typecheck: pass
 - test: pass (149 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-012 - Create calendar selection page
+
+**Completed**: Created calendar selection page with checkbox UI
+
+**Features**:
+- Fetches calendars via /api/calendars/sources endpoint
+- Checkbox UI with staggered animation (50ms delay)
+- Pre-selects already enabled calendars
+- Select all / Deselect all controls
+- Calendar color indicator
+- Save button with loading state
+- Cancel button to abort
+- Empty state when no calendars
+- Error handling with user-friendly messages
+- Redirects to /calendars on success
+
+**Files changed**:
+- app/(dashboard)/calendars/connect/page.tsx (new)
+- app/(dashboard)/calendars/connect/page.test.tsx (new, 11 tests)
+- app/api/calendars/sources/route.ts (new - GET + PATCH)
+- docs/prd.json (marked REQ-2-012 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (160 tests total)
+- lint: pass
