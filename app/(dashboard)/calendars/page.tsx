@@ -5,7 +5,7 @@
  * REQ-2-013: Create calendars list page
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -242,17 +242,13 @@ function ErrorAlert({ message, onDismiss }: { message: string; onDismiss: () => 
 }
 
 /**
- * Calendars list page component.
+ * Component that handles URL error params.
+ * Needs to be wrapped in Suspense as it uses useSearchParams.
  */
-export default function CalendarsPage() {
+function ErrorParamHandler({ onError }: { onError: (error: string) => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [calendars, setCalendars] = useState<CalendarSource[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [syncStatuses, setSyncStatuses] = useState<Record<string, SyncStatus>>({});
 
-  // Check for error in URL params (from OAuth callback)
   useEffect(() => {
     const urlError = searchParams.get('error');
     if (urlError) {
@@ -267,11 +263,28 @@ export default function CalendarsPage() {
         db_error: 'Failed to save calendar connection',
         callback_failed: 'Calendar connection failed',
       };
-      setError(errorMessages[urlError] ?? 'An error occurred');
+      onError(errorMessages[urlError] ?? 'An error occurred');
       // Clear error from URL
       router.replace('/calendars', { scroll: false });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, onError]);
+
+  return null;
+}
+
+/**
+ * Calendars list page component.
+ */
+export default function CalendarsPage() {
+  const router = useRouter();
+  const [calendars, setCalendars] = useState<CalendarSource[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [syncStatuses, setSyncStatuses] = useState<Record<string, SyncStatus>>({});
+
+  const handleUrlError = useCallback((err: string) => {
+    setError(err);
+  }, []);
 
   // Fetch calendars
   const fetchCalendars = useCallback(async () => {
@@ -379,6 +392,11 @@ export default function CalendarsPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
+      {/* Handle URL error params */}
+      <Suspense fallback={null}>
+        <ErrorParamHandler onError={handleUrlError} />
+      </Suspense>
+
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>

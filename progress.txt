@@ -727,3 +727,21 @@
 - typecheck: pass
 - test: pass (198 tests total)
 - lint: pass
+
+## 2026-01-19: Build Fix - Suspense boundaries for useSearchParams
+
+**Completed**: Fixed Next.js build errors for useSearchParams without Suspense
+
+**Changes**:
+- app/(dashboard)/calendars/page.tsx: Added ErrorParamHandler component wrapped in Suspense
+- app/(dashboard)/calendars/view/page.tsx: Refactored to CalendarViewContent with UrlParamsSyncer + useInitialParams hook, all wrapped in Suspense
+
+**Notes**:
+- Next.js requires useSearchParams to be wrapped in Suspense boundary for static page generation
+- Extracted URL param logic into separate components that can be suspended
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
+- build: pass

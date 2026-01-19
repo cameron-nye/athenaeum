@@ -5,7 +5,7 @@
  * REQ-2-024: Calendar view page with view switcher
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Suspense, useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, CalendarDays, CalendarRange, ChevronDown } from 'lucide-react';
@@ -191,14 +191,32 @@ function DatePicker({
 }
 
 /**
- * Main calendar view page component.
+ * Component to handle URL search params synchronization.
+ * Needs to be wrapped in Suspense as it uses useSearchParams.
  */
-export default function CalendarViewPage() {
+function UrlParamsSyncer({ viewMode, currentDate }: { viewMode: ViewMode; currentDate: Date }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Initialize view mode from URL or localStorage
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set('view', viewMode);
+    params.set('date', currentDate.toISOString().split('T')[0]);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }, [viewMode, currentDate, router, searchParams]);
+
+  return null;
+}
+
+/**
+ * Hook to get initial values from URL or localStorage.
+ * This reads search params once on mount for SSR-safe initialization.
+ */
+function useInitialParams(): { initialView: ViewMode; initialDate: Date } {
+  // These are only accessed client-side after hydration
+  const searchParams = useSearchParams();
+
+  const initialView = useMemo((): ViewMode => {
     const urlView = searchParams.get('view') as ViewMode | null;
     if (urlView && ['month', 'week', 'day'].includes(urlView)) {
       return urlView;
@@ -210,10 +228,9 @@ export default function CalendarViewPage() {
       }
     }
     return 'month';
-  });
+  }, [searchParams]);
 
-  // Initialize current date from URL or today
-  const [currentDate, setCurrentDate] = useState<Date>(() => {
+  const initialDate = useMemo((): Date => {
     const urlDate = searchParams.get('date');
     if (urlDate) {
       const parsed = new Date(urlDate);
@@ -222,7 +239,19 @@ export default function CalendarViewPage() {
       }
     }
     return getNow();
-  });
+  }, [searchParams]);
+
+  return { initialView, initialDate };
+}
+
+/**
+ * Inner calendar view content wrapped by Suspense.
+ */
+function CalendarViewContent() {
+  const { initialView, initialDate } = useInitialParams();
+
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
+  const [currentDate, setCurrentDate] = useState<Date>(initialDate);
 
   const [events, setEvents] = useState<CalendarViewEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -281,16 +310,12 @@ export default function CalendarViewPage() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // Persist view mode to localStorage and URL
+  // Persist view mode to localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
       localStorage.setItem('calendarViewMode', viewMode);
     }
-    const params = new URLSearchParams(searchParams);
-    params.set('view', viewMode);
-    params.set('date', currentDate.toISOString().split('T')[0]);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }, [viewMode, currentDate, router, searchParams]);
+  }, [viewMode]);
 
   const handleViewChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -316,6 +341,9 @@ export default function CalendarViewPage() {
 
   return (
     <div className="bg-background flex h-screen flex-col">
+      {/* URL params syncer */}
+      <UrlParamsSyncer viewMode={viewMode} currentDate={currentDate} />
+
       {/* Top toolbar */}
       <div className="border-border flex items-center justify-between border-b px-4 py-3">
         <div className="flex items-center gap-4">
@@ -390,5 +418,16 @@ export default function CalendarViewPage() {
       {/* Event detail modal */}
       <EventDetail event={selectedEvent} onClose={() => setSelectedEvent(null)} />
     </div>
+  );
+}
+
+/**
+ * Main calendar view page component.
+ */
+export default function CalendarViewPage() {
+  return (
+    <Suspense fallback={<CalendarSkeleton />}>
+      <CalendarViewContent />
+    </Suspense>
   );
 }
