@@ -21,6 +21,7 @@ cp .env.local.example .env.local
 | `GOOGLE_CLIENT_SECRET`          | Google OAuth client secret                                                                     |
 | `GOOGLE_REDIRECT_URI`           | OAuth callback URL (e.g., `http://localhost:3000/api/google/callback`)                         |
 | `ENCRYPTION_KEY`                | 32-byte key for token encryption. Generate: `openssl rand -base64 32`                          |
+| `CRON_SECRET`                   | Secret for authenticating Vercel cron jobs. Generate: `openssl rand -base64 32`                |
 
 ### Google Calendar Setup
 
