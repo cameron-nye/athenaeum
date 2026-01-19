@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "mcp__plugin_compound-engineering_context7__resolve-library-id",
+      "mcp__plugin_compound-engineering_context7__query-docs",
+      "WebFetch(domain:www.raspberrypi.com)",
+      "WebFetch(domain:benswift.me)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:reelyactive.github.io)",
+      "Bash(npm install:*)",
+      "Bash(npx husky init)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run test)",
+      "Bash(npm run build:*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
