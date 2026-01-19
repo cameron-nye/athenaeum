@@ -1,673 +1,577 @@
 {
-  "phase": 1,
-  "name": "Foundation",
-  "description": "Set up the core project infrastructure including Next.js, Supabase, authentication, household management, and the design system with animations",
+  "phase": 2,
+  "name": "Calendar Integration",
+  "description": "Integrate with Google Calendar API for syncing and displaying calendar events with smooth animations",
   "requirements": [
     {
-      "id": "REQ-1-001",
-      "title": "Initialize Next.js project with TypeScript and Tailwind",
-      "description": "Create a new Next.js 14+ project with App Router, TypeScript, Tailwind CSS, and src directory structure",
+      "id": "REQ-2-001",
+      "title": "Install Google API dependencies",
+      "description": "Install googleapis package for Google Calendar API access",
       "acceptance_criteria": [
-        "Project created with pnpm create next-app",
-        "TypeScript configuration (tsconfig.json) exists and is valid",
-        "Tailwind CSS configuration (tailwind.config.ts) exists",
-        "App Router structure exists at src/app/",
-        "pnpm dev starts the development server at localhost:3000",
-        "No TypeScript or ESLint errors on fresh project"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-002",
-      "title": "Install Supabase dependencies",
-      "description": "Install @supabase/supabase-js, @supabase/ssr, and supabase CLI as dev dependency",
-      "acceptance_criteria": [
-        "@supabase/supabase-js is in package.json dependencies",
-        "@supabase/ssr is in package.json dependencies",
-        "supabase is in package.json devDependencies",
-        "All packages install without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-003",
-      "title": "Install Framer Motion",
-      "description": "Install framer-motion library for buttery smooth animations",
-      "acceptance_criteria": [
-        "framer-motion is in package.json dependencies",
+        "googleapis package is in package.json dependencies",
         "Package installs without errors",
-        "Motion components can be imported and used"
+        "TypeScript types are available"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-004",
-      "title": "Configure Tailwind with pastel color palette",
-      "description": "Set up soft, calming pastel colors in Tailwind config",
+      "id": "REQ-2-002",
+      "title": "Create Google OAuth environment variables",
+      "description": "Add Google OAuth credentials to environment configuration",
       "acceptance_criteria": [
-        "tailwind.config.ts includes primary palette (soft lavender: #f5f3ff to #8b5cf6)",
-        "tailwind.config.ts includes accent palette (soft coral: #fff7ed to #fb923c)",
-        "tailwind.config.ts includes calm palette (soft sage: #f0fdf4 to #86efac)",
-        "tailwind.config.ts includes warm palette (soft blush: #fff1f2 to #fda4af)",
-        "Custom border-radius values added (xl: 1rem, 2xl: 1.5rem, 3xl: 2rem)",
-        "Custom soft shadow values added (shadow-soft, shadow-soft-lg)",
-        "Shimmer animation keyframes defined",
-        "Colors work in both light and dark modes"
+        ".env.local.example includes GOOGLE_CLIENT_ID",
+        ".env.local.example includes GOOGLE_CLIENT_SECRET",
+        ".env.local.example includes GOOGLE_REDIRECT_URI",
+        "Variables documented in README"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-005",
-      "title": "Create animation variants module",
-      "description": "Create reusable Framer Motion animation variants",
-      "acceptance_criteria": [
-        "File exists at src/components/animations/variants.ts",
-        "Exports staggered container variant (staggerChildren: 0.05)",
-        "Exports item reveal variant (fade + slide up with spring physics)",
-        "Exports page transition variant (fade + subtle y movement)",
-        "Exports button tap variant (scale: 0.98 with spring)",
-        "Exports modal variant (fade + scale with backdrop)",
-        "All animations use spring physics where appropriate",
-        "TypeScript compiles without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-006",
-      "title": "Create page transition wrapper component",
-      "description": "Create component for smooth page transitions using AnimatePresence",
-      "acceptance_criteria": [
-        "File exists at src/components/animations/transitions.tsx",
-        "Exports PageTransition component wrapping children with motion.div",
-        "Uses page transition variants (fade in 0.3s, fade out 0.2s)",
-        "Integrates with Next.js App Router",
-        "Handles exit animations properly with AnimatePresence"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-007",
-      "title": "Create animated Button component",
-      "description": "Create a button component with smooth hover and tap animations",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/button.tsx",
-        "Uses Framer Motion for animations",
-        "Hover state: subtle lift (y: -1px) and shadow increase",
-        "Tap state: scale down (0.98) with spring physics",
-        "Supports variants: primary, secondary, destructive, ghost",
-        "Supports sizes: sm, md, lg",
-        "Loading state shows animated spinner",
-        "Disabled state prevents animations",
-        "Uses pastel colors from theme",
-        "Rounded corners (radius-xl or larger)"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-008",
-      "title": "Create animated Input component",
-      "description": "Create an input component with focus animations",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/input.tsx",
-        "Focus state: soft glow animation (not harsh ring)",
-        "Label floats or transitions smoothly",
-        "Error state: gentle shake animation",
-        "Uses soft border colors from pastel palette",
-        "Rounded corners (radius-lg or larger)",
-        "Forwards ref properly",
-        "Fully typed with TypeScript"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-009",
-      "title": "Create animated Card component",
-      "description": "Create a card component with hover elevation",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/card.tsx",
-        "Hover state: subtle lift and shadow increase",
-        "Uses soft shadows (shadow-soft)",
-        "Large rounded corners (radius-2xl or larger)",
-        "Exports Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter",
-        "Smooth transition duration (200-300ms)",
-        "Uses Framer Motion for animations"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-010",
-      "title": "Create animated Modal component",
-      "description": "Create a modal with fade, scale, and backdrop blur animations",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/modal.tsx",
-        "Uses AnimatePresence for enter/exit animations",
-        "Modal fades in with scale (0.95 to 1)",
-        "Backdrop blurs and fades in",
-        "Exit animation reverses smoothly",
-        "Closes on Escape key",
-        "Closes on backdrop click",
-        "Traps focus within modal",
-        "Duration: 300-400ms"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-011",
-      "title": "Create Skeleton loading component with shimmer",
-      "description": "Create a skeleton component with smooth shimmer animation",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/skeleton.tsx",
-        "Uses CSS shimmer animation (gradient moving left to right)",
-        "Shimmer is subtle and calming (not harsh flash)",
-        "Supports different shapes: rectangle, circle, text lines",
-        "Animation duration: 2s linear infinite",
-        "Uses neutral-200/neutral-300 colors",
-        "Rounded corners match content being loaded"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-012",
-      "title": "Create animated Toggle/Switch component",
-      "description": "Create a toggle switch with smooth state transitions",
-      "acceptance_criteria": [
-        "Component exists at src/components/ui/toggle.tsx",
-        "Thumb slides smoothly between states (spring physics)",
-        "Background color transitions smoothly",
-        "Uses primary pastel color when active",
-        "Uses neutral color when inactive",
-        "Satisfying tactile feel on interaction",
-        "Accessible with keyboard"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-013",
-      "title": "Initialize Supabase project",
-      "description": "Initialize Supabase configuration for local development",
-      "acceptance_criteria": [
-        "supabase/ directory exists with config.toml",
-        "supabase/migrations/ directory exists",
-        "supabase/seed.sql file exists (can be empty)",
-        "pnpm supabase start launches local Supabase containers"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-014",
-      "title": "Create Supabase browser client utility",
-      "description": "Create a reusable Supabase client for browser/client components",
-      "acceptance_criteria": [
-        "File exists at src/lib/supabase/client.ts",
-        "Exports a createClient function that returns a Supabase client",
-        "Uses @supabase/ssr createBrowserClient",
-        "Reads NEXT_PUBLIC_SUPABASE_URL from environment",
-        "Reads NEXT_PUBLIC_SUPABASE_ANON_KEY from environment",
-        "TypeScript compiles without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-015",
-      "title": "Create Supabase server client utility",
-      "description": "Create a reusable Supabase client for server components and API routes",
-      "acceptance_criteria": [
-        "File exists at src/lib/supabase/server.ts",
-        "Exports a createClient function for server components",
-        "Uses @supabase/ssr createServerClient",
-        "Properly handles cookies for session management",
-        "Works with Next.js cookies() function",
-        "TypeScript compiles without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-016",
-      "title": "Create environment variables template",
-      "description": "Create .env.local.example with all required environment variables",
-      "acceptance_criteria": [
-        "File .env.local.example exists in project root",
-        "Contains NEXT_PUBLIC_SUPABASE_URL placeholder",
-        "Contains NEXT_PUBLIC_SUPABASE_ANON_KEY placeholder",
-        "Contains SUPABASE_SERVICE_ROLE_KEY placeholder",
-        ".env.local is in .gitignore"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-017",
-      "title": "Create households table migration",
-      "description": "Create PostgreSQL migration for households table",
+      "id": "REQ-2-003",
+      "title": "Create calendar_sources table migration",
+      "description": "Create PostgreSQL migration for storing connected calendar accounts",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "Table households created with columns: id (UUID PK), name (TEXT NOT NULL), invite_code (TEXT UNIQUE), created_at (TIMESTAMPTZ)",
-        "id has default gen_random_uuid()",
-        "invite_code has default for generating short codes",
-        "created_at defaults to now()",
-        "Migration applies without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-018",
-      "title": "Create users table migration",
-      "description": "Create PostgreSQL migration for users table linked to Supabase Auth",
-      "acceptance_criteria": [
-        "Migration file exists in supabase/migrations/",
-        "Table users created with columns: id (UUID PK), household_id (UUID FK), display_name (TEXT NOT NULL), avatar_url (TEXT), role (TEXT), created_at (TIMESTAMPTZ)",
-        "id references auth.users(id) ON DELETE CASCADE",
-        "household_id references households(id) ON DELETE SET NULL",
-        "role has CHECK constraint for 'admin', 'member', 'child'",
-        "role defaults to 'member'",
-        "Migration applies without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-019",
-      "title": "Create displays table migration",
-      "description": "Create PostgreSQL migration for display devices (Pi units)",
-      "acceptance_criteria": [
-        "Migration file exists in supabase/migrations/",
-        "Table displays created with columns: id (UUID PK), household_id (UUID FK NOT NULL), name (TEXT NOT NULL), auth_token (TEXT UNIQUE NOT NULL), last_seen_at (TIMESTAMPTZ), settings (JSONB), created_at (TIMESTAMPTZ)",
+        "Table calendar_sources created with all columns from schema",
+        "Columns: id, household_id, user_id, provider, external_id, name, color, access_token_encrypted, refresh_token_encrypted, sync_token, last_synced_at, enabled, created_at",
         "household_id references households(id) ON DELETE CASCADE",
-        "auth_token defaults to encode(gen_random_bytes(32), 'hex')",
-        "settings defaults to '{}'::jsonb",
+        "user_id references users(id) ON DELETE SET NULL",
+        "provider has CHECK constraint for 'google', 'ical'",
+        "UNIQUE constraint on (household_id, provider, external_id)",
+        "enabled defaults to true",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-020",
-      "title": "Create get_user_household_id helper function",
-      "description": "Create PostgreSQL function to get current user's household ID for RLS policies",
+      "id": "REQ-2-004",
+      "title": "Create events table migration",
+      "description": "Create PostgreSQL migration for cached calendar events",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "Function get_user_household_id() created",
-        "Returns UUID",
-        "Queries users table using auth.uid()",
-        "Marked as SECURITY DEFINER",
-        "Marked as STABLE",
+        "Table events created with all columns from schema",
+        "Columns: id, calendar_source_id, external_id, title, description, location, start_time, end_time, all_day, recurrence_rule, raw_data, created_at, updated_at",
+        "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
+        "UNIQUE constraint on (calendar_source_id, external_id)",
+        "all_day defaults to false",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-021",
-      "title": "Enable RLS on core tables",
-      "description": "Enable Row Level Security on households, users, and displays tables",
+      "id": "REQ-2-005",
+      "title": "Create events table indexes",
+      "description": "Create performance indexes for events table queries",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "RLS enabled on households table",
-        "RLS enabled on users table",
-        "RLS enabled on displays table",
+        "Index idx_events_calendar_time on (calendar_source_id, start_time)",
+        "Index idx_events_time_range on (start_time, end_time)",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-022",
-      "title": "Create RLS policies for households table",
-      "description": "Create Row Level Security policies for households access",
+      "id": "REQ-2-006",
+      "title": "Create RLS policies for calendar_sources table",
+      "description": "Create Row Level Security policies for calendar sources",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "SELECT policy allows users to view their own household",
-        "INSERT policy allows authenticated users to create households",
-        "UPDATE policy allows household admins to update their household",
-        "Policies use get_user_household_id() helper",
+        "RLS enabled on calendar_sources table",
+        "SELECT policy allows viewing sources in own household",
+        "INSERT policy allows adding sources to own household",
+        "UPDATE policy allows updating own household's sources",
+        "DELETE policy allows deleting own household's sources",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-023",
-      "title": "Create RLS policies for users table",
-      "description": "Create Row Level Security policies for users access",
+      "id": "REQ-2-007",
+      "title": "Create RLS policies for events table",
+      "description": "Create Row Level Security policies for events",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "SELECT policy allows viewing users in same household",
-        "INSERT policy allows creating own user profile",
-        "UPDATE policy allows updating own profile",
-        "Policies properly scope to household membership",
+        "RLS enabled on events table",
+        "SELECT policy allows viewing events from own household's calendars",
+        "INSERT policy allows adding events to own household's calendars",
+        "UPDATE policy allows updating own household's events",
+        "DELETE policy allows deleting own household's events",
+        "Policies join through calendar_sources to check household",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-024",
-      "title": "Create RLS policies for displays table",
-      "description": "Create Row Level Security policies for displays access",
+      "id": "REQ-2-008",
+      "title": "Create Google OAuth utility module",
+      "description": "Create utility for Google OAuth client initialization",
       "acceptance_criteria": [
-        "Migration file exists in supabase/migrations/",
-        "SELECT policy allows viewing displays in own household",
-        "INSERT policy allows household admins to create displays",
-        "UPDATE policy allows household admins to update displays",
-        "DELETE policy allows household admins to delete displays",
-        "Migration applies without errors"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-025",
-      "title": "Generate TypeScript types from Supabase schema",
-      "description": "Generate and configure TypeScript types from database schema",
-      "acceptance_criteria": [
-        "File exists at src/types/database.ts",
-        "Types generated using supabase gen types typescript",
-        "Types include households, users, displays tables",
-        "TypeScript compiles without errors",
-        "npm script exists for regenerating types"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-026",
-      "title": "Create auth middleware",
-      "description": "Create Next.js middleware for authentication protection",
-      "acceptance_criteria": [
-        "File exists at src/middleware.ts",
-        "Middleware refreshes Supabase auth session",
-        "Redirects unauthenticated users from /dashboard/* to /auth/login",
-        "Allows public access to /auth/* routes",
-        "Allows public access to /display/* routes",
-        "Matcher config excludes static files and images",
+        "File exists at src/lib/google/auth.ts",
+        "Exports function to create OAuth2 client",
+        "Uses environment variables for credentials",
+        "Handles token refresh logic",
         "TypeScript compiles without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-027",
-      "title": "Create login page with animations",
-      "description": "Create the login page with email/password authentication and smooth animations",
+      "id": "REQ-2-009",
+      "title": "Create token encryption utility",
+      "description": "Create utility for encrypting/decrypting OAuth tokens at rest",
       "acceptance_criteria": [
-        "Page exists at src/app/auth/login/page.tsx",
-        "Form uses animated Input components",
-        "Form uses animated Button component",
-        "Page content fades in on load (staggered animation)",
-        "Form validation errors animate in smoothly",
-        "Shows loading state with animated spinner during submission",
-        "Redirects to /dashboard on successful login",
-        "Uses pastel color scheme throughout",
-        "Card container uses soft shadows"
+        "File exists at src/lib/crypto.ts",
+        "Exports encrypt function for tokens",
+        "Exports decrypt function for tokens",
+        "Uses AES-256-GCM or similar secure algorithm",
+        "Uses ENCRYPTION_KEY from environment",
+        "TypeScript compiles without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-028",
-      "title": "Create signup page with animations",
-      "description": "Create the signup page with email/password registration and smooth animations",
+      "id": "REQ-2-010",
+      "title": "Create Google OAuth initiation route",
+      "description": "Create API route to start Google Calendar OAuth flow",
       "acceptance_criteria": [
-        "Page exists at src/app/auth/signup/page.tsx",
-        "Form uses animated Input and Button components",
-        "Page content fades in with staggered animation",
-        "Password strength indicator animates smoothly",
-        "Error messages animate in/out",
-        "Success message animates in after signup",
-        "Uses pastel color scheme throughout"
+        "Route exists at src/app/api/google/auth/route.ts",
+        "GET handler generates OAuth URL with calendar scopes",
+        "Scopes include calendar.readonly at minimum",
+        "State parameter includes CSRF protection",
+        "Redirects user to Google OAuth consent page",
+        "Only accessible to authenticated users"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-029",
-      "title": "Create auth callback route",
-      "description": "Create the OAuth callback handler for email confirmation",
+      "id": "REQ-2-011",
+      "title": "Create Google OAuth callback route",
+      "description": "Create API route to handle Google OAuth callback",
       "acceptance_criteria": [
-        "Route exists at src/app/auth/callback/route.ts",
-        "Handles code exchange for session",
-        "Redirects to /dashboard on success",
-        "Redirects to /auth/login with error on failure",
-        "Works with email confirmation links"
+        "Route exists at src/app/api/google/callback/route.ts",
+        "GET handler exchanges code for tokens",
+        "Validates state parameter for CSRF",
+        "Encrypts and stores refresh token in database",
+        "Creates calendar_source record",
+        "Fetches list of user's calendars",
+        "Redirects to calendar selection page on success",
+        "Handles errors gracefully"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-030",
-      "title": "Create password reset request page",
-      "description": "Create page to request password reset email with animations",
+      "id": "REQ-2-012",
+      "title": "Create calendar selection page",
+      "description": "Create page to select which Google calendars to sync",
       "acceptance_criteria": [
-        "Page exists at src/app/auth/forgot-password/page.tsx",
-        "Uses animated form components",
-        "Success message fades in smoothly",
-        "Uses pastel color scheme"
+        "Page exists at src/app/(dashboard)/calendars/connect/page.tsx",
+        "Displays list of available Google calendars",
+        "Shows calendar name and color",
+        "Checkbox to enable/disable each calendar",
+        "Submit button to save selection",
+        "Stores selected calendars in calendar_sources",
+        "Redirects to calendars list on success"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-031",
-      "title": "Create password reset confirmation page",
-      "description": "Create page to set new password after reset",
+      "id": "REQ-2-013",
+      "title": "Create calendars list page",
+      "description": "Create page showing all connected calendar sources",
       "acceptance_criteria": [
-        "Page exists at src/app/auth/reset-password/page.tsx",
-        "Uses animated form components",
-        "Password confirmation validation animates",
-        "Success redirect is smooth"
+        "Page exists at src/app/(dashboard)/calendars/page.tsx",
+        "Lists all calendar_sources for household",
+        "Shows calendar name, provider, enabled status",
+        "Shows last synced time",
+        "Button to add new calendar connection",
+        "Toggle to enable/disable each calendar",
+        "Button to disconnect (delete) calendar",
+        "Shows sync status indicator"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-032",
-      "title": "Create user profile trigger function",
-      "description": "Create PostgreSQL trigger to create user profile on auth signup",
+      "id": "REQ-2-014",
+      "title": "Create Google Calendar sync utility",
+      "description": "Create utility function to sync events from Google Calendar",
+      "acceptance_criteria": [
+        "File exists at src/lib/google/calendar.ts",
+        "Exports syncCalendarEvents function",
+        "Uses syncToken for incremental sync when available",
+        "Falls back to full sync on 410 error (token expired)",
+        "Handles pagination for large calendars",
+        "Upserts events to database",
+        "Updates sync_token after successful sync",
+        "Updates last_synced_at timestamp",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-015",
+      "title": "Create event upsert function",
+      "description": "Create database function to upsert calendar events",
+      "acceptance_criteria": [
+        "Function exists in src/lib/google/calendar.ts or separate file",
+        "Handles INSERT or UPDATE based on external_id",
+        "Maps Google Calendar event fields to database schema",
+        "Handles all-day events correctly",
+        "Stores raw_data for debugging",
+        "Handles event deletion (cancelled events)",
+        "TypeScript compiles without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-016",
+      "title": "Create manual sync trigger API",
+      "description": "Create API route to manually trigger calendar sync",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/calendars/sync/route.ts",
+        "POST handler triggers sync for specified calendar_source_id",
+        "Validates user has access to calendar",
+        "Returns sync status and event count",
+        "Handles errors and returns appropriate status codes",
+        "Rate limited to prevent abuse"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-017",
+      "title": "Create cron sync API route",
+      "description": "Create API route for Vercel cron to trigger background sync",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/cron/sync/route.ts",
+        "GET handler validates CRON_SECRET authorization",
+        "Queries calendar_sources that need sync (stale > 5 min)",
+        "Syncs all stale calendars in parallel",
+        "Returns count of synced calendars",
+        "Handles partial failures gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-018",
+      "title": "Create vercel.json with cron configuration",
+      "description": "Configure Vercel cron job for background sync",
+      "acceptance_criteria": [
+        "vercel.json exists in project root",
+        "Cron job configured for /api/cron/sync",
+        "Schedule set to every 5 minutes (*/5 * * * *)",
+        "Configuration is valid JSON"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-019",
+      "title": "Add CRON_SECRET environment variable",
+      "description": "Add cron secret for securing cron endpoints",
+      "acceptance_criteria": [
+        ".env.local.example includes CRON_SECRET",
+        "Documentation explains how to set in Vercel",
+        "Cron route validates against this secret"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-020",
+      "title": "Create calendar view data fetching",
+      "description": "Create server-side function to fetch events for calendar view",
+      "acceptance_criteria": [
+        "Function exists to fetch events for date range",
+        "Accepts start_date and end_date parameters",
+        "Filters by household's enabled calendars only",
+        "Returns events sorted by start_time",
+        "Includes calendar source info (name, color)",
+        "TypeScript types defined for return value"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-021",
+      "title": "Create month calendar view component",
+      "description": "Create calendar component showing month view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/MonthView.tsx",
+        "Displays month grid with day cells",
+        "Shows events in each day cell",
+        "Events show title and time",
+        "Events colored by calendar source",
+        "Navigation to previous/next month with slide animation (300-400ms)",
+        "Current day highlighted",
+        "Responsive layout for different screen sizes",
+        "Day cells use staggered fade-in animation on initial render",
+        "Events animate in with subtle spring physics"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-022",
+      "title": "Create week calendar view component",
+      "description": "Create calendar component showing week view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/WeekView.tsx",
+        "Displays 7-day week with hourly grid",
+        "Events positioned by time and duration",
+        "Events show title",
+        "Events colored by calendar source",
+        "Navigation to previous/next week with slide animation (300-400ms)",
+        "Current day/time highlighted",
+        "Handles all-day events section",
+        "Events animate in with staggered reveal (50ms stagger)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-023",
+      "title": "Create day calendar view component",
+      "description": "Create calendar component showing single day view with smooth animations",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/DayView.tsx",
+        "Displays single day with hourly grid",
+        "Events positioned by time and duration",
+        "Events show title and details",
+        "Events colored by calendar source",
+        "Navigation to previous/next day with slide animation (300-400ms)",
+        "Current time indicator line with subtle pulse animation",
+        "Handles all-day events section",
+        "Events animate in with spring physics (stiffness: 300, damping: 24)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-024",
+      "title": "Create calendar view page with view switcher",
+      "description": "Create main calendar page with animated view selection",
+      "acceptance_criteria": [
+        "Page exists at src/app/(dashboard)/calendars/view/page.tsx",
+        "Toggle buttons for Month/Week/Day views with hover animations",
+        "View preference persisted (localStorage or URL)",
+        "Today button to jump to current date",
+        "Date picker for navigation",
+        "Fetches events for current view range",
+        "Loading state shows shimmer skeleton animation",
+        "View transitions use AnimatePresence for smooth switching"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-025",
+      "title": "Create event detail modal/panel",
+      "description": "Create animated component to show event details when clicked",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/EventDetail.tsx",
+        "Modal animates in with fade + scale (opacity 0→1, scale 0.95→1)",
+        "Backdrop has blur effect and fades in",
+        "Shows event title, description, location",
+        "Shows start and end time/date",
+        "Shows calendar source name",
+        "Shows recurrence info if applicable",
+        "Close button to dismiss",
+        "Keyboard accessible (Escape to close)",
+        "Exit animation (fade out, scale down) using AnimatePresence"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-026",
+      "title": "Create calendar color picker component",
+      "description": "Create component to change calendar display color",
+      "acceptance_criteria": [
+        "Component exists at src/components/calendar/ColorPicker.tsx",
+        "Shows palette of predefined colors",
+        "Current color is highlighted",
+        "Clicking color updates calendar_source.color",
+        "Changes reflected immediately in UI"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-027",
+      "title": "Create Google Calendar webhook receiver",
+      "description": "Create API route to receive Google Calendar push notifications",
+      "acceptance_criteria": [
+        "Route exists at src/app/api/webhooks/google/route.ts",
+        "POST handler validates X-Goog-Resource-ID header",
+        "Looks up channel in database",
+        "Triggers sync for affected calendar",
+        "Returns 200 OK quickly (before sync completes)",
+        "Logs webhook receipt for debugging"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-2-028",
+      "title": "Create webhook channel table migration",
+      "description": "Create table to store Google Calendar webhook channels",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "Function handle_new_user() created",
-        "Trigger on_auth_user_created exists on auth.users",
-        "Trigger fires AFTER INSERT",
-        "Creates entry in public.users with id and display_name from metadata",
+        "Table webhook_channels created",
+        "Columns: id, calendar_source_id, channel_id, resource_id, expiration, created_at",
+        "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-033",
-      "title": "Create dashboard route group layout with navigation",
-      "description": "Create the dashboard layout with animated navigation sidebar",
+      "id": "REQ-2-029",
+      "title": "Create webhook registration function",
+      "description": "Create function to register Google Calendar push notifications",
       "acceptance_criteria": [
-        "Layout exists at src/app/(dashboard)/layout.tsx",
-        "Navigation items animate on hover (subtle lift)",
-        "Active navigation item has animated indicator",
-        "Navigation includes links to: Dashboard, Calendars, Photos, Chores, Meals, Settings",
-        "Shows current user info in navigation",
-        "Logout button with hover animation",
-        "Mobile menu slides in with animation",
-        "Uses pastel colors and soft shadows"
+        "Function exists in src/lib/google/calendar.ts",
+        "Creates watch on calendar events",
+        "Stores channel info in webhook_channels table",
+        "Sets expiration to 7 days",
+        "Returns channel details"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-034",
-      "title": "Create dashboard home page with animations",
-      "description": "Create the main dashboard page with staggered content reveal",
+      "id": "REQ-2-030",
+      "title": "Create webhook renewal cron job",
+      "description": "Create cron job to renew expiring webhook channels",
       "acceptance_criteria": [
-        "Page exists at src/app/(dashboard)/page.tsx",
-        "Content cards animate in with staggered delay",
-        "Welcome message with user's display name",
-        "Household name displayed if user has one",
-        "Empty state animates in if no household",
-        "Uses PageTransition wrapper",
-        "Loading skeleton shows during data fetch"
+        "Route exists at src/app/api/cron/webhooks/route.ts",
+        "Queries channels expiring within 24 hours",
+        "Renews each channel with Google API",
+        "Updates expiration in database",
+        "Handles errors gracefully",
+        "Cron configured in vercel.json (daily)"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-035",
-      "title": "Create household creation form with animations",
-      "description": "Create animated form component for creating a new household",
+      "id": "REQ-2-031",
+      "title": "Create token refresh mechanism",
+      "description": "Implement automatic OAuth token refresh",
       "acceptance_criteria": [
-        "Component uses animated Modal if in modal mode",
-        "Form fields animate in sequence",
-        "Submit button shows loading animation",
-        "Success state animates smoothly",
-        "Error messages animate in/out"
+        "Token refresh triggered when access token expires",
+        "Uses stored encrypted refresh token",
+        "Updates access token in memory/cache",
+        "Handles refresh token revocation gracefully",
+        "Marks calendar_source as disconnected on failure"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-036",
-      "title": "Create household join form with animations",
-      "description": "Create animated form component for joining an existing household",
+      "id": "REQ-2-032",
+      "title": "Handle calendar disconnect",
+      "description": "Create functionality to disconnect a calendar source",
       "acceptance_criteria": [
-        "Form uses animated components",
-        "Invite code input with animated validation feedback",
-        "Success animation on valid join",
-        "Error shake animation on invalid code"
+        "Delete button on calendar list page",
+        "Confirmation dialog before deletion",
+        "Deletes calendar_source record",
+        "Cascade deletes associated events",
+        "Stops webhook channel",
+        "Shows success message"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-037",
-      "title": "Create household settings page with animations",
-      "description": "Create settings page with smooth interactions",
+      "id": "REQ-2-033",
+      "title": "Create date utility functions",
+      "description": "Create utility functions for date manipulation",
       "acceptance_criteria": [
-        "Page exists at src/app/(dashboard)/settings/page.tsx",
-        "Member list items animate in with stagger",
-        "Copy invite code shows animated confirmation",
-        "Role change dropdown animates",
-        "Remove member shows confirmation modal with animation"
+        "File exists at src/lib/utils/dates.ts",
+        "Function to get start/end of week",
+        "Function to get start/end of month",
+        "Function to format dates for display",
+        "Function to check if date is today",
+        "Function to calculate event duration",
+        "Handles timezone considerations",
+        "TypeScript compiles without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-038",
-      "title": "Create logout functionality",
-      "description": "Implement logout button and handler",
+      "id": "REQ-2-034",
+      "title": "Add timezone handling",
+      "description": "Properly handle timezones for events",
       "acceptance_criteria": [
-        "Logout button in navigation triggers signOut",
-        "Calls supabase.auth.signOut()",
-        "Redirects to /auth/login after logout",
-        "Clears all session cookies",
-        "Works without JavaScript errors"
+        "Events stored in UTC in database",
+        "Events displayed in user's local timezone",
+        "All-day events handled correctly across timezones",
+        "Timezone info preserved from Google Calendar"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-039",
-      "title": "Create global CSS styles with pastel theme",
-      "description": "Set up global styles and CSS variables for pastel theme",
+      "id": "REQ-2-035",
+      "title": "Create calendar sync status indicator",
+      "description": "Show sync status in calendar UI",
       "acceptance_criteria": [
-        "src/app/globals.css includes Tailwind directives",
-        "CSS variables defined for pastel color theming",
-        "Smooth focus styles (glow instead of harsh ring)",
-        "Scrollbar styled to match theme (subtle)",
-        "Selection color uses primary pastel",
-        "Body background uses warm neutral-50"
+        "Component shows last sync time",
+        "Shows syncing spinner during sync",
+        "Shows error indicator on sync failure",
+        "Manual refresh button visible",
+        "Updates automatically after sync"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-040",
-      "title": "Create root layout with metadata and fonts",
-      "description": "Configure the root layout with proper metadata and warm fonts",
+      "id": "REQ-2-036",
+      "title": "Handle recurring events",
+      "description": "Properly display recurring events from Google Calendar",
       "acceptance_criteria": [
-        "Layout exists at src/app/layout.tsx",
-        "Metadata includes title 'Skylight'",
-        "Metadata includes description",
-        "Warm, readable font loaded (e.g., Plus Jakarta Sans, DM Sans, or similar)",
-        "Font applied to body",
-        "HTML lang attribute set",
-        "Viewport meta configured"
+        "Recurring events expanded by Google (singleEvents=true)",
+        "Individual instances stored in events table",
+        "Recurrence info shown in event detail",
+        "Exception instances handled correctly"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-041",
-      "title": "Create loading states with animated skeletons",
-      "description": "Create loading UI with shimmer skeleton animations",
+      "id": "REQ-2-037",
+      "title": "Create empty state for calendars page",
+      "description": "Show helpful UI when no calendars connected",
       "acceptance_criteria": [
-        "Loading file exists at src/app/(dashboard)/loading.tsx",
-        "Shows shimmer skeleton matching page layout",
-        "Loading file exists at src/app/auth/loading.tsx",
-        "Skeleton animation is smooth and subtle",
-        "Skeletons match the shape of actual content"
+        "Empty state shown when no calendar_sources exist",
+        "Explains what connecting a calendar does",
+        "Prominent button to connect first calendar",
+        "Styled consistently with app design"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-042",
-      "title": "Create error boundary pages with animations",
-      "description": "Create error handling pages with smooth animations",
+      "id": "REQ-2-038",
+      "title": "Create error handling for Google API failures",
+      "description": "Gracefully handle Google API errors",
       "acceptance_criteria": [
-        "Error file exists at src/app/(dashboard)/error.tsx",
-        "Error content animates in smoothly",
-        "Retry button has hover/tap animations",
-        "Uses calming pastel colors (not harsh red)",
-        "Not-found page has friendly animated illustration"
+        "Auth errors (401) trigger token refresh",
+        "Rate limit errors (429) show user message",
+        "Calendar not found (404) marks source as disconnected",
+        "Network errors show retry option",
+        "Errors logged for debugging"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-043",
-      "title": "Create nanoid utility for invite codes",
-      "description": "Create or install utility for generating short invite codes",
+      "id": "REQ-2-039",
+      "title": "Add calendar events to seed data",
+      "description": "Add sample calendar events for development",
       "acceptance_criteria": [
-        "nanoid package installed OR custom implementation exists",
-        "Can generate 8-character alphanumeric codes",
-        "Codes are URL-safe",
-        "Function is usable in database migrations"
+        "supabase/seed.sql includes sample calendar_source",
+        "Includes sample events spanning different dates",
+        "Includes all-day event examples",
+        "Includes multi-day event examples",
+        "Seed applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-1-044",
-      "title": "Create seed data for development",
-      "description": "Create seed.sql with sample data for local development",
+      "id": "REQ-2-040",
+      "title": "Verify complete calendar sync flow",
+      "description": "Manual verification of calendar integration",
       "acceptance_criteria": [
-        "supabase/seed.sql contains sample households",
-        "Contains sample users linked to households",
-        "Contains sample display devices",
-        "Seed data applies without errors",
-        "Includes comments explaining sample data"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-045",
-      "title": "Document Phase 1 setup in README",
-      "description": "Update README with setup instructions",
-      "acceptance_criteria": [
-        "README.md includes project description",
-        "Includes prerequisites (Node.js, pnpm, Docker)",
-        "Includes step-by-step setup instructions",
-        "Includes environment variable setup",
-        "Includes commands to start local Supabase",
-        "Includes commands to run migrations",
-        "Includes commands to start dev server"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-046",
-      "title": "Verify complete auth flow end-to-end",
-      "description": "Manual verification that the entire auth flow works",
-      "acceptance_criteria": [
-        "Can create new account via signup form",
-        "Email confirmation link works",
-        "Can log in with created account",
-        "Dashboard shows user info",
-        "Can create a new household",
-        "Can see household in settings",
-        "Can copy invite code",
-        "Can log out successfully",
-        "Can log in again",
-        "Protected routes redirect when not authenticated"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-1-047",
-      "title": "Verify design system and animations",
-      "description": "Manual verification that UI design and animations work correctly",
-      "acceptance_criteria": [
-        "Pastel color palette is applied throughout (no harsh colors)",
-        "All buttons have smooth hover lift and tap scale animations",
-        "Page transitions animate smoothly (300-400ms fade + slide)",
-        "Loading states show shimmer skeleton animations",
-        "Modals fade in with scale and backdrop blur",
-        "Form inputs have soft focus glow (not harsh ring)",
-        "All animations run at 60fps with no jank",
-        "Interactive elements respond within 100ms",
-        "Card components have soft shadows and rounded corners",
-        "Overall feel is calm and inviting"
+        "Can initiate Google OAuth from calendar page",
+        "Google consent screen appears with correct scopes",
+        "Callback creates calendar_source record",
+        "Calendar selection shows available calendars",
+        "Initial sync populates events in database",
+        "Events appear in calendar view",
+        "View switching works (month/week/day)",
+        "Event details show when clicked",
+        "Manual sync button triggers sync",
+        "Sync status updates correctly"
       ],
       "completed": false
     }

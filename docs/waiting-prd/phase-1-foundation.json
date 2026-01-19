@@ -15,7 +15,7 @@
         "pnpm dev starts the development server at localhost:3000",
         "No TypeScript or ESLint errors on fresh project"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-002",
@@ -27,7 +27,7 @@
         "supabase is in package.json devDependencies",
         "All packages install without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-003",
@@ -38,7 +38,7 @@
         "Package installs without errors",
         "Motion components can be imported and used"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-004",
@@ -54,7 +54,7 @@
         "Shimmer animation keyframes defined",
         "Colors work in both light and dark modes"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-005",
@@ -70,7 +70,7 @@
         "All animations use spring physics where appropriate",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-006",
@@ -83,7 +83,7 @@
         "Integrates with Next.js App Router",
         "Handles exit animations properly with AnimatePresence"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-007",
@@ -101,7 +101,7 @@
         "Uses pastel colors from theme",
         "Rounded corners (radius-xl or larger)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-008",
@@ -117,7 +117,7 @@
         "Forwards ref properly",
         "Fully typed with TypeScript"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-009",
@@ -132,7 +132,7 @@
         "Smooth transition duration (200-300ms)",
         "Uses Framer Motion for animations"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-010",
@@ -149,7 +149,7 @@
         "Traps focus within modal",
         "Duration: 300-400ms"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-011",
@@ -164,7 +164,7 @@
         "Uses neutral-200/neutral-300 colors",
         "Rounded corners match content being loaded"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-012",
@@ -179,7 +179,7 @@
         "Satisfying tactile feel on interaction",
         "Accessible with keyboard"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-013",
@@ -191,7 +191,7 @@
         "supabase/seed.sql file exists (can be empty)",
         "pnpm supabase start launches local Supabase containers"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-014",
@@ -205,7 +205,7 @@
         "Reads NEXT_PUBLIC_SUPABASE_ANON_KEY from environment",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-015",
@@ -219,7 +219,7 @@
         "Works with Next.js cookies() function",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-016",
@@ -232,7 +232,7 @@
         "Contains SUPABASE_SERVICE_ROLE_KEY placeholder",
         ".env.local is in .gitignore"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-017",
@@ -246,7 +246,7 @@
         "created_at defaults to now()",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-018",
@@ -261,7 +261,7 @@
         "role defaults to 'member'",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-019",
@@ -275,7 +275,7 @@
         "settings defaults to '{}'::jsonb",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-020",
@@ -290,7 +290,7 @@
         "Marked as STABLE",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-021",
@@ -303,7 +303,7 @@
         "RLS enabled on displays table",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-022",
@@ -317,7 +317,7 @@
         "Policies use get_user_household_id() helper",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-023",
@@ -331,7 +331,7 @@
         "Policies properly scope to household membership",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-024",
@@ -345,7 +345,7 @@
         "DELETE policy allows household admins to delete displays",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-025",
@@ -358,7 +358,7 @@
         "TypeScript compiles without errors",
         "npm script exists for regenerating types"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-026",
@@ -373,7 +373,7 @@
         "Matcher config excludes static files and images",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-027",
@@ -390,7 +390,7 @@
         "Uses pastel color scheme throughout",
         "Card container uses soft shadows"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-028",
@@ -405,7 +405,7 @@
         "Success message animates in after signup",
         "Uses pastel color scheme throughout"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-029",
@@ -418,7 +418,7 @@
         "Redirects to /auth/login with error on failure",
         "Works with email confirmation links"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-030",
@@ -430,7 +430,7 @@
         "Success message fades in smoothly",
         "Uses pastel color scheme"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-031",
@@ -442,7 +442,7 @@
         "Password confirmation validation animates",
         "Success redirect is smooth"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-032",
@@ -456,7 +456,7 @@
         "Creates entry in public.users with id and display_name from metadata",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-033",
@@ -472,7 +472,7 @@
         "Mobile menu slides in with animation",
         "Uses pastel colors and soft shadows"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-034",
@@ -487,7 +487,7 @@
         "Uses PageTransition wrapper",
         "Loading skeleton shows during data fetch"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-035",
@@ -500,7 +500,7 @@
         "Success state animates smoothly",
         "Error messages animate in/out"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-036",
@@ -512,7 +512,7 @@
         "Success animation on valid join",
         "Error shake animation on invalid code"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-037",
@@ -525,7 +525,7 @@
         "Role change dropdown animates",
         "Remove member shows confirmation modal with animation"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-038",
@@ -538,7 +538,7 @@
         "Clears all session cookies",
         "Works without JavaScript errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-039",
@@ -552,7 +552,7 @@
         "Selection color uses primary pastel",
         "Body background uses warm neutral-50"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-040",
@@ -567,7 +567,7 @@
         "HTML lang attribute set",
         "Viewport meta configured"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-041",
@@ -580,7 +580,7 @@
         "Skeleton animation is smooth and subtle",
         "Skeletons match the shape of actual content"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-042",
@@ -593,7 +593,7 @@
         "Uses calming pastel colors (not harsh red)",
         "Not-found page has friendly animated illustration"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-043",
@@ -605,7 +605,7 @@
         "Codes are URL-safe",
         "Function is usable in database migrations"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-044",
@@ -618,7 +618,7 @@
         "Seed data applies without errors",
         "Includes comments explaining sample data"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-045",
@@ -633,7 +633,7 @@
         "Includes commands to run migrations",
         "Includes commands to start dev server"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-046",
@@ -651,7 +651,7 @@
         "Can log in again",
         "Protected routes redirect when not authenticated"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-1-047",
@@ -669,7 +669,7 @@
         "Card components have soft shadows and rounded corners",
         "Overall feel is calm and inviting"
       ],
-      "completed": false
+      "completed": true
     }
   ]
 }
