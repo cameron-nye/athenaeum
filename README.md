@@ -2,6 +2,34 @@
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+Copy `.env.local.example` to `.env.local` and fill in the values:
+
+```bash
+cp .env.local.example .env.local
+```
+
+### Required Variables
+
+| Variable                        | Description                                                                                    |
+| ------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_SUPABASE_URL`      | Supabase project URL                                                                           |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key (public)                                                                |
+| `SUPABASE_SERVICE_ROLE_KEY`     | Supabase service role key (server-side only)                                                   |
+| `GOOGLE_CLIENT_ID`              | Google OAuth client ID from [Cloud Console](https://console.cloud.google.com/apis/credentials) |
+| `GOOGLE_CLIENT_SECRET`          | Google OAuth client secret                                                                     |
+| `GOOGLE_REDIRECT_URI`           | OAuth callback URL (e.g., `http://localhost:3000/api/google/callback`)                         |
+| `ENCRYPTION_KEY`                | 32-byte key for token encryption. Generate: `openssl rand -base64 32`                          |
+
+### Google Calendar Setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/)
+2. Enable the Google Calendar API
+3. Create OAuth 2.0 credentials (Web application)
+4. Add authorized redirect URI: `http://localhost:3000/api/google/callback`
+5. Copy Client ID and Client Secret to `.env.local`
+
 ## Getting Started
 
 First, run the development server:
