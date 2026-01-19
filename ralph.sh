@@ -42,7 +42,7 @@ Fail fast on risky work. Save easy wins for later. \
 - Prefer multiple small commits over one large commit
 - Run feedback loops after each change, not at the end
 Quality over speed. Small steps compound into big progress. \
-4. After completing each task, append to progress.txt:
+4. After completing each task, mark the item in the PRD as completed and append to progress.txt:
 - Task completed and PRD item reference
 - Key decisions made and reasoning
 - Files changed
@@ -55,8 +55,7 @@ Keep entries concise. Sacrifice grammar for the sake of concision. This file hel
 - Use agent-browser to test the UI features you have implemented.
 Do NOT commit if any feedback loop fails. Fix issues first.
 - Make a git commit of that feature. \
-ONLY WORK ON A SINGLE FEATURE. \
-If, while implementing the feature, you notice that all work \
+If, while implementing the feature, you notice that all work
 is complete, output <promise>COMPLETE</promise>. \
 ")
 

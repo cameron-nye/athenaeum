@@ -350,3 +350,16 @@
 - typecheck: pass
 - test: pass (90 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-019 - Add CRON_SECRET environment variable
+
+**Completed**: Added CRON_SECRET to env example and docs
+
+**Files changed**:
+- .env.local.example (added CRON_SECRET)
+- README.md (added to env vars table)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
