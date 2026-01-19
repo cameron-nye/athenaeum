@@ -464,7 +464,7 @@
         "Stops webhook channel",
         "Shows success message"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-033",

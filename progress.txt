@@ -659,3 +659,21 @@
 - typecheck: pass
 - test: pass (188 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-032 - Handle calendar disconnect
+
+**Completed**: Calendar delete API now stops webhook channels
+
+**Changes**:
+- DELETE /api/calendars/sources/[id] calls stopAllWebhookChannels before delete
+- Webhook cleanup is best-effort (logs warning but doesn't fail delete)
+- All criteria already met: delete button, confirmation, cascade delete, success response
+
+**Files changed**:
+- app/api/calendars/sources/[id]/route.ts (added webhook cleanup)
+- docs/prd.json (marked REQ-2-032 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass
