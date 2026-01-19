@@ -336,7 +336,7 @@
         "Handles all-day events section",
         "Events animate in with spring physics (stiffness: 300, damping: 24)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-024",
