@@ -300,3 +300,19 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-018 - Create vercel.json with cron configuration
+
+**Completed**: Created Vercel cron config for background sync
+
+**Decisions**:
+- Schedule: */5 * * * * (every 5 minutes)
+- Path: /api/cron/sync (matches existing route)
+
+**Files changed**:
+- vercel.json (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
