@@ -278,3 +278,25 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-017 - Create cron sync API route
+
+**Completed**: Created Vercel cron endpoint for background calendar sync
+
+**Decisions**:
+- Route at app/api/cron/sync/route.ts
+- GET handler validates CRON_SECRET via Authorization header
+- Added createAdminClient() to lib/supabase/server.ts for RLS bypass
+- Queries enabled google calendar_sources not synced in 5 min
+- Syncs all stale calendars in parallel via Promise.all
+- Returns { calendars_synced, total_events_upserted, total_events_deleted, failures }
+- Partial failures handled gracefully (continues other syncs)
+
+**Files changed**:
+- lib/supabase/server.ts (added createAdminClient)
+- app/api/cron/sync/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
