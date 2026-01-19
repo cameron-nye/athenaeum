@@ -258,3 +258,23 @@
 - typecheck: pass
 - test: pass (38 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-016 - Create manual sync trigger API
+
+**Completed**: Created API route to manually trigger calendar sync
+
+**Decisions**:
+- Route at app/api/calendars/sync/route.ts
+- POST accepts { calendar_source_id } in body
+- Validates user auth + household membership via RLS-like check
+- In-memory rate limiting: 5 requests per calendar per minute
+- Returns { success, events_upserted, events_deleted, error? }
+- HTTP 401 (unauth), 400 (bad request), 404 (not found), 429 (rate limited), 500 (sync failed)
+
+**Files changed**:
+- app/api/calendars/sync/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
