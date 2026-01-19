@@ -133,3 +133,24 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-009 - Create token encryption utility
+
+**Completed**: Created AES-256-GCM encryption for OAuth tokens
+
+**Decisions**:
+- Created lib/crypto.ts (not src/lib) to match existing codebase structure
+- Uses Node.js crypto module (no deps needed)
+- AES-256-GCM with scrypt key derivation
+- Random salt + IV per encryption for security
+- Base64 encoding for storage: salt + iv + authTag + ciphertext
+- Requires ENCRYPTION_KEY env var
+
+**Files changed**:
+- lib/crypto.ts (new)
+- lib/crypto.test.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass (11 tests)
+- lint: pass
