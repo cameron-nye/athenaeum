@@ -450,7 +450,7 @@
         "Handles refresh token revocation gracefully",
         "Marks calendar_source as disconnected on failure"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-032",
@@ -505,7 +505,7 @@
         "Manual refresh button visible",
         "Updates automatically after sync"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-036",
@@ -529,7 +529,7 @@
         "Prominent button to connect first calendar",
         "Styled consistently with app design"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-038",

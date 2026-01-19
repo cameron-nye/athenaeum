@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Credentials } from 'google-auth-library';
-import { checkTokenStatus } from './auth';
+import { checkTokenStatus, TokenRevocationError } from './auth';
 
 describe('google/auth', () => {
   const originalEnv = process.env;
@@ -198,6 +198,20 @@ describe('google/auth', () => {
       await expect(getValidOAuth2Client(tokens)).rejects.toThrow(
         'Access token expired and no refresh token available'
       );
+    });
+  });
+
+  describe('TokenRevocationError', () => {
+    it('has correct name property', () => {
+      const error = new TokenRevocationError('Token revoked');
+      expect(error.name).toBe('TokenRevocationError');
+      expect(error.message).toBe('Token revoked');
+    });
+
+    it('is instance of Error', () => {
+      const error = new TokenRevocationError('Token revoked');
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(TokenRevocationError);
     });
   });
 });

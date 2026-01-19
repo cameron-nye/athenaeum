@@ -583,3 +583,29 @@
 - typecheck: pass
 - test: pass (171 tests total)
 - lint: pass
+
+## 2026-01-19: REQ-2-031 - Create token refresh mechanism
+
+**Completed**: Enhanced OAuth token refresh with revocation handling
+
+**Features**:
+- TokenRevocationError class for distinguishing permanent auth failures
+- refreshAccessToken detects invalid_grant/revoked/expired tokens
+- syncCalendarEvents catches TokenRevocationError
+- markCalendarDisconnected clears tokens, sets enabled=false
+- SyncResult includes disconnected flag
+
+**Files changed**:
+- lib/google/auth.ts (added TokenRevocationError, enhanced refreshAccessToken)
+- lib/google/auth.test.ts (added tests for TokenRevocationError)
+- lib/google/calendar.ts (import TokenRevocationError, markCalendarDisconnected)
+- docs/prd.json (marked REQ-2-031, REQ-2-035, REQ-2-037 as completed)
+
+**Notes**:
+- REQ-2-035 (sync status indicator) already done in calendars page
+- REQ-2-037 (empty state) already done in calendars page
+
+**Verification**:
+- typecheck: pass
+- test: pass (173 tests total)
+- lint: pass

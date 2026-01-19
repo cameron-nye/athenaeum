@@ -72,18 +72,48 @@ export async function exchangeCodeForTokens(code: string): Promise<Credentials> 
 }
 
 /**
+ * Error class for token revocation/invalid grant scenarios.
+ * Used to distinguish between temporary errors and permanent auth failures.
+ */
+export class TokenRevocationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'TokenRevocationError';
+  }
+}
+
+/**
  * Refreshes an expired access token using the refresh token.
  *
  * @param refreshToken - The refresh token to use
  * @returns New credentials with a fresh access_token
- * @throws Error if refresh token is invalid or revoked
+ * @throws TokenRevocationError if refresh token is invalid or revoked
+ * @throws Error for other failures
  */
 export async function refreshAccessToken(refreshToken: string): Promise<Credentials> {
   const client = createOAuth2Client();
   client.setCredentials({ refresh_token: refreshToken });
 
-  const { credentials } = await client.refreshAccessToken();
-  return credentials;
+  try {
+    const { credentials } = await client.refreshAccessToken();
+    return credentials;
+  } catch (error) {
+    // Check for token revocation errors
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      // Google returns 'invalid_grant' when refresh token is revoked or expired
+      if (
+        message.includes('invalid_grant') ||
+        message.includes('token has been revoked') ||
+        message.includes('token has been expired')
+      ) {
+        throw new TokenRevocationError(
+          'Refresh token has been revoked or expired. User must re-authenticate.'
+        );
+      }
+    }
+    throw error;
+  }
 }
 
 /**

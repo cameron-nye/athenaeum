@@ -1,7 +1,7 @@
 import { google, calendar_v3 } from 'googleapis';
 import { Credentials } from 'google-auth-library';
 import { SupabaseClient } from '@supabase/supabase-js';
-import { getValidOAuth2Client } from './auth';
+import { getValidOAuth2Client, TokenRevocationError } from './auth';
 import { encrypt, decrypt } from '../crypto';
 
 /**
@@ -29,6 +29,8 @@ export interface SyncResult {
   eventsDeleted: number;
   newSyncToken: string | null;
   error?: string;
+  /** True if the calendar was disconnected due to token revocation */
+  disconnected?: boolean;
 }
 
 /**
@@ -266,6 +268,34 @@ async function updateCalendarSourceTokens(
 }
 
 /**
+ * Marks a calendar source as disconnected due to token revocation.
+ * Clears tokens and disables the calendar.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSourceId - UUID of the calendar_source record
+ */
+async function markCalendarDisconnected(
+  supabase: SupabaseClient,
+  calendarSourceId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('calendar_sources')
+    .update({
+      enabled: false,
+      access_token_encrypted: null,
+      refresh_token_encrypted: null,
+      sync_token: null,
+    })
+    .eq('id', calendarSourceId);
+
+  if (error) {
+    console.error('Failed to mark calendar as disconnected:', error);
+  } else {
+    console.log(`Calendar ${calendarSourceId} marked as disconnected due to token revocation`);
+  }
+}
+
+/**
  * Syncs events from a Google Calendar to the database.
  *
  * Uses incremental sync with syncToken when available.
@@ -355,6 +385,19 @@ export async function syncCalendarEvents(
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error(`Sync failed for calendar ${calendarSource.id}:`, errorMessage);
+
+    // Check if this is a token revocation error
+    if (error instanceof TokenRevocationError) {
+      await markCalendarDisconnected(supabase, calendarSource.id);
+      return {
+        success: false,
+        eventsUpserted: 0,
+        eventsDeleted: 0,
+        newSyncToken: null,
+        error: 'Calendar disconnected: authentication expired. Please reconnect.',
+        disconnected: true,
+      };
+    }
 
     return {
       success: false,
