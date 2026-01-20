@@ -1073,3 +1073,32 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: Phase 4 Photos - Core Photo Management
+
+**Completed**: REQ-4-005 to REQ-4-011, REQ-4-015, REQ-4-030, REQ-4-031
+
+**Files created**:
+- app/api/photos/route.ts: GET (list), POST (upload), PATCH (bulk update)
+- app/api/photos/[id]/route.ts: GET, PATCH, DELETE for single photo
+- lib/photos/image-utils.ts: getImageDimensions, extractExifDate
+- lib/photos/urls.ts: getThumbnailUrl, getMediumUrl, getDisplayUrl, getFullUrl
+- components/photos/PhotoUpload.tsx: drag-drop upload with progress
+- app/(dashboard)/photos/page.tsx: photo grid with modal viewer
+
+**Key decisions**:
+- Uses image-size package for dimension extraction
+- Uses uuid for unique filenames
+- EXIF date parsing done manually (no heavy exif lib)
+- Supabase image transforms for thumbnails (300x300) and display (1920x1080)
+- PhotoGrid uses IntersectionObserver for lazy loading
+- PhotoModal has keyboard nav (arrows, Escape), crossfade between images
+- Enable/disable toggle in both grid and modal
+- Delete with confirmation dialog
+- Upload component shows per-file status/errors
+- Optimistic updates for enable/disable toggle
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (4 warnings, all non-blocking)

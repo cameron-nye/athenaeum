@@ -576,7 +576,7 @@
         "Empty state for no photos",
         "Pagination or infinite scroll for many photos"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-006",
@@ -592,7 +592,7 @@
         "Validates file size before upload",
         "Shows error messages for invalid files"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-007",
@@ -608,7 +608,7 @@
         "Returns created photo object",
         "Handles errors gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-008",
@@ -621,7 +621,7 @@
         "Transforms applied via URL parameters",
         "Thumbnails cached by Supabase"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-009",
@@ -640,7 +640,7 @@
         "Close button",
         "Exit animation using AnimatePresence"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-010",
@@ -654,7 +654,7 @@
         "Shows success message",
         "Refreshes photo grid after deletion"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-011",
@@ -666,7 +666,7 @@
         "Disabled photos shown with overlay in grid",
         "Disabled photos excluded from slideshow"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-012",
@@ -720,7 +720,7 @@
         "Quality set to 85%",
         "Progressive JPEG format"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-016",
@@ -914,7 +914,7 @@
         "Skeleton uses soft pastel colors",
         "No layout shift when images load"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-031",
@@ -926,7 +926,7 @@
         "Success/error status per file",
         "Cancel upload option"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-032",
