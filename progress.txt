@@ -1281,3 +1281,29 @@ This requirement cannot be completed automatically as it requires:
 - REQ-4-028: Storage quota management
 - REQ-4-032: EXIF orientation handling
 - REQ-4-035: Manual verification (requires running app)
+
+## 2026-01-20: PRD Status Sync - Phase 4 Requirements
+
+**Completed**: Updated PRD to reflect already-implemented features
+
+**Items marked complete (previously missed in PRD updates)**:
+- REQ-4-012: Album management - fully implemented in photos page
+- REQ-4-013: Slideshow component with crossfade transitions
+- REQ-4-014: Image preloading (ring buffer, cleanup)
+- REQ-4-016: Ken Burns effect with 6 randomized variants
+- REQ-4-017: Idle detection for auto slideshow trigger
+- REQ-4-018: Manual mode toggle (Ctrl+P keyboard shortcut)
+- REQ-4-019: Slideshow settings in display config UI
+- REQ-4-020: Photo info overlay with animations
+- REQ-4-021: Empty state handling for no photos
+- REQ-4-029: Bulk photo actions (select, delete, enable/disable, assign album)
+- REQ-4-033: Photos added to realtime subscription
+- REQ-4-034: Photo records added to seed data
+
+**Files modified**:
+- docs/prd.json (marked 12 requirements as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (10 warnings, all pre-existing)

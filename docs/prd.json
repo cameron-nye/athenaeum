@@ -679,7 +679,7 @@
         "Can filter grid by album",
         "Album selector on slideshow settings"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-013",
@@ -695,7 +695,7 @@
         "Randomized or sequential order option",
         "Transitions are buttery smooth at 60fps"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-014",
@@ -707,7 +707,7 @@
         "Cleans up old preloaded images",
         "Reduces visible loading time between slides"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-015",
@@ -735,7 +735,7 @@
         "Combined with crossfade for elegant photo transitions",
         "Effect feels cinematic and calming"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-017",
@@ -749,7 +749,7 @@
         "Transition between modes is seamless",
         "No jarring visual changes during mode switch"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-018",
@@ -760,7 +760,7 @@
         "Setting in dashboard for default mode",
         "Can set to always calendar, always photos, or auto"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-019",
@@ -772,7 +772,7 @@
         "Settings include: showPhotoInfo (date, filename)",
         "Settings stored in displays.settings JSON"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-020",
@@ -788,7 +788,7 @@
         "Uses soft pastel colors matching theme",
         "Typography readable but not distracting"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-021",
@@ -799,7 +799,7 @@
         "Shows calendar or placeholder",
         "Logs warning for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-022",
@@ -900,7 +900,7 @@
         "Bulk enable/disable selected",
         "Bulk assign to album"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-030",
@@ -950,7 +950,7 @@
         "Deleted photos removed from slideshow",
         "Disabled photos excluded from slideshow"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-034",
@@ -962,7 +962,7 @@
         "Photos linked to sample household",
         "Various albums represented"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-035",
