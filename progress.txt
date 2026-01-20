@@ -1235,3 +1235,25 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (10 warnings, pre-existing)
+
+## 2026-01-20: REQ-4-034 - Add photos to seed data
+
+**Completed**: Sample photo records for development
+
+**Seed data includes**:
+- 10 sample photo records linked to demo household
+- Albums: Vacation (3), Family (2), Nature (3), plus 2 without album
+- Mix of landscape (1920x1080) and portrait (1200x1600) orientations
+- Dates ranging from 180 days ago to recent
+- One disabled photo for testing enabled/disabled filter
+- Storage paths follow household folder convention
+
+**Note**: These are placeholder database records. Actual images must be uploaded separately to Supabase Storage.
+
+**Files modified**:
+- supabase/seed.sql (added photo INSERT statements)
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (10 warnings, pre-existing)

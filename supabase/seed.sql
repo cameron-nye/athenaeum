@@ -186,3 +186,142 @@ WHERE id IN (
   '00000000-0000-0000-0000-000000000011',
   '00000000-0000-0000-0000-000000000012'
 );
+
+-- REQ-4-034: Add photos to seed data
+-- Note: These are placeholder records. For actual images:
+-- 1. Upload photos via the dashboard UI, or
+-- 2. Manually upload to Supabase Storage 'photos' bucket at:
+--    photos/00000000-0000-0000-0000-000000000001/{filename}
+-- and these records will display correctly.
+
+INSERT INTO photos (
+  id, household_id, uploaded_by, storage_path, filename, width, height,
+  taken_at, album, enabled, created_at
+)
+VALUES
+  -- Family photos
+  (
+    '00000000-0000-0000-0000-000000000100',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/beach-sunset.jpg',
+    'beach-sunset.jpg',
+    1920, 1080,
+    (CURRENT_DATE - 30)::TIMESTAMPTZ,
+    'Vacation',
+    true,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000101',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/family-portrait.jpg',
+    'family-portrait.jpg',
+    1200, 1600,
+    (CURRENT_DATE - 60)::TIMESTAMPTZ,
+    'Family',
+    true,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000102',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/birthday-cake.jpg',
+    'birthday-cake.jpg',
+    1600, 1200,
+    (CURRENT_DATE - 14)::TIMESTAMPTZ,
+    'Family',
+    true,
+    now()
+  ),
+  -- Nature photos
+  (
+    '00000000-0000-0000-0000-000000000103',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/mountain-view.jpg',
+    'mountain-view.jpg',
+    1920, 1280,
+    (CURRENT_DATE - 90)::TIMESTAMPTZ,
+    'Nature',
+    true,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000104',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/autumn-leaves.jpg',
+    'autumn-leaves.jpg',
+    1600, 1200,
+    (CURRENT_DATE - 120)::TIMESTAMPTZ,
+    'Nature',
+    true,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000105',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/flower-macro.jpg',
+    'flower-macro.jpg',
+    1200, 1200,
+    (CURRENT_DATE - 45)::TIMESTAMPTZ,
+    'Nature',
+    true,
+    now()
+  ),
+  -- Vacation photos
+  (
+    '00000000-0000-0000-0000-000000000106',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/hotel-pool.jpg',
+    'hotel-pool.jpg',
+    1920, 1080,
+    (CURRENT_DATE - 28)::TIMESTAMPTZ,
+    'Vacation',
+    true,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000107',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/city-skyline.jpg',
+    'city-skyline.jpg',
+    1920, 1080,
+    (CURRENT_DATE - 25)::TIMESTAMPTZ,
+    'Vacation',
+    true,
+    now()
+  ),
+  -- Pet photos (no album)
+  (
+    '00000000-0000-0000-0000-000000000108',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/cute-cat.jpg',
+    'cute-cat.jpg',
+    1400, 1400,
+    (CURRENT_DATE - 7)::TIMESTAMPTZ,
+    NULL,
+    true,
+    now()
+  ),
+  -- Disabled photo (for testing)
+  (
+    '00000000-0000-0000-0000-000000000109',
+    '00000000-0000-0000-0000-000000000001',
+    '00000000-0000-0000-0000-000000000002',
+    'photos/00000000-0000-0000-0000-000000000001/test-disabled.jpg',
+    'test-disabled.jpg',
+    800, 600,
+    (CURRENT_DATE - 180)::TIMESTAMPTZ,
+    NULL,
+    false,
+    now()
+  )
+ON CONFLICT (id) DO NOTHING;
