@@ -83,7 +83,7 @@
         "Package installs without errors",
         "TypeScript types available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-007",
@@ -182,7 +182,7 @@
         "Returns array of Date objects",
         "Handles null recurrence_rule (single occurrence)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-014",

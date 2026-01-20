@@ -1071,3 +1071,27 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass (cleared .next cache)
 - test: pass (240 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-006, REQ-5-013 - rrule and recurrence utility
+
+**Completed**: Installed rrule library and created recurrence expansion utility
+
+**Dependencies**:
+- rrule (bundled TypeScript types)
+
+**Functions created** (lib/chores/recurrence.ts):
+- generateRRule: create RRULE from RecurrenceConfig
+- getNextOccurrences: expand rule to next N dates
+- getNextOccurrence: get single next date
+- parseRRuleToText: human-readable description
+- parseRRuleToConfig: parse back to config object
+- jsWeekdayToRRule/rruleWeekdayToJs: weekday conversions
+
+**Files created**:
+- lib/chores/recurrence.ts
+- lib/chores/recurrence.test.ts (33 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (273 tests)
+- lint: pass (1 pre-existing warning)
