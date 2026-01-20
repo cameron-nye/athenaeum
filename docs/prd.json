@@ -14,7 +14,7 @@
         "points defaults to 0",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-002",
@@ -30,7 +30,7 @@
         "completed_at is nullable TIMESTAMPTZ",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-003",
@@ -41,7 +41,7 @@
         "Index idx_chore_assignments_due on (due_date, completed_at)",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-004",
@@ -56,7 +56,7 @@
         "DELETE policy allows deleting own household's chores",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-005",
@@ -72,7 +72,7 @@
         "Policy joins through chores to check household",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-006",

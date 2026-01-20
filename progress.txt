@@ -1050,3 +1050,24 @@ This requirement cannot be completed automatically as it requires:
 - Verifying calendar data displays correctly
 - Testing real-time updates
 - Verifying animations and theme transitions
+
+## 2026-01-20: REQ-5-001 to REQ-5-005 - Chores database schema
+
+**Completed**: Created PostgreSQL migrations for chores system
+
+**Migrations created**:
+- 20260120100000_create_chores.sql: chores table (id, household_id, title, description, icon, points, created_at)
+- 20260120100100_create_chore_assignments.sql: assignments table (id, chore_id, assigned_to, due_date, recurrence_rule, completed_at, created_at)
+- 20260120100200_create_chore_assignments_index.sql: idx_chore_assignments_due (due_date, completed_at)
+- 20260120100300_chores_rls.sql: RLS for chores (SELECT/INSERT/UPDATE/DELETE via get_user_household_id)
+- 20260120100400_chore_assignments_rls.sql: RLS for assignments (joins through chores to check household)
+
+**Decisions**:
+- Followed existing pattern from calendar_sources/events RLS
+- Assignments RLS uses EXISTS subquery to join through chores table
+- Added indexes on chore_id and assigned_to for assignments table
+
+**Verification**:
+- typecheck: pass (cleared .next cache)
+- test: pass (240 tests)
+- lint: pass (1 pre-existing warning)
