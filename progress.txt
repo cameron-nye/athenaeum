@@ -1050,3 +1050,26 @@ This requirement cannot be completed automatically as it requires:
 - Verifying calendar data displays correctly
 - Testing real-time updates
 - Verifying animations and theme transitions
+
+## 2026-01-20: Phase 4 Photos - Database Infrastructure
+
+**Completed**: REQ-4-001, REQ-4-002, REQ-4-003, REQ-4-004
+
+**Migrations created**:
+- 20260120100000_create_photos.sql: photos table with all required columns
+- 20260120100100_photos_rls.sql: RLS policies for user + display access
+- 20260120100200_create_photos_bucket.sql: 'photos' storage bucket (10MB limit, image/* types)
+- 20260120100300_photos_storage_rls.sql: Storage RLS for household folder access
+
+**Key decisions**:
+- photos table includes: id, household_id, uploaded_by, storage_path, filename, width, height, taken_at, album, enabled, created_at, updated_at
+- Storage path pattern: photos/{household_id}/{filename}
+- RLS uses existing get_user_household_id() + get_display_household_id() helpers
+- Display RLS only allows reading enabled=true photos
+- Storage policies use storage.foldername() to check household folder ownership
+- 10MB file size limit with jpeg/png/webp/gif MIME types allowed
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (1 pre-existing warning)
