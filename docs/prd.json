@@ -1,509 +1,483 @@
 {
-  "phase": 3,
-  "name": "Display Route",
-  "description": "Create the full-screen display route for Raspberry Pi with real-time updates, smooth animations, and calming pastel design",
+  "phase": 4,
+  "name": "Photos",
+  "description": "Implement photo upload, storage, and slideshow functionality with elegant transitions and animations",
   "requirements": [
     {
-      "id": "REQ-3-001",
-      "title": "Create display route group layout",
-      "description": "Create the full-screen layout for display routes with calming design",
-      "acceptance_criteria": [
-        "Layout exists at src/app/(display)/layout.tsx",
-        "Layout is full-screen (h-screen w-screen)",
-        "No navigation or chrome elements",
-        "Uses soft pastel color palette (not harsh black/white)",
-        "Dark mode uses warm neutral-800/900 (not pure black)",
-        "Light mode uses neutral-50/100 (warm off-white)",
-        "Overflow hidden to prevent scrolling",
-        "Applies to all child routes"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-002",
-      "title": "Create display device authentication",
-      "description": "Implement authentication for display devices using tokens",
-      "acceptance_criteria": [
-        "Display layout checks for display_token cookie",
-        "Validates token against displays table auth_token",
-        "Returns 404 if token invalid or missing",
-        "Updates last_seen_at on each request",
-        "Fetches household data for valid display"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-003",
-      "title": "Create display registration page in dashboard",
-      "description": "Create page to register new display devices",
-      "acceptance_criteria": [
-        "Page exists at src/app/(dashboard)/settings/displays/page.tsx",
-        "Lists all registered displays for household",
-        "Shows display name and last seen time",
-        "Form to add new display with name",
-        "Generates unique auth_token on creation",
-        "Shows setup URL with token for new displays"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-004",
-      "title": "Create display setup/pairing page",
-      "description": "Create page shown on Pi to authenticate display",
-      "acceptance_criteria": [
-        "Page exists at src/app/(display)/setup/page.tsx",
-        "Accepts token query parameter",
-        "Validates token exists in displays table",
-        "Sets display_token cookie on success",
-        "Redirects to main display route",
-        "Shows error for invalid tokens"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-005",
-      "title": "Create main display page",
-      "description": "Create the primary display view showing calendar",
-      "acceptance_criteria": [
-        "Page exists at src/app/(display)/[displayId]/page.tsx",
-        "Server component fetches today's events",
-        "Fetches household settings",
-        "Renders display-optimized calendar view",
-        "Handles loading state",
-        "Handles error state"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-006",
-      "title": "Create display calendar component",
-      "description": "Create calendar view optimized for 1080p wall display with smooth animations",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/Calendar.tsx",
-        "Large, readable typography (minimum 24px body text)",
-        "Shows current date prominently",
-        "Lists today's events with times",
-        "Shows upcoming events (next 7 days sidebar)",
-        "High contrast but soft colors (pastel palette)",
-        "No interactive elements (view only)",
-        "Events animate in with staggered fade (50ms stagger)",
-        "Content updates animate smoothly (no jarring changes)",
-        "Uses warm, calming colors that feel like ambient art"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-007",
-      "title": "Create display clock component",
-      "description": "Create clock display for current time",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/Clock.tsx",
-        "Shows current time in large font",
-        "Updates every second (or minute)",
-        "Shows current date",
-        "Client component with useEffect for updates"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-008",
-      "title": "Create Supabase Realtime provider for display",
-      "description": "Create component to handle real-time subscriptions",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/RealtimeProvider.tsx",
-        "Client component ('use client')",
-        "Creates single channel for household",
-        "Subscribes to events table changes",
-        "Subscribes to chore_assignments table changes",
-        "Subscribes to meal_plans table changes",
-        "Properly cleans up on unmount",
-        "Provides callbacks for data updates"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-009",
-      "title": "Create display data context",
-      "description": "Create React context to manage display data state",
-      "acceptance_criteria": [
-        "Context exists at src/components/display/DisplayContext.tsx",
-        "Holds current events, chores, meals data",
-        "Provides update functions for real-time updates",
-        "Wraps display page components",
-        "TypeScript types for context value"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-010",
-      "title": "Implement real-time event updates with smooth animations",
-      "description": "Display updates automatically when calendar events change with smooth transitions",
-      "acceptance_criteria": [
-        "New events appear without page refresh",
-        "New events animate in with fade + slide (300ms ease-out)",
-        "Updated events reflect changes with subtle highlight animation",
-        "Deleted events animate out (fade + collapse)",
-        "Changes from dashboard visible on display within seconds",
-        "List reorders smoothly using layout animations",
-        "No jarring content shifts or flashes"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-011",
-      "title": "Create display settings schema",
-      "description": "Define JSON schema for display settings",
-      "acceptance_criteria": [
-        "TypeScript interface for DisplaySettings",
-        "Settings include: theme, layout, widgetsEnabled, refreshInterval",
-        "Settings stored in displays.settings JSONB column",
-        "Default settings defined"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-012",
-      "title": "Create display settings editor",
-      "description": "Create UI to customize individual display settings",
-      "acceptance_criteria": [
-        "Page exists at src/app/(dashboard)/settings/displays/[id]/page.tsx",
-        "Form to edit display name",
-        "Theme selector (light/dark/auto)",
-        "Layout options selection",
-        "Widget toggles (clock, weather, etc.)",
-        "Save button updates displays.settings",
-        "Changes reflected on display"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-013",
-      "title": "Create display theme support with smooth transitions",
-      "description": "Implement light/dark theme switching for display with calming colors",
-      "acceptance_criteria": [
-        "Display respects theme setting from settings",
-        "Light theme uses soft pastel colors (warm off-whites, soft lavender accents)",
-        "Dark theme uses warm neutrals (neutral-800/900, not pure black)",
-        "Auto option follows system preference or time of day",
-        "Theme applied via CSS classes or variables",
-        "Theme transitions animate smoothly (500ms ease-in-out)",
-        "All components respect current theme",
-        "Colors feel calming and non-intrusive"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-014",
-      "title": "Create Pi kiosk setup script",
-      "description": "Create shell script for Raspberry Pi kiosk configuration",
-      "acceptance_criteria": [
-        "Script exists at scripts/pi-setup.sh",
-        "Installs chromium-browser if needed",
-        "Installs unclutter for cursor hiding",
-        "Disables screen blanking/DPMS",
-        "Creates kiosk.sh launcher script",
-        "Configures autostart on boot",
-        "Sets up daily restart cron for memory management",
-        "Sets up watchdog cron for crash recovery",
-        "Script is executable and documented"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-015",
-      "title": "Create Pi watchdog script",
-      "description": "Create watchdog to restart Chromium if it becomes unresponsive",
-      "acceptance_criteria": [
-        "Script checks if Chromium/display is responsive",
-        "Restarts Chromium if frozen",
-        "Logs restart events",
-        "Runs via cron every 5 minutes"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-016",
-      "title": "Implement scheduled page reload",
-      "description": "Add daily page reload to prevent memory leaks",
-      "acceptance_criteria": [
-        "Page reloads automatically at configured time (3 AM default)",
-        "Implemented via client-side JavaScript",
-        "Or via cron xdotool F5 command",
-        "Configurable reload time in settings"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-017",
-      "title": "Create display loading state with skeleton animations",
-      "description": "Show animated loading indicator while display data loads",
-      "acceptance_criteria": [
-        "Loading component exists",
-        "Shows pulsing skeleton (shimmer effect, not spinner)",
-        "Skeleton matches layout of actual content",
-        "Uses soft pastel colors for skeleton",
-        "Displays on initial load",
-        "Displays during data refresh",
-        "Smooth transition from skeleton to content (fade)",
-        "Shimmer animation uses 2s linear infinite timing"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-018",
-      "title": "Create display error state",
-      "description": "Show error message when display encounters errors",
-      "acceptance_criteria": [
-        "Error component exists",
-        "Shows user-friendly error message",
-        "Shows retry button",
-        "Logs errors for debugging",
-        "Auto-retries after timeout"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-019",
-      "title": "Create offline indicator component",
-      "description": "Show indicator when display loses network connection",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/OfflineIndicator.tsx",
-        "Detects online/offline status",
-        "Shows warning badge when offline",
-        "Hides when back online",
-        "Client component with event listeners"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-020",
-      "title": "Implement screen burn-in prevention",
-      "description": "Add subtle animations to prevent static burn-in",
-      "acceptance_criteria": [
-        "Subtle pixel shift implemented (1-2px)",
-        "Shifts every few minutes",
-        "Not noticeable during normal use",
-        "Applied to static elements",
-        "Can be disabled in settings"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-021",
-      "title": "Create date/time header component",
-      "description": "Create header showing current date and time prominently",
-      "acceptance_criteria": [
-        "Component shows day of week",
-        "Shows full date (Month Day, Year)",
-        "Shows current time",
-        "Updates in real-time",
-        "Large, readable typography",
-        "Positioned at top of display"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-022",
-      "title": "Create today's events list component",
-      "description": "Create scrollable list of today's events",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/TodayEvents.tsx",
-        "Lists all events for current day",
-        "Shows event time and title",
-        "Color-coded by calendar source",
-        "Current/next event highlighted",
-        "Empty state when no events"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-023",
-      "title": "Create upcoming events sidebar",
-      "description": "Create sidebar showing next 7 days of events",
-      "acceptance_criteria": [
-        "Component exists at src/components/display/UpcomingEvents.tsx",
-        "Groups events by date",
-        "Shows date headers",
-        "Shows event time and title",
-        "Scrollable if many events",
-        "Compact layout to fit sidebar"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-024",
-      "title": "Create event time formatting utility",
-      "description": "Create utility for formatting event times for display",
-      "acceptance_criteria": [
-        "Function formats time in 12h or 24h format",
-        "Handles all-day events ('All Day')",
-        "Handles multi-day events",
-        "Handles ongoing events ('Now')",
-        "Returns human-readable strings"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-025",
-      "title": "Create display layout grid",
-      "description": "Create CSS grid layout for display components",
-      "acceptance_criteria": [
-        "Grid accommodates header, main content, sidebar",
-        "Responsive to different aspect ratios",
-        "Optimized for 1920x1080 resolution",
-        "Gaps and padding appropriate for viewing distance"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-026",
-      "title": "Create display typography scale",
-      "description": "Define typography sizes for wall display viewing",
-      "acceptance_criteria": [
-        "Heading sizes readable from 6+ feet",
-        "Body text readable from 4+ feet",
-        "Time/clock extra large",
-        "Consistent vertical rhythm",
-        "Tailwind classes or CSS custom properties"
-      ],
-      "completed": false
-    },
-    {
-      "id": "REQ-3-027",
-      "title": "Create RLS policy for display device access",
-      "description": "Allow displays to read their household's data",
+      "id": "REQ-4-001",
+      "title": "Create photos table migration",
+      "description": "Create PostgreSQL migration for photo metadata storage",
       "acceptance_criteria": [
         "Migration file exists in supabase/migrations/",
-        "Events readable by display via auth_token",
-        "Uses request header x-display-token or cookie",
-        "Joins through calendar_sources and displays tables",
+        "Table photos created with columns: id, household_id, uploaded_by, storage_path, filename, width, height, taken_at, album, enabled, created_at",
+        "household_id references households(id) ON DELETE CASCADE",
+        "uploaded_by references users(id) ON DELETE SET NULL",
+        "enabled defaults to true",
         "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-028",
-      "title": "Create Supabase client for display",
-      "description": "Create Supabase client that works with display token auth",
+      "id": "REQ-4-002",
+      "title": "Create RLS policies for photos table",
+      "description": "Create Row Level Security policies for photos",
       "acceptance_criteria": [
-        "Client passes display token in requests",
-        "Works for both server and client components",
-        "Token extracted from cookie",
-        "TypeScript compiles without errors"
+        "Migration file exists in supabase/migrations/",
+        "RLS enabled on photos table",
+        "SELECT policy allows viewing photos in own household",
+        "INSERT policy allows adding photos to own household",
+        "UPDATE policy allows updating own household's photos",
+        "DELETE policy allows deleting own household's photos",
+        "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-029",
-      "title": "Create display heartbeat mechanism",
-      "description": "Implement periodic heartbeat to update last_seen_at",
+      "id": "REQ-4-003",
+      "title": "Create Supabase Storage bucket for photos",
+      "description": "Create storage bucket for photo files",
       "acceptance_criteria": [
-        "Client sends heartbeat every 5 minutes",
-        "Updates displays.last_seen_at in database",
-        "Dashboard shows online/offline status based on last_seen_at",
-        "Heartbeat continues even when idle"
+        "Migration creates 'photos' bucket",
+        "Bucket is private (not public)",
+        "File size limit set (e.g., 10MB)",
+        "Allowed MIME types: image/jpeg, image/png, image/webp, image/gif"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-030",
-      "title": "Create display QR code generator",
-      "description": "Generate QR code for easy display setup",
+      "id": "REQ-4-004",
+      "title": "Create storage RLS policies",
+      "description": "Create Row Level Security policies for storage bucket",
       "acceptance_criteria": [
-        "QR code shown on display registration page",
-        "QR code contains setup URL with token",
-        "Scannable by phone to verify URL",
-        "Clear instructions for Pi setup"
+        "Migration file exists in supabase/migrations/",
+        "SELECT policy allows reading photos from own household folder",
+        "INSERT policy allows uploading to own household folder",
+        "DELETE policy allows deleting from own household folder",
+        "Folder structure: photos/{household_id}/{filename}",
+        "Migration applies without errors"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-031",
-      "title": "Handle display token invalidation",
-      "description": "Allow regenerating display token for security",
+      "id": "REQ-4-005",
+      "title": "Create photos dashboard page",
+      "description": "Create main photos management page",
       "acceptance_criteria": [
-        "Button to regenerate token in dashboard",
-        "Confirmation dialog warns about disconnection",
-        "Old token invalidated immediately",
-        "New setup URL provided",
-        "Display shows error until re-paired"
+        "Page exists at src/app/(dashboard)/photos/page.tsx",
+        "Shows grid of uploaded photos",
+        "Thumbnail images optimized for grid",
+        "Shows photo count",
+        "Upload button prominent",
+        "Empty state for no photos",
+        "Pagination or infinite scroll for many photos"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-032",
-      "title": "Create display debug overlay",
-      "description": "Create hidden debug overlay for troubleshooting",
+      "id": "REQ-4-006",
+      "title": "Create photo upload component",
+      "description": "Create component for uploading photos",
       "acceptance_criteria": [
-        "Triggered by keyboard shortcut (e.g., Ctrl+D)",
-        "Shows connection status",
-        "Shows last sync time",
-        "Shows display ID and household",
-        "Shows realtime subscription status",
-        "Shows memory usage",
-        "Overlay dismissible"
+        "Component exists at src/components/photos/PhotoUpload.tsx",
+        "Drag and drop support",
+        "Click to select files",
+        "Multiple file selection",
+        "Shows upload progress for each file",
+        "Validates file type before upload",
+        "Validates file size before upload",
+        "Shows error messages for invalid files"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-033",
-      "title": "Implement graceful reconnection",
-      "description": "Handle Supabase realtime disconnection gracefully",
+      "id": "REQ-4-007",
+      "title": "Implement photo upload API",
+      "description": "Create server action or API for photo upload",
       "acceptance_criteria": [
-        "Detects realtime connection loss",
-        "Shows reconnecting indicator",
-        "Attempts automatic reconnection",
-        "Exponential backoff on failures",
-        "Full data refresh on reconnection"
+        "Accepts multipart/form-data with files",
+        "Uploads to Supabase Storage in household folder",
+        "Generates unique filename to prevent collisions",
+        "Extracts image dimensions",
+        "Extracts EXIF taken_at date if available",
+        "Creates photos table record",
+        "Returns created photo object",
+        "Handles errors gracefully"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-034",
-      "title": "Create Pi installation documentation",
-      "description": "Document Raspberry Pi setup process",
+      "id": "REQ-4-008",
+      "title": "Create photo thumbnail generation",
+      "description": "Generate thumbnails for photo grid display",
       "acceptance_criteria": [
-        "Documentation in docs/ or README",
-        "Lists required Raspberry Pi model",
-        "Lists required OS (Raspberry Pi OS)",
-        "Step-by-step setup instructions",
-        "Troubleshooting section",
-        "Screenshots or photos if helpful"
+        "Uses Supabase image transforms",
+        "Thumbnail size: 300x300 or similar",
+        "Maintains aspect ratio (crop or fit)",
+        "Transforms applied via URL parameters",
+        "Thumbnails cached by Supabase"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-035",
-      "title": "Create ambient background animations",
-      "description": "Add subtle ambient animations to create calm, living feel",
+      "id": "REQ-4-009",
+      "title": "Create photo detail modal with animations",
+      "description": "Create animated modal to view full-size photo",
       "acceptance_criteria": [
-        "Optional subtle gradient animation in background (2000-4000ms)",
-        "Gradient uses soft pastel colors (calm-100, primary-100)",
-        "Animation is very slow and non-distracting",
-        "Can be disabled in display settings",
-        "CPU usage minimal (< 1% for animation)",
-        "Works well with both light and dark themes"
+        "Modal component exists",
+        "Modal animates in with fade + scale (opacity 0→1, scale 0.95→1)",
+        "Backdrop has blur effect and fades in",
+        "Shows full-size image",
+        "Image crossfades when navigating (300ms)",
+        "Shows filename and upload date",
+        "Shows taken_at date if available",
+        "Previous/next navigation with slide animation",
+        "Keyboard navigation (arrow keys, Escape)",
+        "Close button",
+        "Exit animation using AnimatePresence"
       ],
       "completed": false
     },
     {
-      "id": "REQ-3-036",
-      "title": "Verify display route end-to-end",
-      "description": "Manual verification of complete display functionality including animations",
+      "id": "REQ-4-010",
+      "title": "Create photo delete functionality",
+      "description": "Allow deleting photos from the system",
       "acceptance_criteria": [
-        "Can register new display in dashboard",
-        "Setup URL shown with token",
-        "Navigating to setup URL on new browser authenticates display",
-        "Display shows calendar data for household",
-        "Real-time updates work (add event in dashboard, appears on display)",
-        "Event updates animate smoothly (no jarring changes)",
-        "Display handles network loss gracefully",
-        "Display resumes after network restored",
-        "1920x1080 resolution renders correctly",
-        "Typography readable at distance (6+ feet)",
-        "Colors feel calming and ambient (soft pastels)",
-        "Skeleton loading states animate with shimmer",
-        "Theme transitions are smooth",
+        "Delete button on photo detail modal",
+        "Confirmation dialog before deletion",
+        "Deletes file from Supabase Storage",
+        "Deletes record from photos table",
+        "Shows success message",
+        "Refreshes photo grid after deletion"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-011",
+      "title": "Create photo enable/disable toggle",
+      "description": "Allow excluding photos from slideshow without deleting",
+      "acceptance_criteria": [
+        "Toggle on photo detail or grid",
+        "Updates photos.enabled in database",
+        "Disabled photos shown with overlay in grid",
+        "Disabled photos excluded from slideshow"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-012",
+      "title": "Create album management",
+      "description": "Allow organizing photos into albums",
+      "acceptance_criteria": [
+        "Album dropdown/selector on photos page",
+        "Can create new album",
+        "Can assign photos to album",
+        "Can filter grid by album",
+        "Album selector on slideshow settings"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-013",
+      "title": "Create slideshow component for display",
+      "description": "Create photo slideshow component for Pi display with elegant transitions",
+      "acceptance_criteria": [
+        "Component exists at src/components/display/Slideshow.tsx",
+        "Fetches enabled photos for household",
+        "Full-screen image display",
+        "Crossfade transitions between photos (800-1200ms ease-in-out)",
+        "No jarring cuts or flashes between photos",
+        "Configurable interval (default 10 seconds)",
+        "Randomized or sequential order option",
+        "Transitions are buttery smooth at 60fps"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-014",
+      "title": "Implement slideshow image preloading",
+      "description": "Preload upcoming images to prevent loading flicker",
+      "acceptance_criteria": [
+        "Preloads next 2-3 images",
+        "Uses ring buffer pattern",
+        "Cleans up old preloaded images",
+        "Reduces visible loading time between slides"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-015",
+      "title": "Create display-optimized image URLs",
+      "description": "Generate image URLs optimized for display resolution",
+      "acceptance_criteria": [
+        "Function generates transform URL",
+        "Resizes to 1920x1080 max",
+        "Uses 'contain' resize mode",
+        "Quality set to 85%",
+        "Progressive JPEG format"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-016",
+      "title": "Implement Ken Burns effect",
+      "description": "Add elegant slow pan/zoom animation to slideshow",
+      "acceptance_criteria": [
+        "CSS animation for slow zoom/pan (scale 1.0→1.1 or similar)",
+        "Different start/end positions per image (randomized)",
+        "Smooth animation using CSS transform (GPU accelerated)",
+        "Animation duration matches slide interval (10s default)",
+        "Can be disabled in settings",
+        "Combined with crossfade for elegant photo transitions",
+        "Effect feels cinematic and calming"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-017",
+      "title": "Create idle detection for slideshow trigger",
+      "description": "Start slideshow with smooth transition after calendar inactivity",
+      "acceptance_criteria": [
+        "Detects no upcoming events in near future",
+        "Configurable idle timeout",
+        "Transitions to slideshow mode with elegant fade (800ms)",
+        "Returns to calendar when events upcoming",
+        "Transition between modes is seamless",
+        "No jarring visual changes during mode switch"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-018",
+      "title": "Create slideshow mode toggle",
+      "description": "Allow manual toggle between calendar and slideshow",
+      "acceptance_criteria": [
+        "Toggle control on display (hidden keyboard shortcut)",
+        "Setting in dashboard for default mode",
+        "Can set to always calendar, always photos, or auto"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-019",
+      "title": "Create slideshow settings in display config",
+      "description": "Add slideshow settings to display settings",
+      "acceptance_criteria": [
+        "Settings include: enabled, interval, album filter",
+        "Settings include: kenBurns enabled, order (random/sequential)",
+        "Settings include: showPhotoInfo (date, filename)",
+        "Settings stored in displays.settings JSON"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-020",
+      "title": "Display photo info overlay with animations",
+      "description": "Optionally show photo information during slideshow with smooth animations",
+      "acceptance_criteria": [
+        "Optional overlay with photo date",
+        "Shows photo filename or album",
+        "Semi-transparent background with subtle blur",
+        "Positioned in corner (bottom left or right)",
+        "Fade in with slide (delay 500ms after image appears)",
+        "Fade out before next slide (300ms before transition)",
+        "Uses soft pastel colors matching theme",
+        "Typography readable but not distracting"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-021",
+      "title": "Handle slideshow with no photos",
+      "description": "Graceful fallback when no photos available",
+      "acceptance_criteria": [
+        "Does not crash with empty photo set",
+        "Shows calendar or placeholder",
+        "Logs warning for debugging"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-022",
+      "title": "Add Google Photos OAuth scope",
+      "description": "Add Google Photos API scope to OAuth flow",
+      "acceptance_criteria": [
+        "photoslibrary.readonly scope added",
+        "Scope only requested if user wants Google Photos",
+        "Separate consent from Calendar if possible"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-023",
+      "title": "Create Google Photos album list fetch",
+      "description": "Fetch user's Google Photos albums",
+      "acceptance_criteria": [
+        "Function fetches albums from Google Photos API",
+        "Returns album id, title, cover photo",
+        "Handles pagination for many albums",
+        "Handles API errors gracefully"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-024",
+      "title": "Create Google Photos album sync",
+      "description": "Sync photos from selected Google Photos album",
+      "acceptance_criteria": [
+        "Fetches photos from specified album",
+        "Downloads and uploads to Supabase Storage",
+        "Creates photos table records",
+        "Tracks sync status",
+        "Handles incremental updates"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-025",
+      "title": "Create Google Photos connection page",
+      "description": "Create page to connect and select Google Photos albums",
+      "acceptance_criteria": [
+        "Page at src/app/(dashboard)/photos/google/page.tsx",
+        "Button to initiate Google Photos OAuth",
+        "Lists available albums after auth",
+        "Checkbox to select albums to sync",
+        "Button to start sync",
+        "Shows sync progress"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-026",
+      "title": "Create photos_sources table for Google Photos",
+      "description": "Track connected Google Photos sources",
+      "acceptance_criteria": [
+        "Migration creates photo_sources table",
+        "Columns: id, household_id, provider, album_id, album_name, tokens, last_synced_at",
+        "RLS policies for household access",
+        "Migration applies without errors"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-027",
+      "title": "Create photo sync background job",
+      "description": "Create cron job for periodic Google Photos sync",
+      "acceptance_criteria": [
+        "Route at src/app/api/cron/photos/route.ts",
+        "Syncs photo sources that are stale",
+        "Adds new photos, removes deleted ones",
+        "Updates last_synced_at",
+        "Cron configured in vercel.json (hourly or daily)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-028",
+      "title": "Handle photo storage quota",
+      "description": "Implement storage limits per household",
+      "acceptance_criteria": [
+        "Track storage usage per household",
+        "Show usage in dashboard",
+        "Warn when approaching limit",
+        "Prevent uploads over limit",
+        "Configurable limit per plan (future)"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-029",
+      "title": "Create bulk photo actions",
+      "description": "Allow selecting and acting on multiple photos",
+      "acceptance_criteria": [
+        "Selection mode in photo grid",
+        "Select all / deselect all",
+        "Bulk delete selected",
+        "Bulk enable/disable selected",
+        "Bulk assign to album"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-030",
+      "title": "Optimize photo grid loading with smooth animations",
+      "description": "Lazy load photos in grid with smooth appearance animations",
+      "acceptance_criteria": [
+        "Intersection observer for lazy loading",
+        "Shimmer skeleton placeholder while loading",
+        "Images load as user scrolls",
+        "Images fade in smoothly when loaded (300ms ease-out)",
+        "Skeleton uses soft pastel colors",
+        "No layout shift when images load"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-031",
+      "title": "Create photo upload progress indicator",
+      "description": "Show progress for multi-file uploads",
+      "acceptance_criteria": [
+        "Progress bar for each uploading file",
+        "Overall progress indicator",
+        "Success/error status per file",
+        "Cancel upload option"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-032",
+      "title": "Handle image orientation (EXIF)",
+      "description": "Correctly handle rotated images",
+      "acceptance_criteria": [
+        "EXIF orientation read on upload",
+        "Images displayed with correct orientation",
+        "Supabase transforms handle orientation",
+        "Thumbnails and full-size both correct"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-033",
+      "title": "Add photos to realtime subscription",
+      "description": "Display receives photo updates in real-time",
+      "acceptance_criteria": [
+        "Realtime subscription includes photos table",
+        "New photos appear in slideshow",
+        "Deleted photos removed from slideshow",
+        "Disabled photos excluded from slideshow"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-034",
+      "title": "Add photos to seed data",
+      "description": "Include sample photos in development seed",
+      "acceptance_criteria": [
+        "Seed script includes sample photo records",
+        "Sample images uploaded to storage",
+        "Photos linked to sample household",
+        "Various albums represented"
+      ],
+      "completed": false
+    },
+    {
+      "id": "REQ-4-035",
+      "title": "Verify photo functionality end-to-end",
+      "description": "Manual verification of complete photo system including animations",
+      "acceptance_criteria": [
+        "Can upload photos via dashboard",
+        "Photos appear in grid with thumbnails",
+        "Photo grid uses lazy loading with shimmer skeletons",
+        "Photos fade in smoothly when loaded",
+        "Can view full-size photo in modal",
+        "Modal animates in with fade + scale",
+        "Can delete photos",
+        "Can enable/disable photos",
+        "Slideshow shows enabled photos on display",
+        "Slideshow transitions are buttery smooth (800-1200ms crossfade)",
+        "Ken Burns effect is elegant and calming",
+        "No jarring cuts or flashes between photos",
+        "Idle detection triggers slideshow with smooth transition",
+        "Photo updates reflect in real-time on display",
         "All animations run at 60fps"
       ],
       "completed": false
