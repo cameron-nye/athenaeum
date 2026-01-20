@@ -109,6 +109,13 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
 
   const { data, error, isLoading, mutate } = useSWR<ChoreDetailData>(`/api/chores/${id}`, fetcher);
 
+  // Fetch current user ID for claim functionality
+  const { data: membersData } = useSWR<{
+    members: HouseholdMember[];
+    current_user_id: string;
+  }>('/api/household/members', fetcher);
+  const currentUserId = membersData?.current_user_id;
+
   const chore = data?.chore;
   const assignments = data?.assignments ?? [];
 
@@ -147,6 +154,30 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
       }
     },
     [mutate]
+  );
+
+  // REQ-5-029: Claim unassigned chore
+  const handleClaim = useCallback(
+    async (assignmentId: string) => {
+      if (!currentUserId) {
+        alert('Unable to claim - user not loaded');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/chores/assignments/${assignmentId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assigned_to: currentUserId,
+          }),
+        });
+        if (!res.ok) throw new Error('Failed to claim');
+        mutate();
+      } catch {
+        alert('Failed to claim assignment');
+      }
+    },
+    [currentUserId, mutate]
   );
 
   if (isLoading) {
@@ -264,6 +295,7 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
                   key={assignment.id}
                   assignment={assignment}
                   onToggleComplete={handleToggleComplete}
+                  onClaim={handleClaim}
                 />
               ))}
             </div>
@@ -341,12 +373,15 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
 function AssignmentCard({
   assignment,
   onToggleComplete,
+  onClaim,
 }: {
   assignment: ChoreAssignment;
   onToggleComplete: (id: string, complete: boolean) => void;
+  onClaim?: (id: string) => void;
 }) {
   const isComplete = !!assignment.completed_at;
   const overdueStatus = !isComplete && isOverdue(assignment.due_date);
+  const isUnassigned = !assignment.users && !assignment.assigned_to;
 
   return (
     <motion.div
@@ -401,9 +436,7 @@ function AssignmentCard({
             </span>
           )}
 
-          {!assignment.users && !assignment.assigned_to && (
-            <span className="text-sm text-gray-400 italic">Unassigned</span>
-          )}
+          {isUnassigned && <span className="text-sm text-gray-400 italic">Anyone</span>}
         </div>
 
         {assignment.recurrence_rule && (
@@ -413,6 +446,21 @@ function AssignmentCard({
           </span>
         )}
       </div>
+
+      {/* Claim button for unassigned chores */}
+      {isUnassigned && !isComplete && onClaim && (
+        <button
+          onClick={() => onClaim(assignment.id)}
+          className={cn(
+            'rounded-lg px-3 py-1 text-xs font-medium',
+            'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400',
+            'hover:bg-indigo-100 dark:hover:bg-indigo-900/50',
+            'transition-colors'
+          )}
+        >
+          Claim
+        </button>
+      )}
     </motion.div>
   );
 }

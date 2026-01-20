@@ -389,7 +389,7 @@
         "Anyone in household can complete",
         "Claim button to self-assign"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-030",

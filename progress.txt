@@ -1286,3 +1286,24 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (318 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-029 - Handle unassigned chores
+
+**Completed**: Support for unassigned chores with claim functionality
+
+**Features**:
+- assigned_to can be null (already supported by schema)
+- Shows "Anyone" label for unassigned assignments
+- Claim button appears on unassigned incomplete assignments
+- Clicking Claim self-assigns to current user via PATCH API
+- handleClaim callback fetches current user ID from /api/household/members
+- Data refreshes via SWR mutate after claim
+
+**Files modified**:
+- app/(dashboard)/chores/[id]/page.tsx (AssignmentCard onClaim prop, handleClaim callback)
+- docs/prd.json (marked REQ-5-029 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (318 tests)
+- lint: pass (1 pre-existing warning)
