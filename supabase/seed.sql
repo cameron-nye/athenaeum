@@ -186,3 +186,186 @@ WHERE id IN (
   '00000000-0000-0000-0000-000000000011',
   '00000000-0000-0000-0000-000000000012'
 );
+
+-- REQ-5-031: Add chores to seed data
+-- Create a second user for assignment variety
+INSERT INTO users (id, household_id, email, name, display_name, created_at)
+VALUES (
+  '00000000-0000-0000-0000-000000000003',
+  '00000000-0000-0000-0000-000000000001',
+  'family@example.com',
+  'Family Member',
+  'Alex',
+  now()
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Update first user with display_name
+UPDATE users
+SET display_name = 'Sam'
+WHERE id = '00000000-0000-0000-0000-000000000002';
+
+-- Create sample chores
+INSERT INTO chores (id, household_id, title, description, icon, points, created_at)
+VALUES
+  -- Kitchen chores
+  (
+    '00000000-0000-0000-0000-000000000020',
+    '00000000-0000-0000-0000-000000000001',
+    'Do the Dishes',
+    'Wash, dry, and put away all dishes',
+    '🍽️',
+    5,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000021',
+    '00000000-0000-0000-0000-000000000001',
+    'Take Out Trash',
+    'Empty all trash cans and take to curb',
+    '🗑️',
+    3,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000022',
+    '00000000-0000-0000-0000-000000000001',
+    'Clean Kitchen',
+    'Wipe counters, clean stovetop, mop floor',
+    '🧽',
+    10,
+    now()
+  ),
+  -- Living spaces
+  (
+    '00000000-0000-0000-0000-000000000023',
+    '00000000-0000-0000-0000-000000000001',
+    'Vacuum Living Room',
+    'Vacuum carpet and under furniture',
+    '🧹',
+    7,
+    now()
+  ),
+  (
+    '00000000-0000-0000-0000-000000000024',
+    '00000000-0000-0000-0000-000000000001',
+    'Dust Furniture',
+    'Dust all surfaces in common areas',
+    '✨',
+    5,
+    now()
+  ),
+  -- Laundry
+  (
+    '00000000-0000-0000-0000-000000000025',
+    '00000000-0000-0000-0000-000000000001',
+    'Do Laundry',
+    'Wash, dry, and fold one load',
+    '👕',
+    8,
+    now()
+  ),
+  -- Outdoor
+  (
+    '00000000-0000-0000-0000-000000000026',
+    '00000000-0000-0000-0000-000000000001',
+    'Mow the Lawn',
+    'Cut grass and edge walkways',
+    '🌿',
+    15,
+    now()
+  ),
+  -- Pet care
+  (
+    '00000000-0000-0000-0000-000000000027',
+    '00000000-0000-0000-0000-000000000001',
+    'Feed the Dog',
+    'Morning and evening feeding',
+    '🐕',
+    2,
+    now()
+  ),
+  -- Bathroom
+  (
+    '00000000-0000-0000-0000-000000000028',
+    '00000000-0000-0000-0000-000000000001',
+    'Clean Bathroom',
+    'Scrub toilet, sink, shower, and mop floor',
+    '🚿',
+    10,
+    now()
+  )
+ON CONFLICT (id) DO NOTHING;
+
+-- Create sample chore assignments with various states
+DO $$
+DECLARE
+  today DATE := CURRENT_DATE;
+  user1 UUID := '00000000-0000-0000-0000-000000000002';
+  user2 UUID := '00000000-0000-0000-0000-000000000003';
+  dishes_chore UUID := '00000000-0000-0000-0000-000000000020';
+  trash_chore UUID := '00000000-0000-0000-0000-000000000021';
+  kitchen_chore UUID := '00000000-0000-0000-0000-000000000022';
+  vacuum_chore UUID := '00000000-0000-0000-0000-000000000023';
+  dust_chore UUID := '00000000-0000-0000-0000-000000000024';
+  laundry_chore UUID := '00000000-0000-0000-0000-000000000025';
+  lawn_chore UUID := '00000000-0000-0000-0000-000000000026';
+  dog_chore UUID := '00000000-0000-0000-0000-000000000027';
+  bathroom_chore UUID := '00000000-0000-0000-0000-000000000028';
+BEGIN
+  INSERT INTO chore_assignments (
+    id, chore_id, assigned_to, due_date, recurrence_rule, completed_at, created_at
+  )
+  VALUES
+    -- Overdue: Dishes from yesterday (not completed)
+    (
+      '00000000-0000-0000-0000-000000000030',
+      dishes_chore, user1, today - 1, NULL, NULL, now()
+    ),
+    -- Today: Trash (not completed)
+    (
+      '00000000-0000-0000-0000-000000000031',
+      trash_chore, user2, today, NULL, NULL, now()
+    ),
+    -- Today: Feed dog (completed)
+    (
+      '00000000-0000-0000-0000-000000000032',
+      dog_chore, user1, today, 'FREQ=DAILY', now() - INTERVAL '2 hours', now()
+    ),
+    -- Today: Dishes (not completed) - recurring daily
+    (
+      '00000000-0000-0000-0000-000000000033',
+      dishes_chore, user2, today, 'FREQ=DAILY', NULL, now()
+    ),
+    -- Tomorrow: Vacuum
+    (
+      '00000000-0000-0000-0000-000000000034',
+      vacuum_chore, user1, today + 1, 'FREQ=WEEKLY;BYDAY=TU', NULL, now()
+    ),
+    -- Tomorrow: Laundry (unassigned)
+    (
+      '00000000-0000-0000-0000-000000000035',
+      laundry_chore, NULL, today + 1, NULL, NULL, now()
+    ),
+    -- Day after tomorrow: Clean kitchen
+    (
+      '00000000-0000-0000-0000-000000000036',
+      kitchen_chore, user2, today + 2, 'FREQ=WEEKLY;BYDAY=TH', NULL, now()
+    ),
+    -- This weekend: Mow lawn
+    (
+      '00000000-0000-0000-0000-000000000037',
+      lawn_chore, user1, today + (6 - EXTRACT(DOW FROM today)::INTEGER), 'FREQ=WEEKLY;BYDAY=SA', NULL, now()
+    ),
+    -- Next week: Dust furniture
+    (
+      '00000000-0000-0000-0000-000000000038',
+      dust_chore, user2, today + 7, 'FREQ=BIWEEKLY', NULL, now()
+    ),
+    -- Overdue: Clean bathroom from 3 days ago (not completed)
+    (
+      '00000000-0000-0000-0000-000000000039',
+      bathroom_chore, user1, today - 3, 'FREQ=WEEKLY;BYDAY=MO', NULL, now()
+    )
+  ON CONFLICT (id) DO NOTHING;
+END $$;

@@ -83,6 +83,83 @@ async function getDisplayData(displayId: string, token: string) {
     events = eventsData || [];
   }
 
+  // Get chore assignments for the household
+  const todayStr = startOfToday.toISOString().split('T')[0];
+  const endDateStr = endOfRange.toISOString().split('T')[0];
+
+  // Get chores for the household first
+  const { data: chores } = await supabase
+    .from('chores')
+    .select('id, title, icon, points')
+    .eq('household_id', display.household_id);
+
+  const choreIds = (chores || []).map((c) => c.id);
+
+  interface ChoreAssignmentRow {
+    id: string;
+    chore_id: string;
+    due_date: string;
+    assigned_to: string | null;
+    completed_at: string | null;
+    users: { id: string; display_name: string | null; avatar_url: string | null }[] | null;
+  }
+
+  let choreAssignments: Array<{
+    id: string;
+    chore_id: string;
+    due_date: string;
+    assigned_to: string | null;
+    completed_at: string | null;
+    chore: {
+      id: string;
+      title: string;
+      icon: string | null;
+      points: number;
+    };
+    user?: {
+      id: string;
+      display_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  }> = [];
+
+  if (choreIds.length > 0) {
+    const { data: assignmentsData } = await supabase
+      .from('chore_assignments')
+      .select(
+        `
+        id,
+        chore_id,
+        due_date,
+        assigned_to,
+        completed_at,
+        users:assigned_to (
+          id,
+          display_name,
+          avatar_url
+        )
+      `
+      )
+      .in('chore_id', choreIds)
+      .or(`due_date.gte.${todayStr},and(completed_at.not.is.null,due_date.gte.${todayStr})`)
+      .lte('due_date', endDateStr)
+      .order('due_date', { ascending: true });
+
+    // Map to include chore details
+    const choresMap = new Map(chores?.map((c) => [c.id, c]) || []);
+    choreAssignments = ((assignmentsData as ChoreAssignmentRow[]) || [])
+      .filter((a) => choresMap.has(a.chore_id))
+      .map((a) => ({
+        id: a.id,
+        chore_id: a.chore_id,
+        due_date: a.due_date,
+        assigned_to: a.assigned_to,
+        completed_at: a.completed_at,
+        chore: choresMap.get(a.chore_id)!,
+        user: a.users?.[0] || null,
+      }));
+  }
+
   // Update last_seen_at
   await supabase
     .from('displays')
@@ -98,6 +175,7 @@ async function getDisplayData(displayId: string, token: string) {
     household: household || { id: display.household_id, name: 'Home' },
     calendarSources: calendarSources || [],
     events,
+    choreAssignments,
   };
 }
 
@@ -121,6 +199,7 @@ export default async function DisplayPage({ params }: DisplayPageProps) {
       displayId={data.display.id}
       initialEvents={data.events}
       initialCalendarSources={data.calendarSources}
+      initialChoreAssignments={data.choreAssignments}
       initialSettings={data.display.settings}
       householdId={data.household.id}
       householdName={data.household.name}

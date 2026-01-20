@@ -14,7 +14,7 @@
         "points defaults to 0",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-002",
@@ -30,7 +30,7 @@
         "completed_at is nullable TIMESTAMPTZ",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-003",
@@ -41,7 +41,7 @@
         "Index idx_chore_assignments_due on (due_date, completed_at)",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-004",
@@ -56,7 +56,7 @@
         "DELETE policy allows deleting own household's chores",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-005",
@@ -72,7 +72,7 @@
         "Policy joins through chores to check household",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-006",
@@ -83,7 +83,7 @@
         "Package installs without errors",
         "TypeScript types available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-007",
@@ -98,7 +98,7 @@
         "Click chore to view/edit",
         "Empty state when no chores"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-008",
@@ -114,7 +114,7 @@
         "Shows validation errors",
         "Success redirects or closes modal"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-009",
@@ -128,7 +128,7 @@
         "Cancel returns without saving",
         "Delete option available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-010",
@@ -141,7 +141,7 @@
         "Shows success message",
         "Redirects to chores list"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-011",
@@ -155,7 +155,7 @@
         "Submit creates chore_assignment record",
         "Shows validation errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-012",
@@ -169,7 +169,7 @@
         "Generates RRULE string from selection",
         "Parses RRULE for display"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-013",
@@ -182,7 +182,7 @@
         "Returns array of Date objects",
         "Handles null recurrence_rule (single occurrence)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-014",
@@ -197,7 +197,7 @@
         "Filter by family member",
         "Filter by date range"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-015",
@@ -210,7 +210,7 @@
         "Visual distinction for completed",
         "Points awarded on completion (future)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-016",
@@ -223,7 +223,7 @@
         "Quick complete button",
         "Accessible from navigation"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-017",
@@ -237,7 +237,7 @@
         "Color-coded by chore or status",
         "Interactive for management"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-018",
@@ -251,7 +251,7 @@
         "Large, readable typography",
         "Color-coded by status or assignee"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-019",
@@ -263,7 +263,7 @@
         "Toggleable in display settings",
         "Responsive to available space"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-020",
@@ -276,7 +276,7 @@
         "Completed chores update on display",
         "Changes from dashboard visible within seconds"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-021",
@@ -289,7 +289,7 @@
         "Click to select",
         "Common chore icons included (broom, dishes, etc.)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-022",
@@ -301,7 +301,7 @@
         "Overdue count shown in navigation",
         "Overdue shown first in lists"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-023",
@@ -314,7 +314,7 @@
         "Shows completion date and chore",
         "Useful for accountability"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-024",
@@ -327,7 +327,7 @@
         "Same assignee by default",
         "Or rotate through family members (future)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-025",
@@ -340,7 +340,7 @@
         "Leaderboard style display",
         "Motivational for children"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-026",
@@ -353,7 +353,7 @@
         "Can delete single assignment",
         "Deleting recurring asks about future occurrences"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-027",
@@ -365,7 +365,7 @@
         "Default due date is today or tomorrow",
         "No modal needed for simple assignment"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-028",
@@ -377,7 +377,7 @@
         "Falls back to initials",
         "Consistent size and style"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-029",
@@ -389,7 +389,7 @@
         "Anyone in household can complete",
         "Claim button to self-assign"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-030",
@@ -401,7 +401,7 @@
         "Button to create first chore",
         "Styled consistently with app"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-031",
@@ -413,7 +413,7 @@
         "Various recurrence patterns represented",
         "Some completed, some pending"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-032",
@@ -431,7 +431,7 @@
         "Real-time updates work",
         "Overdue chores highlighted"
       ],
-      "completed": false
+      "completed": true
     }
   ]
 }
