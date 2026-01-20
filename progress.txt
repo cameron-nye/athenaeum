@@ -1095,3 +1095,25 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (273 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: Chores API routes
+
+**Completed**: Created full CRUD API for chores and assignments
+
+**Routes created**:
+- GET/POST /api/chores - list and create chores
+- GET/PATCH/DELETE /api/chores/[id] - individual chore operations
+- GET/POST /api/chores/assignments - list and create assignments
+- GET/PATCH/DELETE /api/chores/assignments/[id] - individual assignment operations
+- GET /api/household/members - list household members for assignment dropdowns
+
+**Features**:
+- GET /api/chores includes next upcoming assignment per chore
+- Assignment PATCH auto-creates next occurrence when completing recurring chore (REQ-5-024)
+- Assignments query supports user_id, from/to date, status filters
+- All routes use RLS for household scoping
+
+**Verification**:
+- typecheck: pass
+- test: pass (273 tests)
+- lint: pass (1 pre-existing warning)
