@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Display Registration Page
  * REQ-3-003: Register and manage display devices

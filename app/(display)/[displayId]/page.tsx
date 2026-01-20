@@ -4,6 +4,8 @@
  * REQ-3-010: Real-time event updates
  */
 
+export const dynamic = 'force-dynamic';
+
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/server';

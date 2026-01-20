@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * Display Settings Editor Page
  * REQ-3-012: Customize individual display settings
