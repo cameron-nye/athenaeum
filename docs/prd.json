@@ -237,7 +237,7 @@
         "Color-coded by chore or status",
         "Interactive for management"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-018",
@@ -340,7 +340,7 @@
         "Leaderboard style display",
         "Motivational for children"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-026",

@@ -1455,3 +1455,57 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (374 tests)
 - lint: pass (warnings only in test mocks)
+
+## 2026-01-20: REQ-5-017 - Create chore chart/schedule view
+
+**Completed**: Weekly schedule grid showing assignments by member
+
+**Features**:
+- Grid layout with rows for family members, columns for days of week
+- Week navigation (prev/next week, "This Week" button)
+- Chore chips color-coded by status (pending/completed/overdue)
+- Click chore to navigate to chore detail page
+- Unassigned row shows chores with no assignee
+- Today column highlighted
+- Member avatars in row headers
+- Legend showing status colors
+
+**Files created**:
+- app/(dashboard)/chores/schedule/page.tsx
+- app/(dashboard)/chores/schedule/page.test.tsx (12 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added Schedule link)
+- docs/prd.json (marked REQ-5-017 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (399 tests)
+- lint: pass (warnings only)
+
+## 2026-01-20: REQ-5-025 - Create chore points summary
+
+**Completed**: Leaderboard page showing points earned by family members
+
+**Features**:
+- Time period filter (This Week, This Month, All Time)
+- Podium display for top 3 members
+- Full ranking list with rank icons (trophy, medals, stars)
+- Member avatar, name, chore count, and points
+- Total stats (total points, total chores completed)
+- Color-coded rank cards (gold, silver, bronze)
+- Motivational message when there are points
+- Empty state when no members
+
+**Files created**:
+- app/(dashboard)/chores/leaderboard/page.tsx
+- app/(dashboard)/chores/leaderboard/page.test.tsx (13 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added Points link)
+- docs/prd.json (marked REQ-5-025 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (399 tests)
+- lint: pass (warnings only)

@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   ClipboardCheck,
   History,
+  Trophy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IconSelector } from '@/components/chores/IconSelector';
@@ -338,6 +339,19 @@ export default function ChoresPage() {
               <span className="hidden sm:inline">My Chores</span>
             </Link>
             <Link
+              href="/chores/schedule"
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'border border-purple-200 bg-purple-50 dark:border-purple-800 dark:bg-purple-900/30',
+                'text-purple-700 dark:text-purple-300',
+                'font-medium',
+                'transition-all duration-200 hover:bg-purple-100 dark:hover:bg-purple-900/50'
+              )}
+            >
+              <Calendar className="h-5 w-5" />
+              <span className="hidden sm:inline">Schedule</span>
+            </Link>
+            <Link
               href="/chores/history"
               className={cn(
                 'flex items-center gap-2 rounded-xl px-4 py-2.5',
@@ -349,6 +363,19 @@ export default function ChoresPage() {
             >
               <History className="h-5 w-5" />
               <span className="hidden sm:inline">History</span>
+            </Link>
+            <Link
+              href="/chores/leaderboard"
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/30',
+                'text-amber-700 dark:text-amber-300',
+                'font-medium',
+                'transition-all duration-200 hover:bg-amber-100 dark:hover:bg-amber-900/50'
+              )}
+            >
+              <Trophy className="h-5 w-5" />
+              <span className="hidden sm:inline">Points</span>
             </Link>
             <button
               onClick={handleAddChore}
