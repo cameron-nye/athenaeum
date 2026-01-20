@@ -5,9 +5,10 @@
  * REQ-2-013: Create calendars list page
  */
 
-import { Suspense, useState, useEffect, useCallback } from 'react';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import useSWR from 'swr';
 import {
   Calendar,
   Plus,
@@ -19,6 +20,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LogoutButton } from '@/components/auth/LogoutButton';
 
 interface CalendarSource {
   id: string;
@@ -272,123 +274,178 @@ function ErrorParamHandler({ onError }: { onError: (error: string) => void }) {
   return null;
 }
 
+// SWR fetcher function
+const fetcher = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch calendars');
+  }
+  const data = await response.json();
+  return data.sources ?? [];
+};
+
 /**
  * Calendars list page component.
  */
 export default function CalendarsPage() {
   const router = useRouter();
-  const [calendars, setCalendars] = useState<CalendarSource[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [syncStatuses, setSyncStatuses] = useState<Record<string, SyncStatus>>({});
+
+  // SWR for calendar data with auto-revalidation on focus
+  const {
+    data: calendars = [],
+    error: swrError,
+    isLoading,
+    mutate,
+  } = useSWR<CalendarSource[]>('/api/calendars/sources?all=true', fetcher, {
+    revalidateOnFocus: true,
+    revalidateOnReconnect: true,
+  });
+
+  // Track timeout IDs to prevent memory leaks
+  const timeoutRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const handleUrlError = useCallback((err: string) => {
     setError(err);
   }, []);
 
-  // Fetch calendars
-  const fetchCalendars = useCallback(async () => {
-    try {
-      const response = await fetch('/api/calendars/sources?all=true');
-      if (!response.ok) {
-        throw new Error('Failed to fetch calendars');
-      }
-      const data = await response.json();
-      setCalendars(data.sources ?? []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load calendars');
-    } finally {
-      setIsLoading(false);
+  // Sync SWR error to local error state
+  useEffect(() => {
+    if (swrError) {
+      setError(swrError.message);
     }
+  }, [swrError]);
+
+  // Cleanup timeouts on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      timeoutRefs.current.forEach((id) => clearTimeout(id));
+      timeoutRefs.current.clear();
+    };
   }, []);
 
-  useEffect(() => {
-    fetchCalendars();
-  }, [fetchCalendars]);
-
-  const handleToggle = async (calendar: CalendarSource) => {
-    // Optimistic update
-    setCalendars((prev) =>
-      prev.map((c) => (c.id === calendar.id ? { ...c, enabled: !c.enabled } : c))
-    );
-
-    try {
-      const response = await fetch('/api/calendars/sources', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          enabledIds: calendars
-            .filter((c) => (c.id === calendar.id ? !c.enabled : c.enabled))
-            .map((c) => c.id),
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update calendar');
-      }
-    } catch {
-      // Revert on failure
-      setCalendars((prev) =>
-        prev.map((c) => (c.id === calendar.id ? { ...c, enabled: calendar.enabled } : c))
+  const handleToggle = useCallback(
+    async (calendar: CalendarSource) => {
+      // Optimistic update with SWR
+      const optimisticData = calendars.map((c) =>
+        c.id === calendar.id ? { ...c, enabled: !c.enabled } : c
       );
-      setError('Failed to update calendar');
-    }
-  };
 
-  const handleSync = async (calendar: CalendarSource) => {
-    setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'syncing' }));
+      try {
+        await mutate(
+          async () => {
+            const response = await fetch('/api/calendars/sources', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                enabledIds: calendars
+                  .filter((c) => (c.id === calendar.id ? !c.enabled : c.enabled))
+                  .map((c) => c.id),
+              }),
+            });
 
-    try {
-      const response = await fetch('/api/calendars/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ calendar_source_id: calendar.id }),
-      });
+            if (!response.ok) {
+              throw new Error('Failed to update calendar');
+            }
 
-      if (!response.ok) {
-        throw new Error('Sync failed');
+            return optimisticData;
+          },
+          {
+            optimisticData,
+            rollbackOnError: true,
+            revalidate: false,
+          }
+        );
+      } catch {
+        setError('Failed to update calendar');
+      }
+    },
+    [calendars, mutate]
+  );
+
+  const handleSync = useCallback(
+    async (calendar: CalendarSource) => {
+      // Clear any existing timeout for this calendar
+      const existingTimeout = timeoutRefs.current.get(calendar.id);
+      if (existingTimeout) {
+        clearTimeout(existingTimeout);
+        timeoutRefs.current.delete(calendar.id);
       }
 
-      setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'success' }));
+      setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'syncing' }));
 
-      // Refresh calendar data to get updated last_synced_at
-      fetchCalendars();
+      try {
+        const response = await fetch('/api/calendars/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ calendar_source_id: calendar.id }),
+        });
 
-      // Clear success status after 3 seconds
-      setTimeout(() => {
-        setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
-      }, 3000);
-    } catch {
-      setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'error' }));
+        if (!response.ok) {
+          throw new Error('Sync failed');
+        }
 
-      // Clear error status after 5 seconds
-      setTimeout(() => {
-        setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
-      }, 5000);
-    }
-  };
+        setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'success' }));
 
-  const handleDelete = async (calendar: CalendarSource) => {
-    try {
-      const response = await fetch(`/api/calendars/sources/${calendar.id}`, {
-        method: 'DELETE',
-      });
+        // Refresh calendar data to get updated last_synced_at
+        mutate();
 
-      if (!response.ok) {
-        throw new Error('Failed to disconnect calendar');
+        // Clear success status after 3 seconds
+        const successTimeout = setTimeout(() => {
+          setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
+          timeoutRefs.current.delete(calendar.id);
+        }, 3000);
+        timeoutRefs.current.set(calendar.id, successTimeout);
+      } catch {
+        setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'error' }));
+
+        // Clear error status after 5 seconds
+        const errorTimeout = setTimeout(() => {
+          setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
+          timeoutRefs.current.delete(calendar.id);
+        }, 5000);
+        timeoutRefs.current.set(calendar.id, errorTimeout);
       }
+    },
+    [mutate]
+  );
 
-      // Remove from local state
-      setCalendars((prev) => prev.filter((c) => c.id !== calendar.id));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to disconnect calendar');
-    }
-  };
+  const handleDelete = useCallback(
+    async (calendar: CalendarSource) => {
+      // Optimistic delete with SWR
+      const optimisticData = calendars.filter((c) => c.id !== calendar.id);
 
-  const handleAddCalendar = () => {
+      try {
+        await mutate(
+          async () => {
+            const response = await fetch(`/api/calendars/sources/${calendar.id}`, {
+              method: 'DELETE',
+            });
+
+            if (!response.ok) {
+              throw new Error('Failed to disconnect calendar');
+            }
+
+            return optimisticData;
+          },
+          {
+            optimisticData,
+            rollbackOnError: true,
+            revalidate: false,
+          }
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to disconnect calendar');
+      }
+    },
+    [calendars, mutate]
+  );
+
+  const handleAddCalendar = useCallback(() => {
     // Redirect to Google OAuth initiation
     window.location.href = '/api/google/auth';
-  };
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
@@ -403,20 +460,23 @@ export default function CalendarsPage() {
           <h1 className="text-2xl font-bold">Calendars</h1>
           <p className="text-muted-foreground mt-1">Manage your connected calendar sources</p>
         </div>
-        <motion.button
-          onClick={handleAddCalendar}
-          className={cn(
-            'flex items-center gap-2 rounded-lg px-4 py-2 font-medium',
-            'bg-primary text-primary-foreground',
-            'hover:bg-primary/90 transition-colors',
-            'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none'
-          )}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Plus className="h-5 w-5" />
-          Add Calendar
-        </motion.button>
+        <div className="flex items-center gap-4">
+          <LogoutButton />
+          <motion.button
+            onClick={handleAddCalendar}
+            className={cn(
+              'flex items-center gap-2 rounded-lg px-4 py-2 font-medium',
+              'bg-primary text-primary-foreground',
+              'hover:bg-primary/90 transition-colors',
+              'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none'
+            )}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Plus className="h-5 w-5" />
+            Add Calendar
+          </motion.button>
+        </div>
       </div>
 
       {/* Error alert */}

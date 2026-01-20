@@ -7,11 +7,9 @@
 
 import { Suspense, useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, CalendarDays, CalendarRange, ChevronDown } from 'lucide-react';
-import { MonthView } from '@/components/calendar/MonthView';
-import { WeekView } from '@/components/calendar/WeekView';
-import { DayView } from '@/components/calendar/DayView';
 import { EventDetail } from '@/components/calendar/EventDetail';
 import {
   getStartOfMonth,
@@ -69,6 +67,20 @@ function CalendarSkeleton() {
     </div>
   );
 }
+
+// Dynamic imports for calendar views - reduces initial bundle by ~30-50KB per view
+const MonthView = dynamic(
+  () => import('@/components/calendar/MonthView').then((m) => ({ default: m.MonthView })),
+  { loading: () => <CalendarSkeleton /> }
+);
+const WeekView = dynamic(
+  () => import('@/components/calendar/WeekView').then((m) => ({ default: m.WeekView })),
+  { loading: () => <CalendarSkeleton /> }
+);
+const DayView = dynamic(
+  () => import('@/components/calendar/DayView').then((m) => ({ default: m.DayView })),
+  { loading: () => <CalendarSkeleton /> }
+);
 
 /**
  * View switcher button component.
@@ -199,11 +211,14 @@ function UrlParamsSyncer({ viewMode, currentDate }: { viewMode: ViewMode; curren
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams.toString());
     params.set('view', viewMode);
     params.set('date', currentDate.toISOString().split('T')[0]);
     router.replace(`?${params.toString()}`, { scroll: false });
-  }, [viewMode, currentDate, router, searchParams]);
+    // Note: searchParams intentionally excluded from deps to prevent infinite loop.
+    // We only want to sync TO the URL when viewMode/currentDate change, not react to URL changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewMode, currentDate, router]);
 
   return null;
 }

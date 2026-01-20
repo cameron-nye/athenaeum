@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import CalendarsPage from './page';
+import { SWRConfig } from 'swr';
 
 // Mock next/navigation
 const mockPush = vi.fn();
@@ -14,6 +15,13 @@ vi.mock('next/navigation', () => ({
   }),
   useSearchParams: () => mockSearchParams,
 }));
+
+// Wrapper to disable SWR cache between tests
+function SWRWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <SWRConfig value={{ provider: () => new Map(), dedupingInterval: 0 }}>{children}</SWRConfig>
+  );
+}
 
 // Mock framer-motion
 vi.mock('framer-motion', () => ({
@@ -91,7 +99,7 @@ describe('CalendarsPage', () => {
 
   it('renders loading state initially', () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {}));
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     // Should show loading skeleton with animate-pulse elements
     const skeletons = document.querySelectorAll('.animate-pulse');
@@ -104,7 +112,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Calendars')).toBeInTheDocument();
@@ -120,7 +128,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Work Calendar')).toBeInTheDocument();
@@ -135,7 +143,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getAllByText('Google')).toHaveLength(2);
@@ -148,7 +156,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('5m ago')).toBeInTheDocument();
@@ -163,7 +171,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Add Calendar')).toBeInTheDocument();
@@ -180,7 +188,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: [] }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('No calendars connected')).toBeInTheDocument();
@@ -200,7 +208,7 @@ describe('CalendarsPage', () => {
         json: async () => ({ success: true }),
       });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Work Calendar')).toBeInTheDocument();
@@ -236,7 +244,7 @@ describe('CalendarsPage', () => {
         json: async () => ({ sources: mockCalendars }),
       });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Work Calendar')).toBeInTheDocument();
@@ -261,7 +269,7 @@ describe('CalendarsPage', () => {
         json: async () => ({ success: true }),
       });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('Work Calendar')).toBeInTheDocument();
@@ -287,7 +295,7 @@ describe('CalendarsPage', () => {
       json: async () => ({ sources: mockCalendars }),
     });
 
-    render(<CalendarsPage />);
+    render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
       expect(screen.getByText('View Calendar →')).toBeInTheDocument();
