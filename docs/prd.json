@@ -887,7 +887,7 @@
         "Prevent uploads over limit",
         "Configurable limit per plan (future)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-029",

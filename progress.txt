@@ -1326,3 +1326,34 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (248 tests)
 - lint: pass (10 warnings, all pre-existing)
+
+## 2026-01-20: REQ-4-028 - Storage quota management
+
+**Completed**: Photo upload quota enforcement for households
+
+**Implementation**:
+- lib/photos/storage-quota.ts: Core quota utilities
+  - getHouseholdStorageUsage(): Lists storage files, sums sizes
+  - wouldExceedQuota(): Checks if upload would exceed limit
+  - formatBytes(): Human-readable size formatting
+  - getStorageStatusMessage(): Status messages for UI
+  - DEFAULT_QUOTA_BYTES: 500 MB per household
+  - WARNING_THRESHOLD_PERCENT: 80%
+- app/api/photos/storage/route.ts: GET storage usage API
+- app/api/photos/route.ts: Added quota check before upload
+  - Returns 413 Payload Too Large when quota exceeded
+  - Includes quotaExceeded flag and usage data in response
+
+**Files created**:
+- lib/photos/storage-quota.ts
+- lib/photos/storage-quota.test.ts (14 tests)
+- app/api/photos/storage/route.ts
+
+**Files modified**:
+- app/api/photos/route.ts (quota check on upload)
+- docs/prd.json (marked REQ-4-028 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (262 tests)
+- lint: pass (10 warnings, all pre-existing)

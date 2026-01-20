@@ -1,11 +1,18 @@
 /**
  * Photos API route for upload and listing
  * REQ-4-007: Implement photo upload API
+ * REQ-4-028: Handle photo storage quota
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { v4 as uuidv4 } from 'uuid';
+import {
+  getHouseholdStorageUsage,
+  wouldExceedQuota,
+  DEFAULT_QUOTA_BYTES,
+  formatBytes,
+} from '@/lib/photos/storage-quota';
 
 /**
  * GET /api/photos - List photos for the user's household
@@ -95,6 +102,27 @@ export async function POST(request: NextRequest) {
     const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
       return NextResponse.json({ error: 'File too large. Maximum size is 10MB' }, { status: 400 });
+    }
+
+    // Check storage quota (REQ-4-028)
+    const usage = await getHouseholdStorageUsage(supabase, householdId, DEFAULT_QUOTA_BYTES);
+
+    if (wouldExceedQuota(usage, file.size)) {
+      const usedStr = formatBytes(usage.usedBytes);
+      const quotaStr = formatBytes(usage.quotaBytes);
+      const fileSizeStr = formatBytes(file.size);
+      return NextResponse.json(
+        {
+          error: `Storage quota exceeded. Using ${usedStr} of ${quotaStr}. File size: ${fileSizeStr}. Delete some photos to upload more.`,
+          quotaExceeded: true,
+          usage: {
+            usedBytes: usage.usedBytes,
+            quotaBytes: usage.quotaBytes,
+            usedPercent: usage.usedPercent,
+          },
+        },
+        { status: 413 } // Payload Too Large
+      );
     }
 
     // Generate unique filename
