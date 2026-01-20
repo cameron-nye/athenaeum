@@ -365,7 +365,7 @@
         "Default due date is today or tomorrow",
         "No modal needed for simple assignment"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-028",

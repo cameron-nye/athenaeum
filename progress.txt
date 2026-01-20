@@ -1368,3 +1368,30 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (341 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-027 - Create quick-assign from chore list
+
+**Completed**: QuickAssign dropdown component on chore cards
+
+**Features**:
+- "Assign" button on each chore card
+- Dropdown with today/tomorrow date selector
+- Household member list with avatars
+- Single-click member selection
+- POST to /api/chores/assignments on confirm
+- Success state with "Assigned!" feedback
+- Event propagation stopped (doesn't trigger card click)
+- Auto-refreshes chore list after assignment
+
+**Files created**:
+- components/chores/QuickAssign.tsx
+- components/chores/QuickAssign.test.tsx (11 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added QuickAssign to ChoreCard)
+- docs/prd.json (marked REQ-5-027 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (352 tests)
+- lint: pass (1 pre-existing warning)

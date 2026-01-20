@@ -27,6 +27,7 @@ import {
 import { cn } from '@/lib/utils';
 import { IconSelector } from '@/components/chores/IconSelector';
 import { AssignmentsView } from '@/components/chores/AssignmentsView';
+import { QuickAssign } from '@/components/chores/QuickAssign';
 
 interface ChoreAssignment {
   id: string;
@@ -124,7 +125,13 @@ function isDueOverdue(dateStr: string): boolean {
   return date < today;
 }
 
-function ChoreCard({ chore, onClick }: { chore: Chore; onClick: () => void }) {
+interface ChoreCardProps {
+  chore: Chore;
+  onClick: () => void;
+  onAssigned?: () => void;
+}
+
+function ChoreCard({ chore, onClick, onAssigned }: ChoreCardProps) {
   const hasNextAssignment = chore.next_assignment !== null;
   const isOverdue = hasNextAssignment && isDueOverdue(chore.next_assignment!.due_date);
 
@@ -199,6 +206,9 @@ function ChoreCard({ chore, onClick }: { chore: Chore; onClick: () => void }) {
             )}
           </div>
         </div>
+
+        {/* Quick assign button */}
+        <QuickAssign choreId={chore.id} onAssigned={onAssigned} />
 
         {/* Points badge */}
         {chore.points > 0 && (
@@ -430,6 +440,7 @@ export default function ChoresPage() {
                         key={chore.id}
                         chore={chore}
                         onClick={() => handleChoreClick(chore.id)}
+                        onAssigned={() => mutate()}
                       />
                     ))}
                   </AnimatePresence>
