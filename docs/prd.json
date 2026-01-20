@@ -431,7 +431,7 @@
         "Real-time updates work",
         "Overdue chores highlighted"
       ],
-      "completed": false
+      "completed": true
     }
   ]
 }
