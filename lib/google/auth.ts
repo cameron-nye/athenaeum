@@ -24,16 +24,22 @@ export const ALL_SCOPES = [...CALENDAR_SCOPES, ...PHOTOS_SCOPES];
 /**
  * Google OAuth2 configuration from environment variables
  */
-function getOAuthConfig() {
+function getOAuthConfig(usePhotosRedirect = false) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  const baseRedirectUri = process.env.GOOGLE_REDIRECT_URI;
 
-  if (!clientId || !clientSecret || !redirectUri) {
+  if (!clientId || !clientSecret || !baseRedirectUri) {
     throw new Error(
       'Missing Google OAuth environment variables: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI'
     );
   }
+
+  // For Photos OAuth, use the photos callback endpoint
+  // Derive from base redirect URI (replace /api/google/callback with /api/google/photos/callback)
+  const redirectUri = usePhotosRedirect
+    ? baseRedirectUri.replace('/api/google/callback', '/api/google/photos/callback')
+    : baseRedirectUri;
 
   return { clientId, clientSecret, redirectUri };
 }
@@ -41,9 +47,11 @@ function getOAuthConfig() {
 /**
  * Creates a new OAuth2 client instance with the configured credentials.
  * Use this for initiating OAuth flows or when you don't have tokens yet.
+ *
+ * @param usePhotosRedirect - If true, use the Google Photos callback URL
  */
-export function createOAuth2Client(): OAuth2Client {
-  const { clientId, clientSecret, redirectUri } = getOAuthConfig();
+export function createOAuth2Client(usePhotosRedirect = false): OAuth2Client {
+  const { clientId, clientSecret, redirectUri } = getOAuthConfig(usePhotosRedirect);
   return new OAuth2Client(clientId, clientSecret, redirectUri);
 }
 
@@ -65,10 +73,15 @@ export function createOAuth2ClientWithTokens(tokens: Credentials): OAuth2Client 
  *
  * @param state - CSRF protection state parameter
  * @param scopes - OAuth scopes to request (defaults to CALENDAR_SCOPES)
+ * @param usePhotosRedirect - If true, use the Google Photos callback URL
  * @returns The authorization URL to redirect the user to
  */
-export function generateAuthUrl(state: string, scopes?: string[]): string {
-  const client = createOAuth2Client();
+export function generateAuthUrl(
+  state: string,
+  scopes?: string[],
+  usePhotosRedirect = false
+): string {
+  const client = createOAuth2Client(usePhotosRedirect);
 
   return client.generateAuthUrl({
     access_type: 'offline', // Get refresh token
@@ -86,17 +99,21 @@ export function generateAuthUrl(state: string, scopes?: string[]): string {
  * @returns The authorization URL for Google Photos consent
  */
 export function generatePhotosAuthUrl(state: string): string {
-  return generateAuthUrl(state, PHOTOS_SCOPES);
+  return generateAuthUrl(state, PHOTOS_SCOPES, true);
 }
 
 /**
  * Exchanges an authorization code for OAuth2 tokens.
  *
  * @param code - The authorization code from the OAuth callback
+ * @param usePhotosRedirect - If true, use the Google Photos callback URL
  * @returns The OAuth2 credentials including access_token and refresh_token
  */
-export async function exchangeCodeForTokens(code: string): Promise<Credentials> {
-  const client = createOAuth2Client();
+export async function exchangeCodeForTokens(
+  code: string,
+  usePhotosRedirect = false
+): Promise<Credentials> {
+  const client = createOAuth2Client(usePhotosRedirect);
   const { tokens } = await client.getToken(code);
   return tokens;
 }

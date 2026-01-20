@@ -58,8 +58,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Exchange authorization code for tokens
-    const tokens = await exchangeCodeForTokens(code);
+    // Exchange authorization code for tokens (use photos redirect URI)
+    const tokens = await exchangeCodeForTokens(code, true);
 
     if (!tokens.refresh_token) {
       console.error('No refresh token received from Google');

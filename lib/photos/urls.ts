@@ -82,28 +82,3 @@ export function getDisplayUrl(storagePath: string): string {
 export function getFullUrl(storagePath: string): string {
   return `${SUPABASE_URL}/storage/v1/object/photos/${storagePath}`;
 }
-
-/**
- * Generate signed URL for private access (if needed)
- * Note: This requires server-side execution with Supabase client
- */
-export async function getSignedUrl(
-  storagePath: string,
-  expiresIn: number = 3600
-): Promise<string | null> {
-  // This function should be called from a server context
-  // For client-side, use the transform URLs which handle auth via cookies
-  const { createClient } = await import('@/lib/supabase/server');
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.storage
-    .from('photos')
-    .createSignedUrl(storagePath, expiresIn);
-
-  if (error) {
-    console.error('Failed to create signed URL:', error);
-    return null;
-  }
-
-  return data.signedUrl;
-}
