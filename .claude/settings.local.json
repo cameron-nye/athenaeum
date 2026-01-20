@@ -26,7 +26,9 @@
       "mcp__plugin_supabase_supabase__apply_migration",
       "mcp__plugin_supabase_supabase__execute_sql",
       "Bash(npm run test:*)",
-      "Skill(frontend-design)"
+      "Skill(frontend-design)",
+      "mcp__plugin_supabase_supabase__list_projects",
+      "Bash(git push:*)"
     ]
   }
 }

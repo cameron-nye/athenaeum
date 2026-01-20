@@ -768,3 +768,285 @@ To complete manually:
 8. Test view switching (month/week/day)
 9. Test event detail modal
 10. Test manual sync button
+
+## 2026-01-20: Phase 3 Display Route - Core Infrastructure
+
+**Completed**: Database migrations, types, components, and pages for display route
+
+**Migrations created**:
+- 20260120000000_create_displays.sql: displays table with auth_token, settings JSONB
+- 20260120000100_displays_rls.sql: RLS policies + get_display_household_id() function
+- 20260120000200_display_events_rls.sql: Allow displays to read household events
+
+**Types/utilities created**:
+- lib/display/types.ts: DisplaySettings interface, parseDisplaySettings, token generation
+- lib/display/types.test.ts: 20 tests
+- lib/display/time-formatting.ts: formatEventTime, isEventOngoing, formatClockTime, etc
+- lib/display/time-formatting.test.ts: 22 tests
+- lib/supabase/display.ts: createDisplayServerClient, createDisplayBrowserClient
+
+**Components created** (components/display/):
+- RealtimeProvider.tsx: Supabase realtime with exponential backoff reconnection
+- DisplayContext.tsx: React context for display state management
+- Clock.tsx: Large clock with 12/24h support
+- DateTimeHeader.tsx: Header combining clock and household name
+- TodayEvents.tsx: Animated list of today's events
+- UpcomingEvents.tsx: Sidebar with 7-day lookahead
+- Calendar.tsx: Main calendar display composition
+- LoadingSkeleton.tsx: Shimmer loading state
+- ErrorState.tsx: Error display with auto-retry
+- OfflineIndicator.tsx: Network status indicator
+
+**Pages created**:
+- app/(display)/layout.tsx: Full-screen display layout (REQ-3-001)
+- app/(display)/setup/page.tsx: Token validation and pairing (REQ-3-004)
+- app/(display)/[displayId]/page.tsx: Server component for display data (REQ-3-005)
+- app/(display)/[displayId]/DisplayClient.tsx: Client wrapper with realtime (REQ-3-005)
+- app/(dashboard)/settings/displays/page.tsx: Display registration UI (REQ-3-003)
+
+**API routes created**:
+- app/api/displays/validate/route.ts: Validate display token
+- app/api/displays/heartbeat/route.ts: Update last_seen_at (REQ-3-029)
+
+**CSS additions** (globals.css):
+- Display typography scale (.display-time, .display-date, .display-heading, etc)
+- Theme transitions (500ms ease-in-out)
+- Skeleton shimmer animation
+- Ambient gradient animation (30s cycle)
+- Burn-in prevention shift (180s cycle)
+- Display grid layout
+
+**Requirements completed**:
+- REQ-3-001: Display route layout
+- REQ-3-003: Display registration page
+- REQ-3-004: Display setup/pairing
+- REQ-3-005: Main display page
+- REQ-3-006: Display calendar component
+- REQ-3-007: Clock component
+- REQ-3-008: Realtime provider
+- REQ-3-009: Display data context
+- REQ-3-010: Real-time event updates (via RealtimeProvider)
+- REQ-3-011: Display settings schema
+- REQ-3-017: Loading skeleton
+- REQ-3-018: Error state
+- REQ-3-019: Offline indicator
+- REQ-3-020: Burn-in prevention CSS
+- REQ-3-021: Date/time header
+- REQ-3-022: Today's events list
+- REQ-3-023: Upcoming events sidebar
+- REQ-3-024: Event time formatting
+- REQ-3-025: Display grid layout
+- REQ-3-026: Display typography scale
+- REQ-3-027: RLS policy for display access
+- REQ-3-028: Supabase client for display
+- REQ-3-029: Heartbeat mechanism
+- REQ-3-033: Graceful reconnection (in RealtimeProvider)
+- REQ-3-035: Ambient background animation
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (1 warning in existing code)
+
+## 2026-01-20: REQ-3-002 - Display device authentication
+
+**Completed**: Page-level token authentication in [displayId]/page.tsx
+
+**Notes**:
+- Token validation implemented at page level rather than middleware
+- All acceptance criteria satisfied:
+  - Checks display_token cookie
+  - Validates against displays.auth_token
+  - Returns notFound() if invalid/missing
+  - Updates last_seen_at on each request
+  - Fetches household data
+
+**Files**: app/(display)/[displayId]/page.tsx (already exists)
+
+## 2026-01-20: REQ-3-012 - Display settings editor page
+
+**Completed**: Created display settings editor UI
+
+**Features**:
+- Page at app/(dashboard)/settings/displays/[id]/page.tsx
+- Edit display name
+- Theme selector (light/dark/auto)
+- Layout selector (calendar/agenda/split)
+- Widget toggles (clock, upcoming events, weather placeholder)
+- Time format selector (12h/24h)
+- Scheduled reload time picker
+- Visual effects toggles (burn-in prevention, ambient animation)
+- Save button with loading state
+- Success/error feedback
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-030 - QR code generator for display setup
+
+**Completed**: Added QR code modal to displays page
+
+**Features**:
+- Installed qrcode.react library
+- QR code button next to copy URL button
+- Modal with QR code and setup URL
+- Instructions for scanning with phone
+- Animated modal open/close
+
+**Files changed**:
+- package.json (added qrcode.react)
+- app/(dashboard)/settings/displays/page.tsx (added QR code modal)
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-031 - Token regeneration/invalidation
+
+**Completed**: Added token regeneration feature to display settings page
+
+**Features**:
+- Security section showing current setup URL
+- Copy URL button
+- Regenerate Token button
+- Confirmation modal warning about disconnection
+- Immediate token update in database
+- Display shows new setup URL after regeneration
+- Success message with instructions
+
+**Files changed**:
+- app/(dashboard)/settings/displays/[id]/page.tsx (added security section)
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-013 - Theme support with smooth transitions
+
+**Completed**: Added theme application from settings with CSS transitions
+
+**Features**:
+- useTheme hook in DisplayClient
+- Applies theme class to document.documentElement
+- Handles 'auto' by detecting system preference via matchMedia
+- Listens for system preference changes when in auto mode
+- CSS transitions already defined (500ms ease-in-out)
+- Works with Tailwind dark mode classes
+
+**Files changed**:
+- app/(display)/[displayId]/DisplayClient.tsx (added useTheme hook)
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-014 + REQ-3-015 - Pi kiosk and watchdog scripts
+
+**Completed**: Created Raspberry Pi deployment scripts
+
+**scripts/pi-setup.sh features**:
+- Takes display URL as argument
+- Installs chromium-browser, unclutter, xdotool
+- Disables screen blanking via xorg.conf
+- Creates kiosk.sh launcher script with Chromium flags
+- Configures autostart via .desktop file
+- Sets up auto-login and startx
+- Configures cron for watchdog (5-min) and daily reboot (3:30 AM)
+- Includes troubleshooting tips
+
+**scripts/pi-watchdog.sh features**:
+- Checks if Chromium process is running
+- Checks if Chromium window exists (xdotool)
+- Monitors memory usage (restarts if >1.5GB)
+- Logs all restart events with timestamps
+- Log rotation when >1MB
+- Designed for cron execution
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+- Scripts are executable
+
+## 2026-01-20: REQ-3-034 - Pi installation documentation
+
+**Completed**: Created comprehensive Raspberry Pi setup guide
+
+**File**: docs/raspberry-pi-setup.md
+
+**Contents**:
+- Hardware requirements (Pi 4 recommended, SD card, HDMI)
+- Software requirements (Raspberry Pi OS, Chromium)
+- Quick setup (3-step process using setup script)
+- Manual setup alternative
+- Troubleshooting section (black screen, invalid token, crashes, WiFi)
+- Maintenance section (logs, updates, settings)
+- Advanced config (resolution, portrait mode, multiple displays)
+- Security notes
+
+## 2026-01-20: REQ-3-032 - Debug overlay
+
+**Completed**: Created hidden debug overlay for troubleshooting
+
+**Features**:
+- Toggle with Ctrl+D / Cmd+D
+- Shows realtime connection status (connecting/connected/reconnecting/error)
+- Shows display ID and household ID
+- Shows last sync time and data counts (events, calendars)
+- Shows memory usage (Chrome only, via performance.memory)
+- Dismissible with Escape or Ctrl+D
+- Semi-transparent dark panel in bottom-right corner
+
+**Files created**:
+- components/display/DebugOverlay.tsx
+
+**Files modified**:
+- app/(display)/[displayId]/DisplayClient.tsx (added DebugOverlay integration)
+
+**Verification**:
+- typecheck: pass
+- lint: pass (1 pre-existing warning)
+
+## 2026-01-20: Build Fix - Split display Supabase client for client/server separation
+
+**Completed**: Fixed Next.js build error caused by mixing server-only imports in a file used by both client and server components
+
+**Changes**:
+- Split lib/supabase/display.ts into 3 files:
+  - lib/supabase/display-constants.ts: Shared constants (DISPLAY_TOKEN_COOKIE, DISPLAY_TOKEN_HEADER)
+  - lib/supabase/display-server.ts: Server-only functions with 'server-only' import
+  - lib/supabase/display-client.ts: Client-side functions with 'use client' directive
+
+**Files created**:
+- lib/supabase/display-constants.ts
+- lib/supabase/display-server.ts
+- lib/supabase/display-client.ts
+
+**Files modified**:
+- components/display/RealtimeProvider.tsx (import from display-client)
+- app/(display)/[displayId]/page.tsx (import from display-constants)
+- app/(display)/setup/page.tsx (import from display-constants)
+- app/api/displays/heartbeat/route.ts (import from display-constants)
+
+**Files deleted**:
+- lib/supabase/display.ts
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (1 pre-existing warning)
+- build: pass
+
+## Phase 3 Status Summary
+
+**All automated requirements completed (35/36)**
+
+**Remaining: REQ-3-036 - Manual verification of complete display functionality**
+
+This requirement cannot be completed automatically as it requires:
+- Running npm run dev
+- Manually registering a display in the dashboard
+- Opening the setup URL in a browser (or Raspberry Pi)
+- Verifying calendar data displays correctly
+- Testing real-time updates
+- Verifying animations and theme transitions
