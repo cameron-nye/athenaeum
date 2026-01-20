@@ -353,7 +353,7 @@
         "Can delete single assignment",
         "Deleting recurring asks about future occurrences"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-027",

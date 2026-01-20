@@ -1395,3 +1395,35 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (352 tests)
 - lint: pass (1 pre-existing warning)
+## 2026-01-20: REQ-5-026 - Create chore assignment edit
+
+**Completed**: Full edit/delete functionality for assignments with recurring handling
+
+**Features**:
+- Edit button (⋮ menu) on each pending assignment card
+- AssignmentEditModal with:
+  - Assignee dropdown (all household members)
+  - Due date picker
+  - Recurrence selector (reuses RecurrenceSelector component)
+  - PATCH to /api/chores/assignments/[id]
+- DeleteAssignmentDialog with:
+  - Single assignment deletion
+  - Recurring assignment handling:
+    - "Only this assignment" option
+    - "This and all future occurrences" option
+  - delete_future=true query param clears recurrence before delete
+- API updated: DELETE /api/chores/assignments/[id] handles delete_future param
+- Edit menu only shown for pending (not completed) assignments
+
+**Files created**:
+- app/(dashboard)/chores/[id]/page.test.tsx (10 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/[id]/page.tsx (AssignmentEditModal, DeleteAssignmentDialog, AssignmentCard edit menu)
+- app/api/chores/assignments/[id]/route.ts (DELETE delete_future handling)
+- docs/prd.json (marked REQ-5-026 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (362 tests)
+- lint: pass (warnings only in test mocks)

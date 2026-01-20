@@ -6,7 +6,7 @@
  * REQ-5-010: Create chore delete functionality
  */
 
-import { useState, useCallback, use, useMemo } from 'react';
+import { useState, useCallback, use, useMemo, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
@@ -20,6 +20,9 @@ import {
   Award,
   RefreshCw,
   AlertTriangle,
+  MoreHorizontal,
+  Calendar,
+  User,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { parseRRuleToText } from '@/lib/chores/recurrence';
@@ -106,6 +109,9 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  // REQ-5-026: Assignment edit state
+  const [editingAssignment, setEditingAssignment] = useState<ChoreAssignment | null>(null);
+  const [deletingAssignment, setDeletingAssignment] = useState<ChoreAssignment | null>(null);
 
   const { data, error, isLoading, mutate } = useSWR<ChoreDetailData>(`/api/chores/${id}`, fetcher);
 
@@ -296,6 +302,8 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
                   assignment={assignment}
                   onToggleComplete={handleToggleComplete}
                   onClaim={handleClaim}
+                  onEdit={setEditingAssignment}
+                  onDelete={setDeletingAssignment}
                 />
               ))}
             </div>
@@ -366,6 +374,34 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ id: stri
           />
         )}
       </AnimatePresence>
+
+      {/* REQ-5-026: Assignment Edit Modal */}
+      <AnimatePresence>
+        {editingAssignment && (
+          <AssignmentEditModal
+            assignment={editingAssignment}
+            onClose={() => setEditingAssignment(null)}
+            onSaved={() => {
+              setEditingAssignment(null);
+              mutate();
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* REQ-5-026: Assignment Delete Dialog */}
+      <AnimatePresence>
+        {deletingAssignment && (
+          <DeleteAssignmentDialog
+            assignment={deletingAssignment}
+            onClose={() => setDeletingAssignment(null)}
+            onDeleted={() => {
+              setDeletingAssignment(null);
+              mutate();
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -374,14 +410,32 @@ function AssignmentCard({
   assignment,
   onToggleComplete,
   onClaim,
+  onEdit,
+  onDelete,
 }: {
   assignment: ChoreAssignment;
   onToggleComplete: (id: string, complete: boolean) => void;
   onClaim?: (id: string) => void;
+  onEdit?: (assignment: ChoreAssignment) => void;
+  onDelete?: (assignment: ChoreAssignment) => void;
 }) {
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
   const isComplete = !!assignment.completed_at;
   const overdueStatus = !isComplete && isOverdue(assignment.due_date);
   const isUnassigned = !assignment.users && !assignment.assigned_to;
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   return (
     <motion.div
@@ -460,6 +514,64 @@ function AssignmentCard({
         >
           Claim
         </button>
+      )}
+
+      {/* Edit/Delete menu */}
+      {!isComplete && onEdit && onDelete && (
+        <div className="relative" ref={menuRef}>
+          <button
+            onClick={() => setShowMenu(!showMenu)}
+            className={cn(
+              'rounded-lg p-1.5 transition-colors',
+              'text-gray-400 hover:bg-gray-100 hover:text-gray-600',
+              'dark:hover:bg-gray-700 dark:hover:text-gray-300'
+            )}
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: -5 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: -5 }}
+                transition={{ duration: 0.1 }}
+                className={cn(
+                  'absolute top-full right-0 z-10 mt-1 w-36 rounded-lg border py-1 shadow-lg',
+                  'border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800'
+                )}
+              >
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onEdit(assignment);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-2 px-3 py-1.5 text-sm',
+                    'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                  )}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                  Edit
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMenu(false);
+                    onDelete(assignment);
+                  }}
+                  className={cn(
+                    'flex w-full items-center gap-2 px-3 py-1.5 text-sm',
+                    'text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
+                  )}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       )}
     </motion.div>
   );
@@ -854,6 +966,300 @@ function AssignModal({
             </button>
           </div>
         </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/**
+ * AssignmentEditModal - Edit an existing assignment
+ * REQ-5-026: Create chore assignment edit
+ */
+function AssignmentEditModal({
+  assignment,
+  onClose,
+  onSaved,
+}: {
+  assignment: ChoreAssignment;
+  onClose: () => void;
+  onSaved: () => void;
+}) {
+  const [assignedTo, setAssignedTo] = useState<string>(assignment.assigned_to || '');
+  const [dueDate, setDueDate] = useState(assignment.due_date);
+  const [recurrenceRule, setRecurrenceRule] = useState<string | null>(assignment.recurrence_rule);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { data: membersData } = useSWR<{
+    members: HouseholdMember[];
+    current_user_id: string;
+  }>('/api/household/members', fetcher);
+
+  const members = membersData?.members ?? [];
+
+  // Parse dueDate string into Date for RecurrenceSelector
+  const startDate = useMemo(() => {
+    const parsed = new Date(dueDate + 'T00:00:00');
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  }, [dueDate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!dueDate) {
+      setError('Due date is required');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/chores/assignments/${assignment.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assigned_to: assignedTo || null,
+          due_date: dueDate,
+          recurrence_rule: recurrenceRule,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update assignment');
+      }
+
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 20 }}
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">
+          Edit Assignment
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Assignee */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <User className="mr-1 inline h-4 w-4" />
+              Assign to
+            </label>
+            <select
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+              className={cn(
+                'w-full rounded-xl border bg-white px-4 py-2.5 dark:bg-gray-900',
+                'border-gray-200 dark:border-gray-700',
+                'focus:border-transparent focus:ring-2 focus:ring-indigo-500',
+                'text-gray-900 dark:text-white'
+              )}
+            >
+              <option value="">Anyone (Unassigned)</option>
+              {members.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.display_name || m.email || 'Unknown'}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Due date */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+              <Calendar className="mr-1 inline h-4 w-4" />
+              Due Date *
+            </label>
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className={cn(
+                'w-full rounded-xl border bg-white px-4 py-2.5 dark:bg-gray-900',
+                'border-gray-200 dark:border-gray-700',
+                'focus:border-transparent focus:ring-2 focus:ring-indigo-500',
+                'text-gray-900 dark:text-white'
+              )}
+            />
+          </div>
+
+          {/* Recurrence */}
+          <RecurrenceSelector
+            value={recurrenceRule}
+            startDate={startDate}
+            onChange={setRecurrenceRule}
+          />
+
+          {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
+
+          <div className="flex justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2',
+                'bg-gradient-to-r from-indigo-500 to-purple-500',
+                'hover:from-indigo-600 hover:to-purple-600',
+                'font-medium text-white',
+                'disabled:cursor-not-allowed disabled:opacity-50'
+              )}
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+/**
+ * DeleteAssignmentDialog - Confirm deletion with recurring handling
+ * REQ-5-026: Deleting recurring asks about future occurrences
+ */
+function DeleteAssignmentDialog({
+  assignment,
+  onClose,
+  onDeleted,
+}: {
+  assignment: ChoreAssignment;
+  onClose: () => void;
+  onDeleted: () => void;
+}) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteScope, setDeleteScope] = useState<'single' | 'all'>('single');
+  const isRecurring = !!assignment.recurrence_rule;
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+
+    try {
+      // If deleting all, clear the recurrence_rule from the assignment before deleting
+      // so the auto-creation of next occurrence doesn't happen
+      const url =
+        deleteScope === 'all' && isRecurring
+          ? `/api/chores/assignments/${assignment.id}?delete_future=true`
+          : `/api/chores/assignments/${assignment.id}`;
+
+      const res = await fetch(url, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete');
+      onDeleted();
+    } catch {
+      alert('Failed to delete assignment');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 20 }}
+        className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+            <AlertTriangle className="h-5 w-5 text-red-500" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Delete Assignment?
+          </h3>
+        </div>
+
+        {isRecurring ? (
+          <>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">
+              This is a recurring assignment. What would you like to delete?
+            </p>
+            <div className="mb-6 space-y-2">
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="deleteScope"
+                  checked={deleteScope === 'single'}
+                  onChange={() => setDeleteScope('single')}
+                  className="text-indigo-500 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Only this assignment
+                </span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="deleteScope"
+                  checked={deleteScope === 'all'}
+                  onChange={() => setDeleteScope('all')}
+                  className="text-indigo-500 focus:ring-indigo-500"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  This and all future occurrences
+                </span>
+              </label>
+            </div>
+          </>
+        ) : (
+          <p className="mb-6 text-gray-600 dark:text-gray-400">
+            This will delete this assignment. This cannot be undone.
+          </p>
+        )}
+
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="rounded-xl px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className={cn(
+              'flex items-center gap-2 rounded-xl px-4 py-2 font-medium',
+              'bg-red-500 text-white hover:bg-red-600',
+              'disabled:cursor-not-allowed disabled:opacity-50'
+            )}
+          >
+            {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
+            Delete
+          </button>
+        </div>
       </motion.div>
     </motion.div>
   );

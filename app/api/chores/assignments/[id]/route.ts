@@ -231,6 +231,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
  * DELETE /api/chores/assignments/[id]
  *
  * Deletes an assignment.
+ * REQ-5-026: Query param ?delete_future=true clears recurrence to prevent future occurrences
  */
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   const { id } = await params;
@@ -246,6 +247,15 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   }
 
   try {
+    // Check if we should prevent future occurrences (for recurring assignments)
+    const deleteFuture = request.nextUrl.searchParams.get('delete_future') === 'true';
+
+    if (deleteFuture) {
+      // First, clear the recurrence_rule to prevent auto-creation of next occurrence
+      // This handles the case where the assignment might be completed and then deleted
+      await supabase.from('chore_assignments').update({ recurrence_rule: null }).eq('id', id);
+    }
+
     // RLS handles household check via chores table
     const { error: deleteError } = await supabase.from('chore_assignments').delete().eq('id', id);
 
