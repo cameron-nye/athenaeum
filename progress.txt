@@ -1307,3 +1307,22 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (10 warnings, all pre-existing)
+
+## 2026-01-20: REQ-4-032 - EXIF orientation handling
+
+**Completed**: Image dimensions now account for EXIF orientation
+
+**Changes**:
+- Added extractExifOrientation() function to read orientation tag (0x0112)
+- Updated getImageDimensions() to swap width/height for orientations 5-8
+- Orientations 5-8 indicate 90/270 degree rotation, requiring dimension swap
+- Supabase image transforms automatically handle orientation for display
+
+**Files created/modified**:
+- lib/photos/image-utils.ts (added orientation extraction, updated dimensions)
+- lib/photos/image-utils.test.ts (new, 8 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (248 tests)
+- lint: pass (10 warnings, all pre-existing)

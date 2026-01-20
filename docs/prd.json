@@ -938,7 +938,7 @@
         "Supabase transforms handle orientation",
         "Thumbnails and full-size both correct"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-033",
