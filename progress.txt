@@ -1117,3 +1117,30 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (273 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-007 to REQ-5-011, REQ-5-015, REQ-5-022, REQ-5-024, REQ-5-030 - Chores UI
+
+**Completed**: Full chores management UI with dashboard and detail pages
+
+**Pages created**:
+- app/(dashboard)/chores/page.tsx: Main chores list with add button, empty state
+- app/(dashboard)/chores/[id]/page.tsx: Chore detail with edit, delete, assignments
+
+**Features**:
+- Chores list with icon, title, points, next assignment info
+- Chore cards show overdue status with red left border
+- Create chore modal (title, description, emoji icon, points)
+- Edit chore modal with pre-filled data
+- Delete with confirmation dialog (cascade deletes assignments)
+- Assignment creation with assignee dropdown, due date, recurrence type
+- Assignment completion toggle (checkbox)
+- Recurring auto-creation on completion (via API)
+- Empty state with suggestions and CTA
+- Framer Motion animations throughout
+
+**Requirements completed**: 5-007, 5-008, 5-009, 5-010, 5-011, 5-015, 5-022, 5-024, 5-030
+
+**Verification**:
+- typecheck: pass
+- test: pass (273 tests)
+- lint: pass (1 pre-existing warning)

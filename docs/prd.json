@@ -98,7 +98,7 @@
         "Click chore to view/edit",
         "Empty state when no chores"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-008",
@@ -114,7 +114,7 @@
         "Shows validation errors",
         "Success redirects or closes modal"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-009",
@@ -128,7 +128,7 @@
         "Cancel returns without saving",
         "Delete option available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-010",
@@ -141,7 +141,7 @@
         "Shows success message",
         "Redirects to chores list"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-011",
@@ -155,7 +155,7 @@
         "Submit creates chore_assignment record",
         "Shows validation errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-012",
@@ -210,7 +210,7 @@
         "Visual distinction for completed",
         "Points awarded on completion (future)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-016",
@@ -301,7 +301,7 @@
         "Overdue count shown in navigation",
         "Overdue shown first in lists"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-023",
@@ -327,7 +327,7 @@
         "Same assignee by default",
         "Or rotate through family members (future)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-025",
@@ -401,7 +401,7 @@
         "Button to create first chore",
         "Styled consistently with app"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-031",
