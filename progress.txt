@@ -768,3 +768,82 @@ To complete manually:
 8. Test view switching (month/week/day)
 9. Test event detail modal
 10. Test manual sync button
+
+## 2026-01-20: Phase 3 Display Route - Core Infrastructure
+
+**Completed**: Database migrations, types, components, and pages for display route
+
+**Migrations created**:
+- 20260120000000_create_displays.sql: displays table with auth_token, settings JSONB
+- 20260120000100_displays_rls.sql: RLS policies + get_display_household_id() function
+- 20260120000200_display_events_rls.sql: Allow displays to read household events
+
+**Types/utilities created**:
+- lib/display/types.ts: DisplaySettings interface, parseDisplaySettings, token generation
+- lib/display/types.test.ts: 20 tests
+- lib/display/time-formatting.ts: formatEventTime, isEventOngoing, formatClockTime, etc
+- lib/display/time-formatting.test.ts: 22 tests
+- lib/supabase/display.ts: createDisplayServerClient, createDisplayBrowserClient
+
+**Components created** (components/display/):
+- RealtimeProvider.tsx: Supabase realtime with exponential backoff reconnection
+- DisplayContext.tsx: React context for display state management
+- Clock.tsx: Large clock with 12/24h support
+- DateTimeHeader.tsx: Header combining clock and household name
+- TodayEvents.tsx: Animated list of today's events
+- UpcomingEvents.tsx: Sidebar with 7-day lookahead
+- Calendar.tsx: Main calendar display composition
+- LoadingSkeleton.tsx: Shimmer loading state
+- ErrorState.tsx: Error display with auto-retry
+- OfflineIndicator.tsx: Network status indicator
+
+**Pages created**:
+- app/(display)/layout.tsx: Full-screen display layout (REQ-3-001)
+- app/(display)/setup/page.tsx: Token validation and pairing (REQ-3-004)
+- app/(display)/[displayId]/page.tsx: Server component for display data (REQ-3-005)
+- app/(display)/[displayId]/DisplayClient.tsx: Client wrapper with realtime (REQ-3-005)
+- app/(dashboard)/settings/displays/page.tsx: Display registration UI (REQ-3-003)
+
+**API routes created**:
+- app/api/displays/validate/route.ts: Validate display token
+- app/api/displays/heartbeat/route.ts: Update last_seen_at (REQ-3-029)
+
+**CSS additions** (globals.css):
+- Display typography scale (.display-time, .display-date, .display-heading, etc)
+- Theme transitions (500ms ease-in-out)
+- Skeleton shimmer animation
+- Ambient gradient animation (30s cycle)
+- Burn-in prevention shift (180s cycle)
+- Display grid layout
+
+**Requirements completed**:
+- REQ-3-001: Display route layout
+- REQ-3-003: Display registration page
+- REQ-3-004: Display setup/pairing
+- REQ-3-005: Main display page
+- REQ-3-006: Display calendar component
+- REQ-3-007: Clock component
+- REQ-3-008: Realtime provider
+- REQ-3-009: Display data context
+- REQ-3-010: Real-time event updates (via RealtimeProvider)
+- REQ-3-011: Display settings schema
+- REQ-3-017: Loading skeleton
+- REQ-3-018: Error state
+- REQ-3-019: Offline indicator
+- REQ-3-020: Burn-in prevention CSS
+- REQ-3-021: Date/time header
+- REQ-3-022: Today's events list
+- REQ-3-023: Upcoming events sidebar
+- REQ-3-024: Event time formatting
+- REQ-3-025: Display grid layout
+- REQ-3-026: Display typography scale
+- REQ-3-027: RLS policy for display access
+- REQ-3-028: Supabase client for display
+- REQ-3-029: Heartbeat mechanism
+- REQ-3-033: Graceful reconnection (in RealtimeProvider)
+- REQ-3-035: Ambient background animation
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (1 warning in existing code)
