@@ -83,6 +83,16 @@ async function getDisplayData(displayId: string, token: string) {
     events = eventsData || [];
   }
 
+  // Get enabled photos for the household (for slideshow)
+  const { data: photosData } = await supabase
+    .from('photos')
+    .select('id, storage_path, filename, taken_at, album, enabled')
+    .eq('household_id', display.household_id)
+    .eq('enabled', true)
+    .order('taken_at', { ascending: false, nullsFirst: false });
+
+  const photos = photosData || [];
+
   // Update last_seen_at
   await supabase
     .from('displays')
@@ -98,6 +108,7 @@ async function getDisplayData(displayId: string, token: string) {
     household: household || { id: display.household_id, name: 'Home' },
     calendarSources: calendarSources || [],
     events,
+    photos,
   };
 }
 
@@ -121,6 +132,7 @@ export default async function DisplayPage({ params }: DisplayPageProps) {
       displayId={data.display.id}
       initialEvents={data.events}
       initialCalendarSources={data.calendarSources}
+      initialPhotos={data.photos}
       initialSettings={data.display.settings}
       householdId={data.household.id}
       householdName={data.household.name}

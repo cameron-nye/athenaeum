@@ -244,7 +244,7 @@
         "Transition between modes is seamless",
         "No jarring visual changes during mode switch"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-018",
@@ -255,7 +255,7 @@
         "Setting in dashboard for default mode",
         "Can set to always calendar, always photos, or auto"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-019",

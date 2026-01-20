@@ -13,7 +13,7 @@ import { useEffect, useCallback, useRef, useState } from 'react';
 import type { DisplayTheme } from '@/lib/display/types';
 import { DisplayProvider, useDisplayContext } from '@/components/display/DisplayContext';
 import { RealtimeProvider } from '@/components/display/RealtimeProvider';
-import { DisplayCalendar } from '@/components/display/Calendar';
+import { DisplayModeController } from '@/components/display/DisplayModeController';
 import { LoadingSkeleton } from '@/components/display/LoadingSkeleton';
 import { ErrorState } from '@/components/display/ErrorState';
 import { OfflineIndicator } from '@/components/display/OfflineIndicator';
@@ -39,6 +39,14 @@ interface DisplayClientProps {
     name: string;
     color: string | null;
     provider: string;
+    enabled: boolean;
+  }>;
+  initialPhotos: Array<{
+    id: string;
+    storage_path: string;
+    filename: string;
+    taken_at: string | null;
+    album: string | null;
     enabled: boolean;
   }>;
   initialSettings: DisplaySettings;
@@ -189,9 +197,10 @@ function DisplayContent({
       onStatusChange={setRealtimeStatus}
       onError={(err) => setError(err.message)}
     >
-      <DisplayCalendar
+      <DisplayModeController
         events={state.events}
         calendarSources={state.calendarSources}
+        photos={state.photos}
         settings={state.settings}
         householdName={householdName}
       />
@@ -212,27 +221,32 @@ function DisplayContent({
 function DisplayInitializer({
   initialEvents,
   initialCalendarSources,
+  initialPhotos,
   initialSettings,
   children,
 }: {
   initialEvents: DisplayClientProps['initialEvents'];
   initialCalendarSources: DisplayClientProps['initialCalendarSources'];
+  initialPhotos: DisplayClientProps['initialPhotos'];
   initialSettings: DisplaySettings;
   children: React.ReactNode;
 }) {
-  const { setEvents, setCalendarSources, setSettings, setLoading } = useDisplayContext();
+  const { setEvents, setCalendarSources, setPhotos, setSettings, setLoading } = useDisplayContext();
 
   useEffect(() => {
     setEvents(initialEvents);
     setCalendarSources(initialCalendarSources);
+    setPhotos(initialPhotos);
     setSettings(initialSettings);
     setLoading(false);
   }, [
     initialEvents,
     initialCalendarSources,
+    initialPhotos,
     initialSettings,
     setEvents,
     setCalendarSources,
+    setPhotos,
     setSettings,
     setLoading,
   ]);
@@ -244,6 +258,7 @@ export function DisplayClient({
   displayId,
   initialEvents,
   initialCalendarSources,
+  initialPhotos,
   initialSettings,
   householdId,
   householdName,
@@ -253,6 +268,7 @@ export function DisplayClient({
       <DisplayInitializer
         initialEvents={initialEvents}
         initialCalendarSources={initialCalendarSources}
+        initialPhotos={initialPhotos}
         initialSettings={initialSettings}
       >
         <DisplayContent

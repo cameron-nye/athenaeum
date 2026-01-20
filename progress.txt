@@ -1151,3 +1151,28 @@ This requirement cannot be completed automatically as it requires:
 **Verification**:
 - typecheck: pass
 - lint: pass (5 warnings, pre-existing)
+
+## 2026-01-20: REQ-4-017 + REQ-4-018 - Display mode controller
+
+**Completed**: Idle detection and slideshow mode toggle
+
+**Features**:
+- DisplayModeController component wraps calendar/slideshow
+- Auto mode: switches to photos when no events in next 2 hours
+- Manual mode toggle via Ctrl+P / Cmd+P keyboard shortcut
+- displayMode setting: 'calendar', 'photos', or 'auto'
+- Smooth 800ms crossfade transitions between modes
+- Falls back to calendar if no enabled photos
+- Photos fetched server-side and passed to DisplayClient
+
+**Files created**:
+- components/display/DisplayModeController.tsx
+
+**Files modified**:
+- app/(display)/[displayId]/page.tsx (fetch photos)
+- app/(display)/[displayId]/DisplayClient.tsx (use DisplayModeController, add initialPhotos)
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (5 warnings, pre-existing)
