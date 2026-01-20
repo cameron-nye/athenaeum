@@ -105,6 +105,28 @@ function DisplaysPageContent() {
     setIsCreating(true);
     setError(null);
 
+    // Get current user's household_id
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      setError('Not authenticated');
+      setIsCreating(false);
+      return;
+    }
+
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('household_id')
+      .eq('id', user.id)
+      .single();
+
+    if (userError || !userData?.household_id) {
+      setError('Could not find your household');
+      setIsCreating(false);
+      return;
+    }
+
     // Generate secure token
     const tokenArray = new Uint8Array(32);
     crypto.getRandomValues(tokenArray);
@@ -113,6 +135,7 @@ function DisplaysPageContent() {
     const { error: insertError } = await supabase.from('displays').insert({
       name: newDisplayName.trim(),
       auth_token: authToken,
+      household_id: userData.household_id,
     });
 
     setIsCreating(false);
