@@ -1006,3 +1006,47 @@ To complete manually:
 **Verification**:
 - typecheck: pass
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: Build Fix - Split display Supabase client for client/server separation
+
+**Completed**: Fixed Next.js build error caused by mixing server-only imports in a file used by both client and server components
+
+**Changes**:
+- Split lib/supabase/display.ts into 3 files:
+  - lib/supabase/display-constants.ts: Shared constants (DISPLAY_TOKEN_COOKIE, DISPLAY_TOKEN_HEADER)
+  - lib/supabase/display-server.ts: Server-only functions with 'server-only' import
+  - lib/supabase/display-client.ts: Client-side functions with 'use client' directive
+
+**Files created**:
+- lib/supabase/display-constants.ts
+- lib/supabase/display-server.ts
+- lib/supabase/display-client.ts
+
+**Files modified**:
+- components/display/RealtimeProvider.tsx (import from display-client)
+- app/(display)/[displayId]/page.tsx (import from display-constants)
+- app/(display)/setup/page.tsx (import from display-constants)
+- app/api/displays/heartbeat/route.ts (import from display-constants)
+
+**Files deleted**:
+- lib/supabase/display.ts
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (1 pre-existing warning)
+- build: pass
+
+## Phase 3 Status Summary
+
+**All automated requirements completed (35/36)**
+
+**Remaining: REQ-3-036 - Manual verification of complete display functionality**
+
+This requirement cannot be completed automatically as it requires:
+- Running npm run dev
+- Manually registering a display in the dashboard
+- Opening the setup URL in a browser (or Raspberry Pi)
+- Verifying calendar data displays correctly
+- Testing real-time updates
+- Verifying animations and theme transitions

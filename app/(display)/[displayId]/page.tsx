@@ -7,7 +7,7 @@
 import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { createAdminClient } from '@/lib/supabase/server';
-import { DISPLAY_TOKEN_COOKIE } from '@/lib/supabase/display';
+import { DISPLAY_TOKEN_COOKIE } from '@/lib/supabase/display-constants';
 import { parseDisplaySettings } from '@/lib/display/types';
 import { DisplayClient } from './DisplayClient';
 

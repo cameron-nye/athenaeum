@@ -8,7 +8,7 @@
 import { useEffect, useState, Suspense, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Monitor, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
-import { DISPLAY_TOKEN_COOKIE } from '@/lib/supabase/display';
+import { DISPLAY_TOKEN_COOKIE } from '@/lib/supabase/display-constants';
 
 type SetupStatus = 'validating' | 'success' | 'error';
 

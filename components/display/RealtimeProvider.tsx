@@ -8,7 +8,10 @@
 
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { RealtimeChannel, SupabaseClient } from '@supabase/supabase-js';
-import { createDisplayBrowserClient, getDisplayTokenFromDocument } from '@/lib/supabase/display';
+import {
+  createDisplayBrowserClient,
+  getDisplayTokenFromDocument,
+} from '@/lib/supabase/display-client';
 
 export type RealtimeStatus = 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
 
