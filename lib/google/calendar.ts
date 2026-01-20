@@ -1,0 +1,724 @@
+import { google, calendar_v3 } from 'googleapis';
+import { Credentials } from 'google-auth-library';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { randomUUID } from 'crypto';
+import { getValidOAuth2Client, TokenRevocationError } from './auth';
+import { encrypt, decrypt } from '../crypto';
+
+/**
+ * Event data mapped from Google Calendar event to our database schema
+ */
+export interface CalendarEvent {
+  calendar_source_id: string;
+  external_id: string;
+  title: string;
+  description: string | null;
+  location: string | null;
+  start_time: string;
+  end_time: string;
+  all_day: boolean;
+  recurrence_rule: string | null;
+  raw_data: calendar_v3.Schema$Event;
+}
+
+/**
+ * Error types for categorizing Google API failures.
+ */
+export type GoogleApiErrorType =
+  | 'auth' // 401 - Authentication/authorization failure
+  | 'not_found' // 404 - Calendar doesn't exist
+  | 'rate_limit' // 429 - Too many requests
+  | 'server_error' // 5xx - Google server error
+  | 'network' // Network connectivity issues
+  | 'unknown'; // Unknown error
+
+/**
+ * Result of a calendar sync operation
+ */
+export interface SyncResult {
+  success: boolean;
+  eventsUpserted: number;
+  eventsDeleted: number;
+  newSyncToken: string | null;
+  error?: string;
+  /** Categorized error type for UI handling */
+  errorType?: GoogleApiErrorType;
+  /** True if the calendar was disconnected due to token revocation */
+  disconnected?: boolean;
+  /** True if the error is retryable */
+  retryable?: boolean;
+}
+
+/**
+ * Calendar source record from database
+ */
+interface CalendarSource {
+  id: string;
+  external_id: string;
+  access_token_encrypted: string | null;
+  refresh_token_encrypted: string | null;
+  sync_token: string | null;
+}
+
+/**
+ * Maps a Google Calendar event to our database schema.
+ * Handles all-day events and time-based events differently.
+ *
+ * @param event - Google Calendar event object
+ * @param calendarSourceId - UUID of the calendar_source record
+ * @returns Mapped event data or null if event is invalid
+ */
+export function mapGoogleEventToDbEvent(
+  event: calendar_v3.Schema$Event,
+  calendarSourceId: string
+): CalendarEvent | null {
+  if (!event.id) {
+    return null;
+  }
+
+  // Skip cancelled events in initial mapping (handled separately in sync)
+  if (event.status === 'cancelled') {
+    return null;
+  }
+
+  const isAllDay = !!(event.start?.date && !event.start?.dateTime);
+
+  let startTime: string;
+  let endTime: string;
+
+  if (isAllDay) {
+    // All-day events use date only (YYYY-MM-DD)
+    // Store as midnight UTC on that date
+    startTime = new Date(event.start!.date! + 'T00:00:00Z').toISOString();
+    // End date is exclusive in Google, so we use it as-is
+    endTime = new Date(event.end!.date! + 'T00:00:00Z').toISOString();
+  } else {
+    // Time-based events use dateTime with timezone
+    if (!event.start?.dateTime || !event.end?.dateTime) {
+      return null;
+    }
+    startTime = new Date(event.start.dateTime).toISOString();
+    endTime = new Date(event.end.dateTime).toISOString();
+  }
+
+  return {
+    calendar_source_id: calendarSourceId,
+    external_id: event.id,
+    title: event.summary ?? 'Untitled Event',
+    description: event.description ?? null,
+    location: event.location ?? null,
+    start_time: startTime,
+    end_time: endTime,
+    all_day: isAllDay,
+    recurrence_rule: event.recurrence?.[0] ?? null,
+    raw_data: event,
+  };
+}
+
+/**
+ * Upserts events to the database.
+ * Uses ON CONFLICT to update existing events or insert new ones.
+ *
+ * @param supabase - Supabase client
+ * @param events - Array of events to upsert
+ * @returns Number of events successfully upserted
+ */
+export async function upsertEvents(
+  supabase: SupabaseClient,
+  events: CalendarEvent[]
+): Promise<number> {
+  if (events.length === 0) {
+    return 0;
+  }
+
+  const { error } = await supabase.from('events').upsert(events, {
+    onConflict: 'calendar_source_id,external_id',
+    ignoreDuplicates: false,
+  });
+
+  if (error) {
+    throw new Error(`Failed to upsert events: ${error.message}`);
+  }
+
+  return events.length;
+}
+
+/**
+ * Deletes cancelled events from the database.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSourceId - UUID of the calendar_source record
+ * @param externalIds - Array of event IDs to delete
+ * @returns Number of events deleted
+ */
+export async function deleteEvents(
+  supabase: SupabaseClient,
+  calendarSourceId: string,
+  externalIds: string[]
+): Promise<number> {
+  if (externalIds.length === 0) {
+    return 0;
+  }
+
+  const { error, count } = await supabase
+    .from('events')
+    .delete()
+    .eq('calendar_source_id', calendarSourceId)
+    .in('external_id', externalIds);
+
+  if (error) {
+    throw new Error(`Failed to delete events: ${error.message}`);
+  }
+
+  return count ?? externalIds.length;
+}
+
+/**
+ * Fetches events from Google Calendar API with pagination.
+ * Uses singleEvents=true to expand recurring events.
+ *
+ * @param calendarApi - Google Calendar API client
+ * @param calendarId - Google Calendar ID (external_id)
+ * @param syncToken - Optional sync token for incremental sync
+ * @param timeMin - Optional minimum time for full sync (defaults to 30 days ago)
+ * @param timeMax - Optional maximum time for full sync (defaults to 90 days ahead)
+ * @returns Object with events array and new sync token
+ */
+async function fetchGoogleEvents(
+  calendarApi: calendar_v3.Calendar,
+  calendarId: string,
+  syncToken?: string | null,
+  timeMin?: string,
+  timeMax?: string
+): Promise<{ events: calendar_v3.Schema$Event[]; nextSyncToken: string | null }> {
+  const allEvents: calendar_v3.Schema$Event[] = [];
+  let pageToken: string | undefined;
+  let nextSyncToken: string | null = null;
+
+  // Default time range for full sync: 30 days ago to 90 days ahead
+  const now = new Date();
+  const defaultTimeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const defaultTimeMax = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000).toISOString();
+
+  do {
+    const params: calendar_v3.Params$Resource$Events$List = {
+      calendarId,
+      singleEvents: true, // Expand recurring events into individual instances
+      orderBy: 'startTime',
+      maxResults: 250, // API max is 250
+      pageToken,
+    };
+
+    // Use sync token OR time range, not both
+    if (syncToken) {
+      params.syncToken = syncToken;
+    } else {
+      params.timeMin = timeMin ?? defaultTimeMin;
+      params.timeMax = timeMax ?? defaultTimeMax;
+    }
+
+    const response = await calendarApi.events.list(params);
+
+    if (response.data.items) {
+      allEvents.push(...response.data.items);
+    }
+
+    pageToken = response.data.nextPageToken ?? undefined;
+    nextSyncToken = response.data.nextSyncToken ?? null;
+  } while (pageToken);
+
+  return { events: allEvents, nextSyncToken };
+}
+
+/**
+ * Gets decrypted OAuth tokens from a calendar source.
+ *
+ * @param source - Calendar source record
+ * @returns OAuth2 Credentials object
+ */
+function getTokensFromSource(source: CalendarSource): Credentials {
+  if (!source.refresh_token_encrypted) {
+    throw new Error('Calendar source has no refresh token');
+  }
+
+  const refreshToken = decrypt(source.refresh_token_encrypted);
+  const accessToken = source.access_token_encrypted ? decrypt(source.access_token_encrypted) : null;
+
+  return {
+    refresh_token: refreshToken,
+    access_token: accessToken ?? undefined,
+  };
+}
+
+/**
+ * Updates the calendar source with new tokens after refresh.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSourceId - UUID of the calendar_source record
+ * @param tokens - New OAuth2 credentials
+ */
+async function updateCalendarSourceTokens(
+  supabase: SupabaseClient,
+  calendarSourceId: string,
+  tokens: Credentials
+): Promise<void> {
+  const updates: Record<string, string | null> = {};
+
+  if (tokens.access_token) {
+    updates.access_token_encrypted = encrypt(tokens.access_token);
+  }
+  if (tokens.refresh_token) {
+    updates.refresh_token_encrypted = encrypt(tokens.refresh_token);
+  }
+
+  if (Object.keys(updates).length > 0) {
+    const { error } = await supabase
+      .from('calendar_sources')
+      .update(updates)
+      .eq('id', calendarSourceId);
+
+    if (error) {
+      console.error('Failed to update calendar source tokens:', error);
+    }
+  }
+}
+
+/**
+ * Marks a calendar source as disconnected due to token revocation.
+ * Clears tokens and disables the calendar.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSourceId - UUID of the calendar_source record
+ */
+async function markCalendarDisconnected(
+  supabase: SupabaseClient,
+  calendarSourceId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('calendar_sources')
+    .update({
+      enabled: false,
+      access_token_encrypted: null,
+      refresh_token_encrypted: null,
+      sync_token: null,
+    })
+    .eq('id', calendarSourceId);
+
+  if (error) {
+    console.error('Failed to mark calendar as disconnected:', error);
+  } else {
+    console.log(`Calendar ${calendarSourceId} marked as disconnected due to token revocation`);
+  }
+}
+
+/**
+ * Categorizes a Google API error and determines if it's retryable.
+ *
+ * @param error - The error from the Google API
+ * @returns Object with error type, message, and retryable flag
+ */
+export function categorizeGoogleApiError(error: unknown): {
+  type: GoogleApiErrorType;
+  message: string;
+  retryable: boolean;
+} {
+  if (!(error instanceof Error)) {
+    return { type: 'unknown', message: 'Unknown error', retryable: false };
+  }
+
+  // Check for HTTP status codes from GaxiosError
+  const code = 'code' in error ? (error as { code?: number | string }).code : undefined;
+  const status = 'status' in error ? (error as { status?: number }).status : undefined;
+  const httpCode = typeof code === 'number' ? code : status;
+
+  // Check for network errors
+  if (
+    error.message.includes('ENOTFOUND') ||
+    error.message.includes('ECONNREFUSED') ||
+    error.message.includes('ETIMEDOUT') ||
+    error.message.includes('network')
+  ) {
+    return {
+      type: 'network',
+      message: 'Network error. Please check your internet connection.',
+      retryable: true,
+    };
+  }
+
+  // Categorize by HTTP status code
+  switch (httpCode) {
+    case 401:
+      return {
+        type: 'auth',
+        message: 'Authentication failed. Please reconnect your calendar.',
+        retryable: false,
+      };
+    case 403: {
+      // Could be rate limit or permissions
+      const lowerMessage = error.message.toLowerCase();
+      if (lowerMessage.includes('rate limit') || lowerMessage.includes('quota')) {
+        return {
+          type: 'rate_limit',
+          message: 'Rate limit exceeded. Please try again later.',
+          retryable: true,
+        };
+      }
+      return {
+        type: 'auth',
+        message: 'Permission denied. Please reconnect your calendar.',
+        retryable: false,
+      };
+    }
+    case 404:
+      return {
+        type: 'not_found',
+        message: 'Calendar not found. It may have been deleted.',
+        retryable: false,
+      };
+    case 429:
+      return {
+        type: 'rate_limit',
+        message: 'Too many requests. Please try again later.',
+        retryable: true,
+      };
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      return {
+        type: 'server_error',
+        message: 'Google Calendar is temporarily unavailable. Please try again later.',
+        retryable: true,
+      };
+    default:
+      return {
+        type: 'unknown',
+        message: error.message || 'An unexpected error occurred.',
+        retryable: false,
+      };
+  }
+}
+
+/**
+ * Syncs events from a Google Calendar to the database.
+ *
+ * Uses incremental sync with syncToken when available.
+ * Falls back to full sync on 410 error (expired sync token).
+ * Handles pagination for large calendars.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ * @returns Sync result with counts and status
+ */
+export async function syncCalendarEvents(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource
+): Promise<SyncResult> {
+  try {
+    const tokens = getTokensFromSource(calendarSource);
+
+    // Get valid OAuth client with automatic token refresh
+    const auth = await getValidOAuth2Client(tokens, async (newTokens) => {
+      await updateCalendarSourceTokens(supabase, calendarSource.id, newTokens);
+    });
+
+    const calendarApi = google.calendar({ version: 'v3', auth });
+
+    let events: calendar_v3.Schema$Event[];
+    let nextSyncToken: string | null;
+
+    try {
+      // Try incremental sync with sync token
+      const result = await fetchGoogleEvents(
+        calendarApi,
+        calendarSource.external_id,
+        calendarSource.sync_token
+      );
+      events = result.events;
+      nextSyncToken = result.nextSyncToken;
+    } catch (error) {
+      // Handle 410 Gone - sync token expired, do full sync
+      if (error instanceof Error && 'code' in error && (error as { code?: number }).code === 410) {
+        console.log(`Sync token expired for calendar ${calendarSource.id}, performing full sync`);
+        const result = await fetchGoogleEvents(calendarApi, calendarSource.external_id, null);
+        events = result.events;
+        nextSyncToken = result.nextSyncToken;
+      } else {
+        throw error;
+      }
+    }
+
+    // Separate events into upserts and deletes
+    const eventsToUpsert: CalendarEvent[] = [];
+    const eventIdsToDelete: string[] = [];
+
+    for (const event of events) {
+      if (event.status === 'cancelled' && event.id) {
+        eventIdsToDelete.push(event.id);
+      } else {
+        const mappedEvent = mapGoogleEventToDbEvent(event, calendarSource.id);
+        if (mappedEvent) {
+          eventsToUpsert.push(mappedEvent);
+        }
+      }
+    }
+
+    // Perform database operations
+    const eventsUpserted = await upsertEvents(supabase, eventsToUpsert);
+    const eventsDeleted = await deleteEvents(supabase, calendarSource.id, eventIdsToDelete);
+
+    // Update calendar source with new sync token and last_synced_at
+    const { error: updateError } = await supabase
+      .from('calendar_sources')
+      .update({
+        sync_token: nextSyncToken,
+        last_synced_at: new Date().toISOString(),
+      })
+      .eq('id', calendarSource.id);
+
+    if (updateError) {
+      console.error('Failed to update sync token:', updateError);
+    }
+
+    return {
+      success: true,
+      eventsUpserted,
+      eventsDeleted,
+      newSyncToken: nextSyncToken,
+    };
+  } catch (error) {
+    // Log the full error for debugging
+    console.error(`Sync failed for calendar ${calendarSource.id}:`, error);
+
+    // Check if this is a token revocation error
+    if (error instanceof TokenRevocationError) {
+      await markCalendarDisconnected(supabase, calendarSource.id);
+      return {
+        success: false,
+        eventsUpserted: 0,
+        eventsDeleted: 0,
+        newSyncToken: null,
+        error: 'Calendar disconnected: authentication expired. Please reconnect.',
+        errorType: 'auth',
+        disconnected: true,
+        retryable: false,
+      };
+    }
+
+    // Categorize the error for UI handling
+    const { type, message, retryable } = categorizeGoogleApiError(error);
+
+    // Mark calendar as disconnected for 404 errors (calendar deleted)
+    if (type === 'not_found') {
+      await markCalendarDisconnected(supabase, calendarSource.id);
+      return {
+        success: false,
+        eventsUpserted: 0,
+        eventsDeleted: 0,
+        newSyncToken: null,
+        error: message,
+        errorType: type,
+        disconnected: true,
+        retryable: false,
+      };
+    }
+
+    return {
+      success: false,
+      eventsUpserted: 0,
+      eventsDeleted: 0,
+      newSyncToken: null,
+      error: message,
+      errorType: type,
+      retryable,
+    };
+  }
+}
+
+/**
+ * Result of a webhook registration operation.
+ */
+export interface WebhookRegistrationResult {
+  success: boolean;
+  channelId?: string;
+  resourceId?: string;
+  expiration?: Date;
+  error?: string;
+}
+
+/**
+ * Registers a webhook channel for a calendar to receive push notifications.
+ * The channel will expire after 7 days and needs to be renewed.
+ *
+ * REQ-2-029: Create webhook registration function
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ * @param webhookUrl - URL where Google will send notifications
+ * @returns Registration result with channel details
+ */
+export async function registerWebhookChannel(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource,
+  webhookUrl: string
+): Promise<WebhookRegistrationResult> {
+  try {
+    const tokens = getTokensFromSource(calendarSource);
+
+    // Get valid OAuth client
+    const auth = await getValidOAuth2Client(tokens, async (newTokens) => {
+      await updateCalendarSourceTokens(supabase, calendarSource.id, newTokens);
+    });
+
+    const calendarApi = google.calendar({ version: 'v3', auth });
+
+    // Generate a unique channel ID
+    const channelId = randomUUID();
+
+    // Calculate expiration (7 days from now, which is Google's max)
+    const expirationMs = Date.now() + 7 * 24 * 60 * 60 * 1000;
+
+    // Create the watch on the calendar
+    const response = await calendarApi.events.watch({
+      calendarId: calendarSource.external_id,
+      requestBody: {
+        id: channelId,
+        type: 'web_hook',
+        address: webhookUrl,
+        expiration: String(expirationMs),
+      },
+    });
+
+    const resourceId = response.data.resourceId;
+    const expiration = response.data.expiration
+      ? new Date(parseInt(response.data.expiration, 10))
+      : new Date(expirationMs);
+
+    if (!resourceId) {
+      throw new Error('No resource ID returned from Google');
+    }
+
+    // Store the channel in the database
+    const { error: dbError } = await supabase.from('webhook_channels').insert({
+      calendar_source_id: calendarSource.id,
+      channel_id: channelId,
+      resource_id: resourceId,
+      expiration: expiration.toISOString(),
+    });
+
+    if (dbError) {
+      // Try to stop the channel since we couldn't store it
+      console.error('Failed to store webhook channel:', dbError);
+      try {
+        await calendarApi.channels.stop({
+          requestBody: { id: channelId, resourceId },
+        });
+      } catch {
+        // Ignore errors when stopping
+      }
+      throw new Error(`Failed to store webhook channel: ${dbError.message}`);
+    }
+
+    console.log(
+      `Webhook registered: calendar=${calendarSource.id}, channel=${channelId}, expires=${expiration.toISOString()}`
+    );
+
+    return {
+      success: true,
+      channelId,
+      resourceId,
+      expiration,
+    };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`Webhook registration failed for calendar ${calendarSource.id}:`, errorMessage);
+    return {
+      success: false,
+      error: errorMessage,
+    };
+  }
+}
+
+/**
+ * Stops a webhook channel and removes it from the database.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ * @param channelId - The channel ID to stop
+ * @param resourceId - The resource ID from Google
+ * @returns True if successful
+ */
+export async function stopWebhookChannel(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource,
+  channelId: string,
+  resourceId: string
+): Promise<boolean> {
+  try {
+    const tokens = getTokensFromSource(calendarSource);
+
+    const auth = await getValidOAuth2Client(tokens, async (newTokens) => {
+      await updateCalendarSourceTokens(supabase, calendarSource.id, newTokens);
+    });
+
+    const calendarApi = google.calendar({ version: 'v3', auth });
+
+    // Stop the channel with Google
+    await calendarApi.channels.stop({
+      requestBody: {
+        id: channelId,
+        resourceId: resourceId,
+      },
+    });
+
+    console.log(`Webhook stopped: channel=${channelId}`);
+  } catch (error) {
+    // Log but don't fail - the channel might already be expired/stopped
+    console.warn(`Failed to stop webhook channel ${channelId}:`, error);
+  }
+
+  // Always remove from database even if Google call failed
+  const { error: dbError } = await supabase
+    .from('webhook_channels')
+    .delete()
+    .eq('channel_id', channelId);
+
+  if (dbError) {
+    console.error(`Failed to delete webhook channel from database:`, dbError);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Stops all webhook channels for a calendar source.
+ * Used when disconnecting a calendar.
+ *
+ * @param supabase - Supabase client
+ * @param calendarSource - Calendar source record
+ */
+export async function stopAllWebhookChannels(
+  supabase: SupabaseClient,
+  calendarSource: CalendarSource
+): Promise<void> {
+  // Get all channels for this calendar
+  const { data: channels, error } = await supabase
+    .from('webhook_channels')
+    .select('channel_id, resource_id')
+    .eq('calendar_source_id', calendarSource.id);
+
+  if (error) {
+    console.error('Failed to fetch webhook channels:', error);
+    return;
+  }
+
+  if (!channels || channels.length === 0) {
+    return;
+  }
+
+  // Stop each channel
+  for (const channel of channels) {
+    await stopWebhookChannel(supabase, calendarSource, channel.channel_id, channel.resource_id);
+  }
+}

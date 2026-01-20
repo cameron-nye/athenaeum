@@ -12,7 +12,7 @@
         "Package installs without errors",
         "TypeScript types are available"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-002",
@@ -24,7 +24,7 @@
         ".env.local.example includes GOOGLE_REDIRECT_URI",
         "Variables documented in README"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-003",
@@ -41,7 +41,7 @@
         "enabled defaults to true",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-004",
@@ -56,7 +56,7 @@
         "all_day defaults to false",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-005",
@@ -68,7 +68,7 @@
         "Index idx_events_time_range on (start_time, end_time)",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-006",
@@ -83,7 +83,7 @@
         "DELETE policy allows deleting own household's sources",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-007",
@@ -99,7 +99,7 @@
         "Policies join through calendar_sources to check household",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-008",
@@ -112,7 +112,7 @@
         "Handles token refresh logic",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-009",
@@ -126,7 +126,7 @@
         "Uses ENCRYPTION_KEY from environment",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-010",
@@ -140,7 +140,7 @@
         "Redirects user to Google OAuth consent page",
         "Only accessible to authenticated users"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-011",
@@ -156,7 +156,7 @@
         "Redirects to calendar selection page on success",
         "Handles errors gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-012",
@@ -171,7 +171,7 @@
         "Stores selected calendars in calendar_sources",
         "Redirects to calendars list on success"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-013",
@@ -187,7 +187,7 @@
         "Button to disconnect (delete) calendar",
         "Shows sync status indicator"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-014",
@@ -204,7 +204,7 @@
         "Updates last_synced_at timestamp",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-015",
@@ -219,7 +219,7 @@
         "Handles event deletion (cancelled events)",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-016",
@@ -233,7 +233,7 @@
         "Handles errors and returns appropriate status codes",
         "Rate limited to prevent abuse"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-017",
@@ -247,7 +247,7 @@
         "Returns count of synced calendars",
         "Handles partial failures gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-018",
@@ -259,7 +259,7 @@
         "Schedule set to every 5 minutes (*/5 * * * *)",
         "Configuration is valid JSON"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-019",
@@ -270,7 +270,7 @@
         "Documentation explains how to set in Vercel",
         "Cron route validates against this secret"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-020",
@@ -284,7 +284,7 @@
         "Includes calendar source info (name, color)",
         "TypeScript types defined for return value"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-021",
@@ -302,7 +302,7 @@
         "Day cells use staggered fade-in animation on initial render",
         "Events animate in with subtle spring physics"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-022",
@@ -319,7 +319,7 @@
         "Handles all-day events section",
         "Events animate in with staggered reveal (50ms stagger)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-023",
@@ -336,7 +336,7 @@
         "Handles all-day events section",
         "Events animate in with spring physics (stiffness: 300, damping: 24)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-024",
@@ -352,7 +352,7 @@
         "Loading state shows shimmer skeleton animation",
         "View transitions use AnimatePresence for smooth switching"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-025",
@@ -370,7 +370,7 @@
         "Keyboard accessible (Escape to close)",
         "Exit animation (fade out, scale down) using AnimatePresence"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-026",
@@ -383,7 +383,7 @@
         "Clicking color updates calendar_source.color",
         "Changes reflected immediately in UI"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-027",
@@ -397,7 +397,7 @@
         "Returns 200 OK quickly (before sync completes)",
         "Logs webhook receipt for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-028",
@@ -410,7 +410,7 @@
         "calendar_source_id references calendar_sources(id) ON DELETE CASCADE",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-029",
@@ -423,7 +423,7 @@
         "Sets expiration to 7 days",
         "Returns channel details"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-030",
@@ -437,7 +437,7 @@
         "Handles errors gracefully",
         "Cron configured in vercel.json (daily)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-031",
@@ -450,7 +450,7 @@
         "Handles refresh token revocation gracefully",
         "Marks calendar_source as disconnected on failure"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-032",
@@ -464,7 +464,7 @@
         "Stops webhook channel",
         "Shows success message"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-033",
@@ -480,7 +480,7 @@
         "Handles timezone considerations",
         "TypeScript compiles without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-034",
@@ -492,7 +492,7 @@
         "All-day events handled correctly across timezones",
         "Timezone info preserved from Google Calendar"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-035",
@@ -505,7 +505,7 @@
         "Manual refresh button visible",
         "Updates automatically after sync"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-036",
@@ -517,7 +517,7 @@
         "Recurrence info shown in event detail",
         "Exception instances handled correctly"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-037",
@@ -529,7 +529,7 @@
         "Prominent button to connect first calendar",
         "Styled consistently with app design"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-038",
@@ -542,7 +542,7 @@
         "Network errors show retry option",
         "Errors logged for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-039",
@@ -555,7 +555,7 @@
         "Includes multi-day event examples",
         "Seed applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-2-040",

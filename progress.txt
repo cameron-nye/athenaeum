@@ -28,3 +28,743 @@
 - typecheck: pass
 - test: pass
 - lint: pass
+
+## 2026-01-19: REQ-2-003 - Create calendar_sources table migration
+
+**Completed**: Created PostgreSQL migration for calendar_sources table
+
+**Decisions**:
+- References households(id) and users(id) - requires Phase 1 migrations to run first
+- Added CHECK constraint for provider ('google', 'ical')
+- Added UNIQUE constraint on (household_id, provider, external_id)
+- Added indexes for household lookup and sync queries
+- Included encrypted token columns for OAuth security
+
+**Files changed**:
+- supabase/migrations/20260119080810_create_calendar_sources.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-004 - Create events table migration
+
+**Completed**: Created PostgreSQL migration for events table
+
+**Decisions**:
+- References calendar_sources(id) ON DELETE CASCADE
+- UNIQUE constraint on (calendar_source_id, external_id)
+- all_day defaults to false
+- raw_data stored as JSONB for provider debugging
+- updated_at column for tracking modifications
+
+**Files changed**:
+- supabase/migrations/20260119090000_create_events.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-005 - Create events table indexes
+
+**Completed**: Created performance indexes for events table
+
+**Decisions**:
+- idx_events_calendar_time: composite index on (calendar_source_id, start_time) for calendar queries
+- idx_events_time_range: composite index on (start_time, end_time) for date range queries
+
+**Files changed**:
+- supabase/migrations/20260119100000_create_events_indexes.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-006 - Create RLS policies for calendar_sources table
+
+**Completed**: Created RLS policies for calendar_sources
+
+**Decisions**:
+- Uses get_user_household_id() helper (from Phase 1) for household scoping
+- SELECT/INSERT/UPDATE/DELETE all scoped to user's household
+- Follows same pattern as Phase 1 RLS policies
+
+**Files changed**:
+- supabase/migrations/20260119110000_calendar_sources_rls.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-007 - Create RLS policies for events table
+
+**Completed**: Created RLS policies for events table
+
+**Decisions**:
+- Joins through calendar_sources to check household membership
+- Uses EXISTS subquery pattern for security
+- SELECT/INSERT/UPDATE/DELETE all check calendar_source->household relation
+- UPDATE uses both USING and WITH CHECK to prevent changing calendar_source_id to other household
+
+**Files changed**:
+- supabase/migrations/20260119120000_events_rls.sql (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-001 - Install Google API dependencies
+
+**Completed**: Installed googleapis v170.1.0 for Google Calendar API access
+
+**Decisions**:
+- googleapis includes bundled TypeScript types (no separate @types needed)
+
+**Files changed**:
+- package.json (added googleapis)
+- package-lock.json (updated)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-009 - Create token encryption utility
+
+**Completed**: Created AES-256-GCM encryption for OAuth tokens
+
+**Decisions**:
+- Created lib/crypto.ts (not src/lib) to match existing codebase structure
+- Uses Node.js crypto module (no deps needed)
+- AES-256-GCM with scrypt key derivation
+- Random salt + IV per encryption for security
+- Base64 encoding for storage: salt + iv + authTag + ciphertext
+- Requires ENCRYPTION_KEY env var
+
+**Files changed**:
+- lib/crypto.ts (new)
+- lib/crypto.test.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass (11 tests)
+- lint: pass
+
+## 2026-01-19: REQ-2-002 - Add Google OAuth environment variables
+
+**Completed**: Created .env.local.example with Google OAuth credentials
+
+**Decisions**:
+- Created .env.local.example (not .env.example) to follow Next.js conventions
+- Added exception to .gitignore for .env.local.example
+- Documented Google Calendar setup in README
+
+**Files changed**:
+- .env.local.example (new)
+- README.md (added env var docs)
+- .gitignore (added exception for .env.local.example)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-008 - Create Google OAuth utility module
+
+**Completed**: Created OAuth2 client utility for Google Calendar API
+
+**Decisions**:
+- Created lib/google/auth.ts (matches existing lib/ pattern, not src/lib/ from PRD)
+- Uses google-auth-library (from googleapis package)
+- Exports: createOAuth2Client, createOAuth2ClientWithTokens, generateAuthUrl, exchangeCodeForTokens, refreshAccessToken, checkTokenStatus, getValidOAuth2Client
+- 5-minute buffer for token expiry checks
+- getValidOAuth2Client auto-refreshes and calls onTokenRefresh callback
+
+**Files changed**:
+- lib/google/auth.ts (new)
+- lib/google/auth.test.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass (16 tests)
+- lint: pass
+
+## 2026-01-19: REQ-2-010 - Create Google OAuth initiation route
+
+**Completed**: Created API route to start Google Calendar OAuth flow
+
+**Decisions**:
+- Created lib/supabase/server.ts as prerequisite (Phase 1 client utility)
+- Route at app/api/google/auth/route.ts (not src/app as PRD - matching codebase pattern)
+- CSRF state format: userId:randomToken for verification in callback
+- Scopes: calendar.readonly + calendar.events.readonly
+- Redirects to Google consent page (302 redirect)
+
+**Files changed**:
+- lib/supabase/server.ts (new)
+- app/api/google/auth/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-011 - Create Google OAuth callback route
+
+**Completed**: Created API route to handle Google OAuth callback
+
+**Decisions**:
+- Route at app/api/google/callback/route.ts (matching existing pattern)
+- Validates CSRF state (userId:randomToken format)
+- Exchanges code for tokens via existing auth utility
+- Encrypts access + refresh tokens before storage
+- Fetches Google Calendar list and stores all calendars (enabled=false)
+- Uses upsert to handle reconnection scenarios
+- Redirects to /calendars/connect for calendar selection
+- Error redirects to /calendars?error={type}
+
+**Files changed**:
+- app/api/google/callback/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-014 + REQ-2-015 - Create Google Calendar sync utility
+
+**Completed**: Created calendar sync utility with event upsert function
+
+**Decisions**:
+- lib/google/calendar.ts exports: mapGoogleEventToDbEvent, upsertEvents, deleteEvents, syncCalendarEvents
+- Uses syncToken for incremental sync, falls back to full sync on 410 error
+- Time range for full sync: 30 days ago to 90 days ahead
+- singleEvents=true expands recurring events into instances (REQ-2-036)
+- Handles pagination (maxResults=250 per page)
+- Cancelled events deleted from DB (status='cancelled')
+- Auto-refreshes tokens via getValidOAuth2Client callback
+- Updates sync_token + last_synced_at after successful sync
+
+**Files changed**:
+- lib/google/calendar.ts (new)
+- lib/google/calendar.test.ts (new, 9 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (38 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-016 - Create manual sync trigger API
+
+**Completed**: Created API route to manually trigger calendar sync
+
+**Decisions**:
+- Route at app/api/calendars/sync/route.ts
+- POST accepts { calendar_source_id } in body
+- Validates user auth + household membership via RLS-like check
+- In-memory rate limiting: 5 requests per calendar per minute
+- Returns { success, events_upserted, events_deleted, error? }
+- HTTP 401 (unauth), 400 (bad request), 404 (not found), 429 (rate limited), 500 (sync failed)
+
+**Files changed**:
+- app/api/calendars/sync/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-017 - Create cron sync API route
+
+**Completed**: Created Vercel cron endpoint for background calendar sync
+
+**Decisions**:
+- Route at app/api/cron/sync/route.ts
+- GET handler validates CRON_SECRET via Authorization header
+- Added createAdminClient() to lib/supabase/server.ts for RLS bypass
+- Queries enabled google calendar_sources not synced in 5 min
+- Syncs all stale calendars in parallel via Promise.all
+- Returns { calendars_synced, total_events_upserted, total_events_deleted, failures }
+- Partial failures handled gracefully (continues other syncs)
+
+**Files changed**:
+- lib/supabase/server.ts (added createAdminClient)
+- app/api/cron/sync/route.ts (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-018 - Create vercel.json with cron configuration
+
+**Completed**: Created Vercel cron config for background sync
+
+**Decisions**:
+- Schedule: */5 * * * * (every 5 minutes)
+- Path: /api/cron/sync (matches existing route)
+
+**Files changed**:
+- vercel.json (new)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-033 - Create date utility functions
+
+**Completed**: Created comprehensive date utilities for calendar views
+
+**Decisions**:
+- Created lib/utils/dates.ts (matches existing lib/ pattern, not src/lib/)
+- All calculations use UTC for consistency
+- Timezone param optional on display functions (uses local by default)
+- Week starts on Sunday (US standard)
+- getMonthCalendarDates returns 42 dates (6 weeks) for grid display
+- parseISO for consistent ISO string parsing
+
+**Functions created**:
+- getStartOfWeek, getEndOfWeek - week boundaries
+- getStartOfMonth, getEndOfMonth - month boundaries
+- getStartOfDay, getEndOfDay - day boundaries
+- isToday, isSameDay, isSameMonth - date comparisons
+- getEventDurationMinutes, getEventDurationHours - duration calc
+- formatDate, formatFullDate, formatShortDate, formatTime, formatDateTime, formatMonthYear, formatDayOfWeek - display formatting
+- addDays, addWeeks, addMonths - date arithmetic
+- getDaysInMonth, getMonthCalendarDates, getWeekDates, getDayHours - calendar grid helpers
+- formatEventDuration - human-readable duration
+- parseISO, getNow - date creation
+- isMultiDayEvent, isWithinRange, doRangesOverlap - range utilities
+
+**Files changed**:
+- lib/utils/dates.ts (new)
+- lib/utils/dates.test.ts (new, 52 tests)
+
+**Verification**:
+- typecheck: pass
+- test: pass (90 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-019 - Add CRON_SECRET environment variable
+
+**Completed**: Added CRON_SECRET to env example and docs
+
+**Files changed**:
+- .env.local.example (added CRON_SECRET)
+- README.md (added to env vars table)
+
+**Verification**:
+- typecheck: pass
+- test: pass
+- lint: pass
+
+## 2026-01-19: REQ-2-020 - Create calendar view data fetching
+
+**Completed**: Created server-side functions to fetch events for calendar views
+
+**Decisions**:
+- Created lib/calendar/queries.ts (matches existing lib/ pattern)
+- fetchEventsForDateRange: joins events with calendar_sources, filters by enabled=true
+- Uses overlapping range query (start < rangeEnd AND end > rangeStart)
+- Returns denormalized CalendarViewEvent type with calendar_source info
+- fetchEnabledCalendarSources + fetchAllCalendarSources for calendar list views
+- RLS handles household scoping automatically
+
+**Files changed**:
+- lib/calendar/queries.ts (new)
+- lib/calendar/queries.test.ts (new, 13 tests)
+- docs/prd.json (marked 19 requirements as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (103 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-034 - Timezone handling (already implemented)
+
+**Completed**: Already implemented in date utilities and calendar sync
+
+**Notes**:
+- Events stored in UTC via toISOString() in mapGoogleEventToDbEvent
+- formatDate/formatTime accept timezone param, default to local
+- All-day events stored as midnight UTC with all_day flag
+- raw_data preserves original Google event with timezone info
+
+**Files**: No changes needed (lib/utils/dates.ts, lib/google/calendar.ts already handle this)
+
+## 2026-01-19: REQ-2-036 - Recurring events (already implemented)
+
+**Completed**: Already implemented in calendar sync utility
+
+**Notes**:
+- singleEvents=true in fetchGoogleEvents expands recurring events
+- Individual instances stored in events table
+- recurrence_rule stored for display
+- Exception handling done by Google API (singleEvents mode)
+
+## 2026-01-19: REQ-2-021 - Create month calendar view component
+
+**Completed**: Created MonthView component with framer-motion animations
+
+**Features**:
+- 6-week grid display (42 cells)
+- Events grouped by date, sorted by all-day then start time
+- Event chips colored by calendar source
+- Prev/next month navigation with slide animation (300ms)
+- Staggered fade-in for day cells (10ms stagger)
+- Spring physics for event chips (stiffness: 400, damping: 25)
+- Current day highlighted
+- Loading skeleton state
+- Accessible: keyboard navigation, aria-labels
+
+**Files changed**:
+- components/calendar/MonthView.tsx (new)
+- components/calendar/MonthView.test.tsx (new, 10 tests)
+- docs/prd.json (marked REQ-2-021, REQ-2-034, REQ-2-036 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (113 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-022 - Create week calendar view component
+
+**Completed**: Created WeekView component with framer-motion animations
+
+**Features**:
+- 7-day view with hourly grid (60px per hour)
+- All-day events in separate top section
+- Timed events positioned by time + duration
+- Current time indicator (red line)
+- Prev/next week navigation with slide animation (300ms)
+- Staggered reveal for events (50ms stagger)
+- Auto-scroll to current hour on mount
+- Loading skeleton state
+
+**Files changed**:
+- components/calendar/WeekView.tsx (new)
+- components/calendar/WeekView.test.tsx (new, 10 tests)
+- docs/prd.json (marked REQ-2-022 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (123 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-023 - Create day calendar view component
+
+**Completed**: Created DayView component with framer-motion animations
+
+**Features**:
+- Single day view with hourly grid (80px per hour)
+- All-day events in top section
+- Timed events show title, time range, location
+- Current time indicator with pulse animation
+- Prev/next day navigation with slide animation (300ms)
+- Spring physics for events (stiffness: 300, damping: 24)
+- Auto-scroll to current hour on mount
+- Loading skeleton state
+
+**Files changed**:
+- components/calendar/DayView.tsx (new)
+- components/calendar/DayView.test.tsx (new, 12 tests)
+- docs/prd.json (marked REQ-2-023 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (135 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-024 - Create calendar view page with view switcher
+
+**Completed**: Created calendar view page with animated view switching
+
+**Features**:
+- View switcher: Month/Week/Day with hover animations
+- View preference persisted to localStorage + URL params
+- Today button jumps to current date
+- Date picker dropdown for navigation
+- Fetches events via /api/calendars/events endpoint
+- Loading skeleton shimmer animation
+- AnimatePresence for smooth view transitions
+- Day click in month view switches to day view
+
+**Files changed**:
+- app/(dashboard)/calendars/view/page.tsx (new)
+- app/api/calendars/events/route.ts (new)
+- docs/prd.json (marked REQ-2-024 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (135 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-025 - Create event detail modal/panel
+
+**Completed**: Created animated event detail modal with framer-motion
+
+**Features**:
+- Backdrop blur + fade animation
+- Modal scale (0.95→1) + fade transition
+- Shows title, time, location, description
+- Shows calendar source name with color indicator
+- Parses RRULE for human-readable recurrence display
+- Close button + backdrop click + Escape key to dismiss
+- Exit animation via AnimatePresence
+- Full ARIA accessibility (dialog, modal, labelledby)
+
+**Files changed**:
+- components/calendar/EventDetail.tsx (new)
+- components/calendar/EventDetail.test.tsx (new, 14 tests)
+- app/(dashboard)/calendars/view/page.tsx (integrated EventDetail)
+- docs/prd.json (marked REQ-2-025 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (149 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-012 - Create calendar selection page
+
+**Completed**: Created calendar selection page with checkbox UI
+
+**Features**:
+- Fetches calendars via /api/calendars/sources endpoint
+- Checkbox UI with staggered animation (50ms delay)
+- Pre-selects already enabled calendars
+- Select all / Deselect all controls
+- Calendar color indicator
+- Save button with loading state
+- Cancel button to abort
+- Empty state when no calendars
+- Error handling with user-friendly messages
+- Redirects to /calendars on success
+
+**Files changed**:
+- app/(dashboard)/calendars/connect/page.tsx (new)
+- app/(dashboard)/calendars/connect/page.test.tsx (new, 11 tests)
+- app/api/calendars/sources/route.ts (new - GET + PATCH)
+- docs/prd.json (marked REQ-2-012 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (160 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-013 - Create calendars list page
+
+**Completed**: Created calendars list page with management UI
+
+**Features**:
+- Lists all calendar_sources with name, color, provider badge
+- Human-readable last synced time (e.g., "5m ago", "Never synced")
+- Toggle switch to enable/disable calendars (optimistic update)
+- Sync button per calendar with loading/success/error states
+- Delete button with confirmation dialog
+- Add Calendar button redirects to Google OAuth
+- Empty state with call-to-action
+- Error alerts for OAuth callback errors
+- Link to calendar view page
+
+**Files changed**:
+- app/(dashboard)/calendars/page.tsx (new)
+- app/(dashboard)/calendars/page.test.tsx (new, 11 tests)
+- app/api/calendars/sources/route.ts (updated GET to support ?all=true)
+- app/api/calendars/sources/[id]/route.ts (new - DELETE)
+- docs/prd.json (marked REQ-2-013 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (171 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-031 - Create token refresh mechanism
+
+**Completed**: Enhanced OAuth token refresh with revocation handling
+
+**Features**:
+- TokenRevocationError class for distinguishing permanent auth failures
+- refreshAccessToken detects invalid_grant/revoked/expired tokens
+- syncCalendarEvents catches TokenRevocationError
+- markCalendarDisconnected clears tokens, sets enabled=false
+- SyncResult includes disconnected flag
+
+**Files changed**:
+- lib/google/auth.ts (added TokenRevocationError, enhanced refreshAccessToken)
+- lib/google/auth.test.ts (added tests for TokenRevocationError)
+- lib/google/calendar.ts (import TokenRevocationError, markCalendarDisconnected)
+- docs/prd.json (marked REQ-2-031, REQ-2-035, REQ-2-037 as completed)
+
+**Notes**:
+- REQ-2-035 (sync status indicator) already done in calendars page
+- REQ-2-037 (empty state) already done in calendars page
+
+**Verification**:
+- typecheck: pass
+- test: pass (173 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-038 - Create error handling for Google API failures
+
+**Completed**: Added comprehensive Google API error categorization
+
+**Features**:
+- GoogleApiErrorType: auth, not_found, rate_limit, server_error, network, unknown
+- categorizeGoogleApiError: maps HTTP codes + message patterns to error types
+- SyncResult: errorType, retryable flags for UI handling
+- 404 errors auto-disconnect calendar (deleted on Google side)
+- Network errors (ENOTFOUND, ECONNREFUSED, ETIMEDOUT) marked retryable
+- 5xx server errors marked retryable
+- Full error logged for debugging
+
+**Files changed**:
+- lib/google/calendar.ts (GoogleApiErrorType, categorizeGoogleApiError)
+- lib/google/calendar.test.ts (+15 tests for error categorization)
+- docs/prd.json (marked REQ-2-038 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-027-030 - Google Calendar webhook system
+
+**Completed**: Full webhook push notification system
+
+**Features**:
+- webhook_channels table: stores channel_id, resource_id, expiration
+- /api/webhooks/google: receives push notifications, triggers sync
+- registerWebhookChannel: creates watch on calendar, 7-day expiration
+- stopWebhookChannel/stopAllWebhookChannels: cleanup functions
+- /api/cron/webhooks: daily job renews channels expiring in 24h
+- vercel.json updated with daily cron
+
+**Files created**:
+- supabase/migrations/20260119210438_create_webhook_channels.sql
+- app/api/webhooks/google/route.ts
+- app/api/cron/webhooks/route.ts
+
+**Files modified**:
+- lib/google/calendar.ts (+registerWebhookChannel, +stopWebhookChannel, +stopAllWebhookChannels)
+- vercel.json (added daily webhook cron)
+- docs/prd.json (marked REQ-2-027,028,029,030 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-032 - Handle calendar disconnect
+
+**Completed**: Calendar delete API now stops webhook channels
+
+**Changes**:
+- DELETE /api/calendars/sources/[id] calls stopAllWebhookChannels before delete
+- Webhook cleanup is best-effort (logs warning but doesn't fail delete)
+- All criteria already met: delete button, confirmation, cascade delete, success response
+
+**Files changed**:
+- app/api/calendars/sources/[id]/route.ts (added webhook cleanup)
+- docs/prd.json (marked REQ-2-032 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (188 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-026 - Create calendar color picker component
+
+**Completed**: Color picker dropdown with 16 predefined colors
+
+**Features**:
+- CALENDAR_COLORS: 16 distinct, accessible colors
+- Trigger button shows current color
+- Dropdown grid of color swatches
+- Check icon on selected color
+- Framer-motion animations (scale, fade)
+- Full accessibility (listbox/option roles)
+- PATCH /api/calendars/sources/[id] for color update
+
+**Files created**:
+- components/calendar/ColorPicker.tsx
+- components/calendar/ColorPicker.test.tsx (10 tests)
+
+**Files modified**:
+- app/api/calendars/sources/[id]/route.ts (added PATCH handler)
+- docs/prd.json (marked REQ-2-026 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
+
+## 2026-01-19: REQ-2-039 - Add calendar events to seed data
+
+**Completed**: Created seed.sql with sample calendar data
+
+**Contents**:
+- Demo household + user
+- 3 calendar_sources (Work, Family, Personal) with distinct colors
+- Work events: standup, sprint planning, project review, workshop
+- Family events: dinner, soccer tournament (all-day), vacation (multi-day)
+- Personal events: gym, dentist, birthday (all-day)
+- Uses current date calculations for realistic data
+
+**Files created**:
+- supabase/seed.sql
+
+**Notes**:
+- Requires Phase 1 migrations (households, users) to exist
+- Uses ON CONFLICT DO NOTHING for idempotent re-runs
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
+
+## 2026-01-19: Build Fix - Suspense boundaries for useSearchParams
+
+**Completed**: Fixed Next.js build errors for useSearchParams without Suspense
+
+**Changes**:
+- app/(dashboard)/calendars/page.tsx: Added ErrorParamHandler component wrapped in Suspense
+- app/(dashboard)/calendars/view/page.tsx: Refactored to CalendarViewContent with UrlParamsSyncer + useInitialParams hook, all wrapped in Suspense
+
+**Notes**:
+- Next.js requires useSearchParams to be wrapped in Suspense boundary for static page generation
+- Extracted URL param logic into separate components that can be suspended
+
+**Verification**:
+- typecheck: pass
+- test: pass (198 tests total)
+- lint: pass
+- build: pass
+
+## Phase 2 Status Summary
+
+**All automated requirements completed (39/40)**
+
+**Remaining: REQ-2-040 - Manual verification of complete calendar sync flow**
+
+This requirement cannot be completed automatically as it requires:
+- Running npm run dev
+- Real Google account with Google Cloud OAuth credentials configured
+- Manual testing of the full OAuth flow, calendar selection, sync, and view
+
+To complete manually:
+1. Set up Google Cloud Console project with OAuth 2.0 credentials
+2. Add credentials to .env.local (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI)
+3. Run npm run dev and navigate to /calendars
+4. Click "Add Calendar" to initiate OAuth
+5. Complete Google consent and verify callback creates calendar_source
+6. Select calendars on /calendars/connect page
+7. Verify events appear on /calendars/view
+8. Test view switching (month/week/day)
+9. Test event detail modal
+10. Test manual sync button

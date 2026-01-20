@@ -3,6 +3,16 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Zen Garden Typography - Elegant serif + clean sans */
+@font-face {
+  font-family: 'Zen Kaku Gothic New';
+  src: url('https://fonts.gstatic.com/s/zenkakugothicnew/v15/gNMYW2drQpDw0GjzrVNFf_valaDBcznOqp9l5Lxi.woff2')
+    format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -47,79 +57,364 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --radius: 0.75rem;
+
+  /* Zen Garden Light Theme - Serene, calming colors */
+  /* Warm ivory background with subtle green undertone */
+  --background: oklch(0.985 0.008 95);
+  --foreground: oklch(0.25 0.02 200);
+
+  /* Cards - Soft warm white with gentle warmth */
+  --card: oklch(0.995 0.005 90);
+  --card-foreground: oklch(0.25 0.02 200);
+
+  /* Popover - Clean white with subtle depth */
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --popover-foreground: oklch(0.25 0.02 200);
+
+  /* Primary - Sage green, the heart of zen */
+  --primary: oklch(0.55 0.1 155);
+  --primary-foreground: oklch(0.99 0.005 155);
+
+  /* Secondary - Warm stone gray */
+  --secondary: oklch(0.94 0.01 80);
+  --secondary-foreground: oklch(0.35 0.02 200);
+
+  /* Muted - Soft sage mist */
+  --muted: oklch(0.96 0.015 150);
+  --muted-foreground: oklch(0.5 0.03 200);
+
+  /* Accent - Soft lavender for highlights */
+  --accent: oklch(0.94 0.03 280);
+  --accent-foreground: oklch(0.3 0.03 280);
+
+  /* Destructive - Muted terracotta */
+  --destructive: oklch(0.6 0.15 25);
+
+  /* Borders - Nearly invisible, zen-like */
+  --border: oklch(0.9 0.01 150);
+  --input: oklch(0.92 0.01 150);
+  --ring: oklch(0.6 0.08 155);
+
+  /* Chart colors - Natural, organic palette */
+  --chart-1: oklch(0.55 0.1 155);
+  --chart-2: oklch(0.6 0.12 200);
+  --chart-3: oklch(0.65 0.1 280);
+  --chart-4: oklch(0.7 0.12 50);
+  --chart-5: oklch(0.55 0.08 25);
+
+  /* Sidebar - Gentle sage tint */
+  --sidebar: oklch(0.97 0.015 150);
+  --sidebar-foreground: oklch(0.25 0.02 200);
+  --sidebar-primary: oklch(0.55 0.1 155);
+  --sidebar-primary-foreground: oklch(0.99 0.005 155);
+  --sidebar-accent: oklch(0.93 0.02 150);
+  --sidebar-accent-foreground: oklch(0.3 0.02 200);
+  --sidebar-border: oklch(0.88 0.015 150);
+  --sidebar-ring: oklch(0.6 0.08 155);
+
+  /* Custom zen colors */
+  --zen-sage: oklch(0.55 0.1 155);
+  --zen-stone: oklch(0.7 0.02 80);
+  --zen-mist: oklch(0.92 0.015 200);
+  --zen-bamboo: oklch(0.6 0.15 130);
+  --zen-sand: oklch(0.9 0.03 80);
+  --zen-water: oklch(0.7 0.08 220);
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Zen Garden Dark Theme - Night garden */
+  --background: oklch(0.16 0.02 200);
+  --foreground: oklch(0.92 0.01 150);
+
+  --card: oklch(0.2 0.02 200);
+  --card-foreground: oklch(0.92 0.01 150);
+
+  --popover: oklch(0.22 0.02 200);
+  --popover-foreground: oklch(0.92 0.01 150);
+
+  /* Primary - Luminous sage */
+  --primary: oklch(0.7 0.12 155);
+  --primary-foreground: oklch(0.15 0.02 155);
+
+  --secondary: oklch(0.25 0.02 200);
+  --secondary-foreground: oklch(0.9 0.01 150);
+
+  --muted: oklch(0.25 0.02 200);
+  --muted-foreground: oklch(0.65 0.02 150);
+
+  --accent: oklch(0.3 0.04 280);
+  --accent-foreground: oklch(0.9 0.02 280);
+
+  --destructive: oklch(0.55 0.15 25);
+
+  --border: oklch(0.3 0.02 200);
+  --input: oklch(0.28 0.02 200);
+  --ring: oklch(0.6 0.1 155);
+
+  --chart-1: oklch(0.65 0.12 155);
+  --chart-2: oklch(0.6 0.1 200);
+  --chart-3: oklch(0.7 0.12 280);
+  --chart-4: oklch(0.65 0.1 50);
+  --chart-5: oklch(0.6 0.12 25);
+
+  --sidebar: oklch(0.18 0.02 200);
+  --sidebar-foreground: oklch(0.92 0.01 150);
+  --sidebar-primary: oklch(0.7 0.12 155);
+  --sidebar-primary-foreground: oklch(0.15 0.02 155);
+  --sidebar-accent: oklch(0.25 0.02 200);
+  --sidebar-accent-foreground: oklch(0.9 0.01 150);
+  --sidebar-border: oklch(0.28 0.02 200);
+  --sidebar-ring: oklch(0.6 0.1 155);
+
+  --zen-sage: oklch(0.65 0.12 155);
+  --zen-stone: oklch(0.45 0.02 80);
+  --zen-mist: oklch(0.3 0.02 200);
+  --zen-bamboo: oklch(0.55 0.12 130);
+  --zen-sand: oklch(0.35 0.02 80);
+  --zen-water: oklch(0.5 0.1 220);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Zen Animations - Slow, deliberate, organic */
+@layer utilities {
+  /* Breathing animation - gentle pulse like meditation */
+  @keyframes zen-breathe {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.02);
+      opacity: 0.95;
+    }
+  }
+
+  .animate-breathe {
+    animation: zen-breathe 4s ease-in-out infinite;
+  }
+
+  /* Gentle float - like leaves on water */
+  @keyframes zen-float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-float {
+    animation: zen-float 3s ease-in-out infinite;
+  }
+
+  /* Ripple effect - water droplet */
+  @keyframes zen-ripple {
+    0% {
+      transform: scale(0.8);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+
+  .animate-ripple {
+    animation: zen-ripple 1s ease-out forwards;
+  }
+
+  /* Fade in up - gentle entrance */
+  @keyframes zen-fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-up {
+    animation: zen-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* Staggered children animation */
+  .stagger-children > * {
+    opacity: 0;
+    animation: zen-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  .stagger-children > *:nth-child(1) {
+    animation-delay: 0.05s;
+  }
+  .stagger-children > *:nth-child(2) {
+    animation-delay: 0.1s;
+  }
+  .stagger-children > *:nth-child(3) {
+    animation-delay: 0.15s;
+  }
+  .stagger-children > *:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+  .stagger-children > *:nth-child(5) {
+    animation-delay: 0.25s;
+  }
+  .stagger-children > *:nth-child(6) {
+    animation-delay: 0.3s;
+  }
+  .stagger-children > *:nth-child(7) {
+    animation-delay: 0.35s;
+  }
+  .stagger-children > *:nth-child(8) {
+    animation-delay: 0.4s;
+  }
+
+  /* Soft glow effect */
+  .glow-soft {
+    box-shadow:
+      0 0 20px oklch(0.55 0.1 155 / 0.15),
+      0 0 40px oklch(0.55 0.1 155 / 0.1);
+  }
+
+  /* Zen shadow - very soft, diffused */
+  .shadow-zen {
+    box-shadow:
+      0 2px 8px oklch(0.2 0.02 200 / 0.04),
+      0 8px 24px oklch(0.2 0.02 200 / 0.06),
+      0 16px 48px oklch(0.2 0.02 200 / 0.04);
+  }
+
+  .shadow-zen-lg {
+    box-shadow:
+      0 4px 12px oklch(0.2 0.02 200 / 0.05),
+      0 12px 36px oklch(0.2 0.02 200 / 0.08),
+      0 24px 64px oklch(0.2 0.02 200 / 0.06);
+  }
+
+  /* Noise texture overlay */
+  .texture-noise {
+    position: relative;
+  }
+
+  .texture-noise::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    mix-blend-mode: overlay;
+  }
+
+  /* Glass morphism - zen style */
+  .glass-zen {
+    background: oklch(1 0 0 / 0.6);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  }
+
+  .dark .glass-zen {
+    background: oklch(0.2 0.02 200 / 0.6);
+  }
+
+  /* Smooth transitions for everything */
+  .transition-zen {
+    transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .transition-zen-slow {
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  /* Gradient backgrounds */
+  .bg-zen-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.985 0.008 95) 0%,
+      oklch(0.96 0.015 150) 50%,
+      oklch(0.97 0.01 200) 100%
+    );
+  }
+
+  .dark .bg-zen-gradient {
+    background: linear-gradient(
+      135deg,
+      oklch(0.16 0.02 200) 0%,
+      oklch(0.18 0.025 180) 50%,
+      oklch(0.15 0.02 220) 100%
+    );
+  }
+
+  /* Organic border radius */
+  .rounded-zen {
+    border-radius: 1rem 0.75rem 1rem 0.75rem;
+  }
+
+  /* Focus styles - soft ring */
+  .focus-zen:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px oklch(0.55 0.1 155 / 0.5);
+  }
+}
+
+/* Custom scrollbar - minimal zen style */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.7 0.02 150 / 0.3);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.6 0.03 150 / 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: oklch(0.4 0.02 150 / 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.5 0.02 150 / 0.5);
+}
+
+/* Selection color */
+::selection {
+  background: oklch(0.55 0.1 155 / 0.3);
+  color: oklch(0.2 0.02 155);
+}
+
+.dark ::selection {
+  background: oklch(0.7 0.12 155 / 0.3);
+  color: oklch(0.95 0.01 155);
 }
