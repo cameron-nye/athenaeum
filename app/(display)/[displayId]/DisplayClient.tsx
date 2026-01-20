@@ -17,6 +17,8 @@ import { DisplayCalendar } from '@/components/display/Calendar';
 import { LoadingSkeleton } from '@/components/display/LoadingSkeleton';
 import { ErrorState } from '@/components/display/ErrorState';
 import { OfflineIndicator } from '@/components/display/OfflineIndicator';
+import { DebugOverlay } from '@/components/display/DebugOverlay';
+import type { RealtimeStatus } from '@/components/display/RealtimeProvider';
 import type { DisplaySettings } from '@/lib/display/types';
 
 interface DisplayClientProps {
@@ -97,6 +99,9 @@ function DisplayContent({
   // Apply theme from settings (REQ-3-013)
   useTheme(state.settings.theme);
 
+  // Track realtime status for debug overlay
+  const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
+
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -174,6 +179,7 @@ function DisplayContent({
       householdId={householdId}
       onEventsChange={handleEventChange}
       onCalendarSourcesChange={handleCalendarSourceChange}
+      onStatusChange={setRealtimeStatus}
       onError={(err) => setError(err.message)}
     >
       <DisplayCalendar
@@ -183,6 +189,14 @@ function DisplayContent({
         householdName={householdName}
       />
       <OfflineIndicator />
+      <DebugOverlay
+        displayId={displayId}
+        householdId={householdId}
+        realtimeStatus={realtimeStatus}
+        lastUpdated={state.lastUpdated}
+        eventCount={state.events.length}
+        calendarSourceCount={state.calendarSources.length}
+      />
     </RealtimeProvider>
   );
 }

@@ -443,7 +443,7 @@
         "Shows memory usage",
         "Overlay dismissible"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-033",

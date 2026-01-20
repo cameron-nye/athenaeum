@@ -983,3 +983,26 @@ To complete manually:
 - Maintenance section (logs, updates, settings)
 - Advanced config (resolution, portrait mode, multiple displays)
 - Security notes
+
+## 2026-01-20: REQ-3-032 - Debug overlay
+
+**Completed**: Created hidden debug overlay for troubleshooting
+
+**Features**:
+- Toggle with Ctrl+D / Cmd+D
+- Shows realtime connection status (connecting/connected/reconnecting/error)
+- Shows display ID and household ID
+- Shows last sync time and data counts (events, calendars)
+- Shows memory usage (Chrome only, via performance.memory)
+- Dismissible with Escape or Ctrl+D
+- Semi-transparent dark panel in bottom-right corner
+
+**Files created**:
+- components/display/DebugOverlay.tsx
+
+**Files modified**:
+- app/(display)/[displayId]/DisplayClient.tsx (added DebugOverlay integration)
+
+**Verification**:
+- typecheck: pass
+- lint: pass (1 pre-existing warning)
