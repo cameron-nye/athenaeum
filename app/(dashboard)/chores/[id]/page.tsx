@@ -15,7 +15,6 @@ import {
   Pencil,
   Trash2,
   Plus,
-  User,
   Check,
   Loader2,
   Award,
@@ -25,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { parseRRuleToText } from '@/lib/chores/recurrence';
 import { RecurrenceSelector } from '@/components/chores/RecurrenceSelector';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface ChoreUser {
   id: string;
@@ -390,8 +390,12 @@ function AssignmentCard({
           </span>
 
           {assignment.users && (
-            <span className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400">
-              <User className="h-3.5 w-3.5" />
+            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+              <UserAvatar
+                name={assignment.users.display_name}
+                avatarUrl={assignment.users.avatar_url}
+                size="xs"
+              />
               {assignment.users.display_name || 'Unknown'}
             </span>
           )}

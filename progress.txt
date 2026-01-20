@@ -1231,3 +1231,30 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (287 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-028 - Create family member avatars
+
+**Completed**: Reusable UserAvatar component with image and initials fallback
+
+**Features**:
+- Displays avatar image via Next.js Image if avatarUrl provided
+- Falls back to initials (first+last or first 2 chars)
+- Consistent color generation based on name (16 colors)
+- 5 sizes: xs (24px), sm (32px), md (40px), lg (48px), xl (64px)
+- Optional bordered variant for avatar groups
+- AvatarGroup component with +N overflow indicator
+- Image error handling falls back to initials
+
+**Files created**:
+- components/ui/UserAvatar.tsx
+- components/ui/UserAvatar.test.tsx (18 tests)
+
+**Files modified**:
+- components/display/ChoreList.tsx (uses UserAvatar instead of local UserInitials)
+- app/(dashboard)/chores/[id]/page.tsx (shows avatar next to assignee name)
+- docs/prd.json (marked REQ-5-028 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (305 tests)
+- lint: pass (1 pre-existing warning)

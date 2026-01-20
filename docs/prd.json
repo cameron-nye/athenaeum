@@ -377,7 +377,7 @@
         "Falls back to initials",
         "Consistent size and style"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-029",

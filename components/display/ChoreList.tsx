@@ -9,6 +9,7 @@
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, AlertTriangle, Clock } from 'lucide-react';
+import { UserAvatar } from '@/components/ui/UserAvatar';
 
 export interface ChoreAssignment {
   id: string;
@@ -72,22 +73,7 @@ function getDateLabel(dateStr: string): { label: string; isOverdue: boolean; isT
   };
 }
 
-function UserInitials({ name }: { name: string | null | undefined }) {
-  const initials = useMemo(() => {
-    if (!name) return '?';
-    const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.slice(0, 2).toUpperCase();
-  }, [name]);
-
-  return (
-    <div className="bg-primary/20 text-primary flex h-10 w-10 items-center justify-center rounded-full">
-      <span className="display-small font-medium">{initials}</span>
-    </div>
-  );
-}
+// UserInitials is now replaced by the shared UserAvatar component from @/components/ui/UserAvatar
 
 function ChoreItem({ assignment, index }: { assignment: ChoreAssignment; index: number }) {
   const { label, isOverdue, isToday } = getDateLabel(assignment.due_date);
@@ -151,7 +137,11 @@ function ChoreItem({ assignment, index }: { assignment: ChoreAssignment; index: 
 
       {/* Assignee */}
       {assignment.user ? (
-        <UserInitials name={assignment.user.display_name} />
+        <UserAvatar
+          name={assignment.user.display_name}
+          avatarUrl={assignment.user.avatar_url}
+          size="md"
+        />
       ) : (
         <div className="border-muted-foreground/30 flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed">
           <span className="display-small text-muted-foreground">?</span>
