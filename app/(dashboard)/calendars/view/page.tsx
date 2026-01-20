@@ -9,7 +9,7 @@ import { Suspense, useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, CalendarDays, CalendarRange, ChevronDown } from 'lucide-react';
+import { Calendar, CalendarDays, CalendarRange, ChevronDown, Sparkles } from 'lucide-react';
 import { EventDetail } from '@/components/calendar/EventDetail';
 import {
   getStartOfMonth,
@@ -38,33 +38,87 @@ const VIEW_LABELS = {
   day: 'Day',
 };
 
+// Zen animation variants
+const pageVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
+
+const toolbarVariants = {
+  hidden: { opacity: 0, y: -10 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
+
+const viewTransition = {
+  initial: { opacity: 0, scale: 0.98 },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    transition: {
+      duration: 0.2,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
+
 /**
- * Loading skeleton for the calendar view.
+ * Loading skeleton for the calendar view with zen styling.
  */
 function CalendarSkeleton() {
   return (
-    <div className="h-full animate-pulse">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full">
       {/* Header skeleton */}
-      <div className="border-border flex items-center justify-between border-b px-4 py-3">
-        <div className="bg-muted h-7 w-48 rounded" />
-        <div className="flex gap-2">
-          <div className="bg-muted h-10 w-10 rounded" />
-          <div className="bg-muted h-10 w-10 rounded" />
+      <div className="border-border/50 flex items-center justify-between border-b px-6 py-4">
+        <div className="flex items-center gap-4">
+          <div className="bg-muted/60 h-10 w-24 animate-pulse rounded-xl" />
+          <div className="bg-muted/40 h-10 w-32 animate-pulse rounded-xl" />
+        </div>
+        <div className="bg-muted/30 flex gap-1 rounded-2xl p-1.5">
+          <div className="bg-muted/50 h-9 w-20 animate-pulse rounded-xl" />
+          <div className="bg-muted/40 h-9 w-20 animate-pulse rounded-xl" />
+          <div className="bg-muted/40 h-9 w-20 animate-pulse rounded-xl" />
         </div>
       </div>
       {/* Grid skeleton */}
-      <div className="bg-border grid grid-cols-7 gap-px">
+      <div className="bg-border/30 grid grid-cols-7 gap-px p-4">
         {Array.from({ length: 35 }).map((_, i) => (
-          <div key={i} className="bg-background h-24 p-2">
-            <div className="bg-muted mx-auto mb-2 h-6 w-6 rounded-full" />
-            <div className="space-y-1">
-              <div className="bg-muted h-4 rounded" />
-              <div className="bg-muted h-4 w-2/3 rounded" />
+          <motion.div
+            key={i}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: i * 0.01 }}
+            className="bg-card/50 h-28 rounded-xl p-3"
+          >
+            <div className="bg-muted/50 mx-auto mb-3 h-8 w-8 animate-pulse rounded-full" />
+            <div className="space-y-2">
+              <div className="bg-muted/40 h-5 animate-pulse rounded-lg" />
+              <div className="bg-muted/30 h-5 w-3/4 animate-pulse rounded-lg" />
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -83,7 +137,7 @@ const DayView = dynamic(
 );
 
 /**
- * View switcher button component.
+ * View switcher button component with zen styling.
  */
 function ViewButton({
   mode,
@@ -101,44 +155,62 @@ function ViewButton({
     <motion.button
       onClick={onClick}
       className={cn(
-        'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors',
-        'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
+        'relative flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium',
+        'transition-zen focus-zen',
         isActive
-          ? 'bg-primary text-primary-foreground'
-          : 'hover:bg-accent text-muted-foreground hover:text-foreground'
+          ? 'bg-primary text-primary-foreground shadow-zen'
+          : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
       )}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      layout
     >
-      <Icon className="h-4 w-4" />
-      <span className="hidden sm:inline">{VIEW_LABELS[mode]}</span>
+      {isActive && (
+        <motion.div
+          layoutId="activeViewIndicator"
+          className="bg-primary absolute inset-0 rounded-xl"
+          initial={false}
+          transition={{
+            type: 'spring' as const,
+            stiffness: 300,
+            damping: 30,
+          }}
+        />
+      )}
+      <span className="relative z-10 flex items-center gap-2">
+        <Icon className="h-4 w-4" />
+        <span className="hidden sm:inline">{VIEW_LABELS[mode]}</span>
+      </span>
     </motion.button>
   );
 }
 
 /**
- * Today button component.
+ * Today button component with zen styling.
  */
 function TodayButton({ onClick }: { onClick: () => void }) {
   return (
     <motion.button
       onClick={onClick}
       className={cn(
-        'rounded-md px-4 py-2 text-sm font-medium',
-        'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-        'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
-        'transition-colors'
+        'rounded-xl px-5 py-2.5 text-sm font-medium',
+        'bg-card text-foreground',
+        'shadow-zen hover:shadow-zen-lg',
+        'transition-zen focus-zen'
       )}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ scale: 1.03, y: -1 }}
+      whileTap={{ scale: 0.97 }}
     >
-      Today
+      <span className="flex items-center gap-2">
+        <Sparkles className="text-primary h-3.5 w-3.5" />
+        Today
+      </span>
     </motion.button>
   );
 }
 
 /**
- * Simple date picker dropdown.
+ * Simple date picker dropdown with zen styling.
  */
 function DatePicker({
   currentDate,
@@ -153,29 +225,41 @@ function DatePicker({
 
   return (
     <div className="relative">
-      <button
+      <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          'flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium',
-          'hover:bg-accent transition-colors',
-          'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none'
+          'flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium',
+          'hover:bg-accent/50 transition-zen focus-zen',
+          'text-muted-foreground hover:text-foreground'
         )}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
       >
         <span>{dateStr}</span>
-        <ChevronDown className="h-4 w-4" />
-      </button>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+          <ChevronDown className="h-4 w-4" />
+        </motion.div>
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <>
-            <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-10"
+              onClick={() => setIsOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ type: 'spring' as const, stiffness: 300, damping: 25 }}
               className={cn(
                 'absolute top-full right-0 z-20 mt-2',
-                'bg-popover border-border rounded-lg border p-4 shadow-lg',
+                'bg-card rounded-2xl p-5',
+                'shadow-zen-lg border-border/50 border',
                 'min-w-[280px]'
               )}
             >
@@ -189,9 +273,9 @@ function DatePicker({
                   }
                 }}
                 className={cn(
-                  'border-input w-full rounded-md border px-3 py-2',
+                  'border-border/50 w-full rounded-xl border px-4 py-3',
                   'bg-background text-foreground',
-                  'focus:ring-ring focus:ring-2 focus:outline-none'
+                  'transition-zen focus-zen'
                 )}
               />
             </motion.div>
@@ -355,18 +439,31 @@ function CalendarViewContent() {
   };
 
   return (
-    <div className="bg-background flex h-screen flex-col">
+    <motion.div
+      variants={pageVariants}
+      initial="hidden"
+      animate="visible"
+      className="bg-zen-gradient texture-noise relative flex h-screen flex-col overflow-hidden"
+    >
       {/* URL params syncer */}
       <UrlParamsSyncer viewMode={viewMode} currentDate={currentDate} />
 
       {/* Top toolbar */}
-      <div className="border-border flex items-center justify-between border-b px-4 py-3">
-        <div className="flex items-center gap-4">
+      <motion.div
+        variants={toolbarVariants}
+        initial="hidden"
+        animate="visible"
+        className="border-border/30 relative z-10 flex items-center justify-between border-b px-6 py-4"
+      >
+        <div className="flex items-center gap-3">
           <TodayButton onClick={handleTodayClick} />
           <DatePicker currentDate={currentDate} onSelect={handleDateChange} />
         </div>
 
-        <div className="bg-muted flex items-center gap-1 rounded-lg p-1">
+        <motion.div
+          className="bg-card/80 shadow-zen flex items-center gap-1 rounded-2xl p-1.5 backdrop-blur-sm"
+          layout
+        >
           {(['month', 'week', 'day'] as const).map((mode) => (
             <ViewButton
               key={mode}
@@ -375,31 +472,18 @@ function CalendarViewContent() {
               onClick={() => handleViewChange(mode)}
             />
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Calendar view */}
-      <div className="flex-1 overflow-hidden">
+      <div className="relative flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           {isLoading ? (
-            <motion.div
-              key="loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="h-full"
-            >
+            <motion.div key="loading" {...viewTransition} className="h-full">
               <CalendarSkeleton />
             </motion.div>
           ) : (
-            <motion.div
-              key={viewMode}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
+            <motion.div key={viewMode} {...viewTransition} className="h-full">
               {viewMode === 'month' && (
                 <MonthView
                   events={events}
@@ -432,7 +516,7 @@ function CalendarViewContent() {
 
       {/* Event detail modal */}
       <EventDetail event={selectedEvent} onClose={() => setSelectedEvent(null)} />
-    </div>
+    </motion.div>
   );
 }
 

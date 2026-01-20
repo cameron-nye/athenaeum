@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Clock,
   Loader2,
+  Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { LogoutButton } from '@/components/auth/LogoutButton';
@@ -32,6 +33,54 @@ interface CalendarSource {
 }
 
 type SyncStatus = 'idle' | 'syncing' | 'success' | 'error';
+
+// Zen-inspired animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+      delayChildren: 0.1,
+    },
+  },
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.98 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 100,
+      damping: 15,
+      mass: 0.8,
+    },
+  },
+  exit: {
+    opacity: 0,
+    x: -30,
+    scale: 0.95,
+    transition: {
+      duration: 0.3,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
+};
+
+const floatVariants = {
+  initial: { y: 0 },
+  animate: {
+    y: [-2, 2, -2],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: 'easeInOut' as const,
+    },
+  },
+};
 
 /**
  * Formats the last synced time in a human-readable way.
@@ -55,14 +104,17 @@ function formatLastSynced(date: string | null): string {
 }
 
 /**
- * Provider badge component.
+ * Provider badge component with zen styling.
  */
 function ProviderBadge({ provider }: { provider: 'google' | 'ical' }) {
   return (
     <span
       className={cn(
-        'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-        provider === 'google' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
+        'transition-zen',
+        provider === 'google'
+          ? 'bg-[oklch(0.92_0.03_220)] text-[oklch(0.4_0.1_220)]'
+          : 'bg-secondary text-secondary-foreground'
       )}
     >
       {provider === 'google' ? 'Google' : 'iCal'}
@@ -71,46 +123,86 @@ function ProviderBadge({ provider }: { provider: 'google' | 'ical' }) {
 }
 
 /**
- * Sync status indicator component.
+ * Sync status indicator with smooth animations.
  */
 function SyncStatusIndicator({ status }: { status: SyncStatus }) {
-  switch (status) {
-    case 'syncing':
-      return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
-    case 'success':
-      return <Check className="h-4 w-4 text-green-500" />;
-    case 'error':
-      return <AlertCircle className="h-4 w-4 text-red-500" />;
-    default:
-      return null;
-  }
+  return (
+    <AnimatePresence mode="wait">
+      {status === 'syncing' && (
+        <motion.div
+          key="syncing"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Loader2 className="text-primary h-4 w-4 animate-spin" />
+        </motion.div>
+      )}
+      {status === 'success' && (
+        <motion.div
+          key="success"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          transition={{ type: 'spring' as const, stiffness: 300, damping: 20 }}
+        >
+          <Check className="h-4 w-4 text-[oklch(0.6_0.15_150)]" />
+        </motion.div>
+      )}
+      {status === 'error' && (
+        <motion.div
+          key="error"
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.5 }}
+          transition={{ duration: 0.2 }}
+        >
+          <AlertCircle className="text-destructive h-4 w-4" />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 }
 
 /**
- * Loading skeleton for calendar list.
+ * Loading skeleton with zen-inspired shimmer.
  */
 function CalendarListSkeleton() {
   return (
     <div className="space-y-4">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div
+        <motion.div
           key={i}
-          className="border-border flex animate-pulse items-center gap-4 rounded-lg border p-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: i * 0.1, duration: 0.4 }}
+          className={cn(
+            'flex items-center gap-4 rounded-2xl p-5',
+            'bg-card shadow-zen',
+            'relative overflow-hidden'
+          )}
         >
-          <div className="bg-muted h-10 w-10 rounded-full" />
+          {/* Shimmer effect */}
+          <motion.div
+            className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent"
+            animate={{ translateX: ['100%', '-100%'] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear', delay: i * 0.2 }}
+          />
+          <div className="bg-muted h-12 w-12 rounded-xl" />
           <div className="flex-1 space-y-2">
-            <div className="bg-muted h-4 w-32 rounded" />
-            <div className="bg-muted h-3 w-24 rounded" />
+            <div className="bg-muted h-4 w-36 rounded-lg" />
+            <div className="bg-muted h-3 w-24 rounded-lg" />
           </div>
-          <div className="bg-muted h-6 w-12 rounded-full" />
-        </div>
+          <div className="bg-muted h-7 w-14 rounded-full" />
+        </motion.div>
       ))}
     </div>
   );
 }
 
 /**
- * Individual calendar card component.
+ * Individual calendar card with zen styling and fluid animations.
  */
 function CalendarCard({
   calendar,
@@ -118,17 +210,16 @@ function CalendarCard({
   onToggle,
   onSync,
   onDelete,
-  index,
 }: {
   calendar: CalendarSource;
   syncStatus: SyncStatus;
   onToggle: () => void;
   onSync: () => void;
   onDelete: () => void;
-  index: number;
 }) {
   const color = calendar.color ?? '#6B7280';
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleDelete = async () => {
     if (!confirm(`Are you sure you want to disconnect "${calendar.name}"?`)) {
@@ -140,112 +231,211 @@ function CalendarCard({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ delay: index * 0.05 }}
+      variants={itemVariants}
+      layout
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
       className={cn(
-        'border-border flex items-center gap-4 rounded-lg border p-4',
-        'hover:bg-accent/30 transition-colors'
+        'group relative flex items-center gap-4 rounded-2xl p-5',
+        'bg-card shadow-zen',
+        'transition-zen hover:shadow-zen-lg',
+        'hover:border-primary/10 border border-transparent'
       )}
     >
-      {/* Calendar color indicator */}
-      <div
-        className="flex h-10 w-10 items-center justify-center rounded-full"
-        style={{ backgroundColor: color + '20' }}
+      {/* Subtle glow on hover */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 rounded-2xl opacity-0"
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          background: `radial-gradient(circle at 30% 50%, ${color}15 0%, transparent 70%)`,
+        }}
+      />
+
+      {/* Calendar color indicator with float animation */}
+      <motion.div
+        variants={floatVariants}
+        initial="initial"
+        animate={calendar.enabled ? 'animate' : 'initial'}
+        className="relative flex h-12 w-12 items-center justify-center rounded-xl"
+        style={{ backgroundColor: color + '15' }}
       >
-        <Calendar className="h-5 w-5" style={{ color }} />
-      </div>
+        <Calendar className="transition-zen h-6 w-6" style={{ color }} />
+        {calendar.enabled && (
+          <motion.div
+            className="absolute -top-1 -right-1 h-3 w-3 rounded-full"
+            style={{ backgroundColor: color }}
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+        )}
+      </motion.div>
 
       {/* Calendar info */}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
-          <h3 className="truncate font-medium">{calendar.name}</h3>
+      <div className="relative min-w-0 flex-1">
+        <div className="flex items-center gap-2.5">
+          <h3 className="truncate text-base font-medium">{calendar.name}</h3>
           <ProviderBadge provider={calendar.provider} />
           <SyncStatusIndicator status={syncStatus} />
         </div>
-        <div className="text-muted-foreground flex items-center gap-1 text-sm">
-          <Clock className="h-3 w-3" />
+        <div className="text-muted-foreground mt-1 flex items-center gap-1.5 text-sm">
+          <Clock className="h-3.5 w-3.5" />
           <span>{formatLastSynced(calendar.last_synced_at)}</span>
         </div>
       </div>
 
-      {/* Toggle switch */}
-      <button
+      {/* Toggle switch with smooth animation */}
+      <motion.button
         onClick={onToggle}
+        whileTap={{ scale: 0.95 }}
         className={cn(
-          'relative h-6 w-11 rounded-full transition-colors',
-          'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
+          'transition-zen relative h-7 w-13 rounded-full',
+          'focus-zen',
           calendar.enabled ? 'bg-primary' : 'bg-muted'
         )}
+        style={{ width: '52px' }}
         aria-label={calendar.enabled ? 'Disable calendar' : 'Enable calendar'}
       >
         <motion.span
-          className="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow"
-          animate={{ x: calendar.enabled ? 20 : 0 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className="absolute top-1 left-1 h-5 w-5 rounded-full bg-white shadow-md"
+          animate={{ x: calendar.enabled ? 24 : 0 }}
+          transition={{ type: 'spring' as const, stiffness: 400, damping: 25 }}
         />
-      </button>
+      </motion.button>
 
-      {/* Sync button */}
-      <button
-        onClick={onSync}
-        disabled={syncStatus === 'syncing'}
-        className={cn(
-          'rounded-lg p-2',
-          'hover:bg-accent transition-colors',
-          'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
-          'disabled:cursor-not-allowed disabled:opacity-50'
-        )}
-        aria-label="Sync calendar"
-      >
-        <RefreshCw className={cn('h-5 w-5', syncStatus === 'syncing' && 'animate-spin')} />
-      </button>
+      {/* Action buttons */}
+      <div className="flex items-center gap-1">
+        <motion.button
+          onClick={onSync}
+          disabled={syncStatus === 'syncing'}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            'rounded-xl p-2.5',
+            'text-muted-foreground hover:text-foreground hover:bg-muted',
+            'transition-zen focus-zen',
+            'disabled:cursor-not-allowed disabled:opacity-50'
+          )}
+          aria-label="Sync calendar"
+        >
+          <RefreshCw className={cn('h-5 w-5', syncStatus === 'syncing' && 'animate-spin')} />
+        </motion.button>
 
-      {/* Delete button */}
-      <button
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className={cn(
-          'rounded-lg p-2',
-          'text-muted-foreground hover:text-destructive hover:bg-destructive/10',
-          'transition-colors',
-          'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none',
-          'disabled:cursor-not-allowed disabled:opacity-50'
-        )}
-        aria-label="Disconnect calendar"
-      >
-        {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Trash2 className="h-5 w-5" />}
-      </button>
+        <motion.button
+          onClick={handleDelete}
+          disabled={isDeleting}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className={cn(
+            'rounded-xl p-2.5',
+            'text-muted-foreground hover:text-destructive hover:bg-destructive/10',
+            'transition-zen focus-zen',
+            'disabled:cursor-not-allowed disabled:opacity-50'
+          )}
+          aria-label="Disconnect calendar"
+        >
+          {isDeleting ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : (
+            <Trash2 className="h-5 w-5" />
+          )}
+        </motion.button>
+      </div>
     </motion.div>
   );
 }
 
 /**
- * Error alert component.
+ * Error alert with zen styling.
  */
 function ErrorAlert({ message, onDismiss }: { message: string; onDismiss: () => void }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="bg-destructive/10 text-destructive mb-6 flex items-center justify-between rounded-lg p-4"
+      initial={{ opacity: 0, y: -10, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.98 }}
+      transition={{ type: 'spring' as const, stiffness: 200, damping: 20 }}
+      className={cn(
+        'mb-6 flex items-center justify-between rounded-2xl p-4',
+        'bg-destructive/10 text-destructive',
+        'border-destructive/20 border'
+      )}
     >
-      <div className="flex items-center gap-2">
-        <AlertCircle className="h-5 w-5" />
-        <span>{message}</span>
+      <div className="flex items-center gap-3">
+        <div className="bg-destructive/20 rounded-full p-2">
+          <AlertCircle className="h-4 w-4" />
+        </div>
+        <span className="font-medium">{message}</span>
       </div>
-      <button onClick={onDismiss} className="hover:bg-destructive/20 rounded p-1 transition-colors">
-        &times;
-      </button>
+      <motion.button
+        onClick={onDismiss}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className="transition-zen hover:bg-destructive/20 rounded-lg p-1.5"
+      >
+        <span className="sr-only">Dismiss</span>
+        <span aria-hidden>&times;</span>
+      </motion.button>
+    </motion.div>
+  );
+}
+
+/**
+ * Empty state with zen illustration.
+ */
+function EmptyState({ onAddCalendar }: { onAddCalendar: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className={cn('relative overflow-hidden rounded-3xl py-20 text-center', 'bg-card shadow-zen')}
+    >
+      {/* Decorative background circles */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <motion.div
+          className="bg-primary/5 absolute -top-20 -left-20 h-64 w-64 rounded-full"
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, 0] }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div
+          className="bg-accent/10 absolute -right-32 -bottom-32 h-96 w-96 rounded-full"
+          animate={{ scale: [1, 1.05, 1], rotate: [0, -3, 0] }}
+          transition={{ duration: 10, repeat: Infinity }}
+        />
+      </div>
+
+      <motion.div variants={floatVariants} initial="initial" animate="animate" className="relative">
+        <div className="bg-primary/10 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl">
+          <Calendar className="text-primary h-10 w-10" />
+        </div>
+      </motion.div>
+
+      <h3 className="relative mb-2 text-xl font-semibold">No calendars connected</h3>
+      <p className="text-muted-foreground relative mb-8 text-sm">
+        Connect a Google Calendar to begin your journey
+      </p>
+
+      <motion.button
+        onClick={onAddCalendar}
+        whileHover={{ scale: 1.02, y: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className={cn(
+          'relative inline-flex items-center gap-2 rounded-xl px-6 py-3',
+          'bg-primary text-primary-foreground font-medium',
+          'shadow-zen hover:shadow-zen-lg',
+          'transition-zen focus-zen'
+        )}
+      >
+        <Plus className="h-5 w-5" />
+        Add Calendar
+      </motion.button>
     </motion.div>
   );
 }
 
 /**
  * Component that handles URL error params.
- * Needs to be wrapped in Suspense as it uses useSearchParams.
  */
 function ErrorParamHandler({ onError }: { onError: (error: string) => void }) {
   const router = useRouter();
@@ -266,7 +456,6 @@ function ErrorParamHandler({ onError }: { onError: (error: string) => void }) {
         callback_failed: 'Calendar connection failed',
       };
       onError(errorMessages[urlError] ?? 'An error occurred');
-      // Clear error from URL
       router.replace('/calendars', { scroll: false });
     }
   }, [searchParams, router, onError]);
@@ -292,7 +481,6 @@ export default function CalendarsPage() {
   const [error, setError] = useState<string | null>(null);
   const [syncStatuses, setSyncStatuses] = useState<Record<string, SyncStatus>>({});
 
-  // SWR for calendar data with auto-revalidation on focus
   const {
     data: calendars = [],
     error: swrError,
@@ -303,21 +491,18 @@ export default function CalendarsPage() {
     revalidateOnReconnect: true,
   });
 
-  // Track timeout IDs to prevent memory leaks
   const timeoutRefs = useRef<Map<string, NodeJS.Timeout>>(new Map());
 
   const handleUrlError = useCallback((err: string) => {
     setError(err);
   }, []);
 
-  // Sync SWR error to local error state
   useEffect(() => {
     if (swrError) {
       setError(swrError.message);
     }
   }, [swrError]);
 
-  // Cleanup timeouts on unmount to prevent memory leaks
   useEffect(() => {
     return () => {
       timeoutRefs.current.forEach((id) => clearTimeout(id));
@@ -327,7 +512,6 @@ export default function CalendarsPage() {
 
   const handleToggle = useCallback(
     async (calendar: CalendarSource) => {
-      // Optimistic update with SWR
       const optimisticData = calendars.map((c) =>
         c.id === calendar.id ? { ...c, enabled: !c.enabled } : c
       );
@@ -366,7 +550,6 @@ export default function CalendarsPage() {
 
   const handleSync = useCallback(
     async (calendar: CalendarSource) => {
-      // Clear any existing timeout for this calendar
       const existingTimeout = timeoutRefs.current.get(calendar.id);
       if (existingTimeout) {
         clearTimeout(existingTimeout);
@@ -387,11 +570,8 @@ export default function CalendarsPage() {
         }
 
         setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'success' }));
-
-        // Refresh calendar data to get updated last_synced_at
         mutate();
 
-        // Clear success status after 3 seconds
         const successTimeout = setTimeout(() => {
           setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
           timeoutRefs.current.delete(calendar.id);
@@ -400,7 +580,6 @@ export default function CalendarsPage() {
       } catch {
         setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'error' }));
 
-        // Clear error status after 5 seconds
         const errorTimeout = setTimeout(() => {
           setSyncStatuses((prev) => ({ ...prev, [calendar.id]: 'idle' }));
           timeoutRefs.current.delete(calendar.id);
@@ -413,7 +592,6 @@ export default function CalendarsPage() {
 
   const handleDelete = useCallback(
     async (calendar: CalendarSource) => {
-      // Optimistic delete with SWR
       const optimisticData = calendars.filter((c) => c.id !== calendar.id);
 
       try {
@@ -443,105 +621,126 @@ export default function CalendarsPage() {
   );
 
   const handleAddCalendar = useCallback(() => {
-    // Redirect to Google OAuth initiation
     window.location.href = '/api/google/auth';
   }, []);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      {/* Handle URL error params */}
-      <Suspense fallback={null}>
-        <ErrorParamHandler onError={handleUrlError} />
-      </Suspense>
+    <div className="bg-zen-gradient texture-noise min-h-screen">
+      <div className="mx-auto max-w-4xl px-4 py-12">
+        {/* Handle URL error params */}
+        <Suspense fallback={null}>
+          <ErrorParamHandler onError={handleUrlError} />
+        </Suspense>
 
-      {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Calendars</h1>
-          <p className="text-muted-foreground mt-1">Manage your connected calendar sources</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <LogoutButton />
-          <motion.button
-            onClick={handleAddCalendar}
-            className={cn(
-              'flex items-center gap-2 rounded-lg px-4 py-2 font-medium',
-              'bg-primary text-primary-foreground',
-              'hover:bg-primary/90 transition-colors',
-              'focus:ring-ring focus:ring-2 focus:ring-offset-2 focus:outline-none'
-            )}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <Plus className="h-5 w-5" />
-            Add Calendar
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Error alert */}
-      <AnimatePresence>
-        {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
-      </AnimatePresence>
-
-      {/* Calendar list */}
-      {isLoading ? (
-        <CalendarListSkeleton />
-      ) : calendars.length === 0 ? (
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="border-border rounded-lg border border-dashed py-16 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-10 flex items-center justify-between"
         >
-          <Calendar className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-          <h3 className="mb-2 font-medium">No calendars connected</h3>
-          <p className="text-muted-foreground mb-6 text-sm">
-            Connect a Google Calendar to get started
-          </p>
-          <button
-            onClick={handleAddCalendar}
-            className={cn(
-              'inline-flex items-center gap-2 rounded-lg px-4 py-2 font-medium',
-              'bg-primary text-primary-foreground',
-              'hover:bg-primary/90 transition-colors'
-            )}
-          >
-            <Plus className="h-5 w-5" />
-            Add Calendar
-          </button>
-        </motion.div>
-      ) : (
-        <AnimatePresence mode="popLayout">
-          <div className="space-y-3">
-            {calendars.map((calendar, index) => (
-              <CalendarCard
-                key={calendar.id}
-                calendar={calendar}
-                syncStatus={syncStatuses[calendar.id] ?? 'idle'}
-                onToggle={() => handleToggle(calendar)}
-                onSync={() => handleSync(calendar)}
-                onDelete={() => handleDelete(calendar)}
-                index={index}
-              />
-            ))}
+          <div>
+            <motion.h1
+              className="text-3xl font-bold tracking-tight"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              Calendars
+            </motion.h1>
+            <motion.p
+              className="text-muted-foreground mt-2"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              Manage your connected calendar sources
+            </motion.p>
           </div>
-        </AnimatePresence>
-      )}
-
-      {/* View calendar link */}
-      {calendars.length > 0 && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-center">
-          <button
-            onClick={() => router.push('/calendars/view')}
-            className={cn(
-              'text-primary hover:text-primary/80 font-medium',
-              'transition-colors hover:underline'
-            )}
+          <motion.div
+            className="flex items-center gap-3"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
           >
-            View Calendar →
-          </button>
+            <LogoutButton />
+            <motion.button
+              onClick={handleAddCalendar}
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-5 py-2.5 font-medium',
+                'bg-primary text-primary-foreground',
+                'shadow-zen hover:shadow-zen-lg',
+                'transition-zen focus-zen'
+              )}
+            >
+              <Sparkles className="h-4 w-4" />
+              Add Calendar
+            </motion.button>
+          </motion.div>
         </motion.div>
-      )}
+
+        {/* Error alert */}
+        <AnimatePresence>
+          {error && <ErrorAlert message={error} onDismiss={() => setError(null)} />}
+        </AnimatePresence>
+
+        {/* Calendar list */}
+        {isLoading ? (
+          <CalendarListSkeleton />
+        ) : calendars.length === 0 ? (
+          <EmptyState onAddCalendar={handleAddCalendar} />
+        ) : (
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="space-y-4"
+          >
+            <AnimatePresence mode="popLayout">
+              {calendars.map((calendar) => (
+                <CalendarCard
+                  key={calendar.id}
+                  calendar={calendar}
+                  syncStatus={syncStatuses[calendar.id] ?? 'idle'}
+                  onToggle={() => handleToggle(calendar)}
+                  onSync={() => handleSync(calendar)}
+                  onDelete={() => handleDelete(calendar)}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+
+        {/* View calendar link */}
+        {calendars.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-10 text-center"
+          >
+            <motion.button
+              onClick={() => router.push('/calendars/view')}
+              whileHover={{ scale: 1.02 }}
+              className={cn(
+                'inline-flex items-center gap-2 font-medium',
+                'text-primary hover:text-primary/80',
+                'transition-zen'
+              )}
+            >
+              View Calendar
+              <motion.span
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                →
+              </motion.span>
+            </motion.button>
+          </motion.div>
+        )}
+      </div>
     </div>
   );
 }

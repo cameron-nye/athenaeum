@@ -16,6 +16,24 @@ vi.mock('framer-motion', () => ({
         {children}
       </div>
     ),
+    span: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLSpanElement> & { children?: React.ReactNode }) => (
+      <span className={className} {...props}>
+        {children}
+      </span>
+    ),
+    h2: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }) => (
+      <h2 className={className} {...props}>
+        {children}
+      </h2>
+    ),
     button: ({
       children,
       className,
@@ -174,6 +192,7 @@ describe('MonthView', () => {
     render(<MonthView {...defaultProps} />);
 
     const teamMeetingEvent = screen.getByTitle(/Team Meeting/);
-    expect(teamMeetingEvent).toHaveStyle({ backgroundColor: '#4285F4' });
+    // Event styling now uses transparent background with left border accent
+    expect(teamMeetingEvent).toHaveStyle({ borderLeft: '3px solid #4285F4' });
   });
 });

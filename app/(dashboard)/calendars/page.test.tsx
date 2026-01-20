@@ -44,6 +44,24 @@ vi.mock('framer-motion', () => ({
         {children}
       </span>
     ),
+    h1: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLHeadingElement> & { children?: React.ReactNode }) => (
+      <h1 className={className} {...props}>
+        {children}
+      </h1>
+    ),
+    p: ({
+      children,
+      className,
+      ...props
+    }: React.HTMLAttributes<HTMLParagraphElement> & { children?: React.ReactNode }) => (
+      <p className={className} {...props}>
+        {children}
+      </p>
+    ),
     button: ({
       children,
       className,
@@ -101,8 +119,8 @@ describe('CalendarsPage', () => {
     (global.fetch as ReturnType<typeof vi.fn>).mockImplementation(() => new Promise(() => {}));
     render(<CalendarsPage />, { wrapper: SWRWrapper });
 
-    // Should show loading skeleton with animate-pulse elements
-    const skeletons = document.querySelectorAll('.animate-pulse');
+    // Should show loading skeleton with bg-muted elements (zen-styled skeleton)
+    const skeletons = document.querySelectorAll('.bg-muted');
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
@@ -194,7 +212,7 @@ describe('CalendarsPage', () => {
       expect(screen.getByText('No calendars connected')).toBeInTheDocument();
     });
 
-    expect(screen.getByText('Connect a Google Calendar to get started')).toBeInTheDocument();
+    expect(screen.getByText('Connect a Google Calendar to begin your journey')).toBeInTheDocument();
   });
 
   it('toggles calendar enabled state', async () => {
@@ -298,10 +316,10 @@ describe('CalendarsPage', () => {
     render(<CalendarsPage />, { wrapper: SWRWrapper });
 
     await waitFor(() => {
-      expect(screen.getByText('View Calendar →')).toBeInTheDocument();
+      expect(screen.getByText('View Calendar')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByText('View Calendar →'));
+    fireEvent.click(screen.getByText('View Calendar'));
 
     expect(mockPush).toHaveBeenCalledWith('/calendars/view');
   });

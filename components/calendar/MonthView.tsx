@@ -23,21 +23,66 @@ import { cn } from '@/lib/utils';
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 interface MonthViewProps {
-  /** Events to display */
   events: CalendarViewEvent[];
-  /** Currently displayed month */
   currentDate: Date;
-  /** Callback when month changes */
   onDateChange: (date: Date) => void;
-  /** Callback when an event is clicked */
   onEventClick?: (event: CalendarViewEvent) => void;
-  /** Callback when a day is clicked */
   onDayClick?: (date: Date) => void;
-  /** Optional timezone for displaying times */
   timezone?: string;
-  /** Whether component is in loading state */
   isLoading?: boolean;
 }
+
+// Zen animation variants
+const gridVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 100 : -100,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      x: { type: 'spring' as const, stiffness: 200, damping: 25 },
+      opacity: { duration: 0.3 },
+    },
+  },
+  exit: (direction: number) => ({
+    x: direction < 0 ? 100 : -100,
+    opacity: 0,
+    transition: {
+      x: { type: 'spring' as const, stiffness: 200, damping: 25 },
+      opacity: { duration: 0.2 },
+    },
+  }),
+};
+
+const dayVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: (index: number) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: index * 0.008,
+      duration: 0.3,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  }),
+};
+
+const eventVariants = {
+  hidden: { opacity: 0, y: 4, scale: 0.95 },
+  visible: (index: number) => ({
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      delay: index * 0.03,
+      type: 'spring' as const,
+      stiffness: 300,
+      damping: 20,
+    },
+  }),
+};
 
 /**
  * Groups events by date for efficient lookup.
@@ -49,7 +94,6 @@ function groupEventsByDate(events: CalendarViewEvent[]): Map<string, CalendarVie
     const startDate = parseISO(event.start_time);
     const endDate = parseISO(event.end_time);
 
-    // For multi-day events or all-day events, add to each day
     const currentDate = new Date(startDate);
     while (currentDate < endDate) {
       const dateKey = currentDate.toISOString().split('T')[0];
@@ -66,7 +110,7 @@ function groupEventsByDate(events: CalendarViewEvent[]): Map<string, CalendarVie
 }
 
 /**
- * Renders a single event chip in the day cell.
+ * Renders a single event chip with zen styling.
  */
 function EventChip({
   event,
@@ -81,61 +125,41 @@ function EventChip({
 }) {
   const startTime = parseISO(event.start_time);
   const timeStr = event.all_day ? '' : formatTime(startTime, false, timezone);
-
-  // Use calendar source color or fallback
   const bgColor = event.calendar_source.color ?? '#6B7280';
 
   return (
     <motion.button
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{
-        type: 'spring',
-        stiffness: 400,
-        damping: 25,
-        delay: index * 0.02,
-      }}
+      custom={index}
+      variants={eventVariants}
+      initial="hidden"
+      animate="visible"
+      whileHover={{ scale: 1.02, y: -1 }}
+      whileTap={{ scale: 0.98 }}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
       }}
       className={cn(
-        'w-full truncate rounded px-1.5 py-0.5 text-left text-xs',
-        'cursor-pointer transition-[filter] hover:brightness-110',
-        'focus:ring-ring focus:ring-2 focus:ring-offset-1 focus:outline-none'
+        'w-full truncate rounded-lg px-2 py-1 text-left text-xs',
+        'transition-zen cursor-pointer',
+        'hover:shadow-sm',
+        'focus-zen'
       )}
       style={{
-        backgroundColor: bgColor,
-        color: getContrastColor(bgColor),
+        backgroundColor: bgColor + '20',
+        color: bgColor,
+        borderLeft: `3px solid ${bgColor}`,
       }}
       title={`${event.title}${timeStr ? ` - ${timeStr}` : ''}`}
     >
-      {!event.all_day && <span className="font-medium">{timeStr} </span>}
-      {event.title}
+      {!event.all_day && <span className="font-semibold opacity-80">{timeStr} </span>}
+      <span className="font-medium">{event.title}</span>
     </motion.button>
   );
 }
 
 /**
- * Determines if text should be light or dark based on background color.
- */
-function getContrastColor(hexColor: string): string {
-  // Remove # if present
-  const hex = hexColor.replace('#', '');
-
-  // Parse RGB values
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-  // Calculate relative luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  return luminance > 0.5 ? '#000000' : '#FFFFFF';
-}
-
-/**
- * Renders a single day cell in the month grid.
+ * Renders a single day cell with zen styling.
  */
 function DayCell({
   date,
@@ -157,45 +181,69 @@ function DayCell({
   const isCurrentMonth = isSameMonth(date, currentMonth);
   const isTodayDate = isToday(date, timezone);
   const dayNumber = date.getUTCDate();
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Sort events: all-day first, then by start time
   const sortedEvents = [...events].sort((a, b) => {
     if (a.all_day && !b.all_day) return -1;
     if (!a.all_day && b.all_day) return 1;
     return new Date(a.start_time).getTime() - new Date(b.start_time).getTime();
   });
 
-  // Show max 3 events, with "+N more" if there are more
   const visibleEvents = sortedEvents.slice(0, 3);
   const hiddenCount = sortedEvents.length - 3;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.2,
-        delay: index * 0.01,
-      }}
+      custom={index}
+      variants={dayVariants}
+      initial="hidden"
+      animate="visible"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
       onClick={() => onDayClick?.(date)}
       className={cn(
-        'border-border min-h-24 cursor-pointer border-r border-b p-1',
-        'hover:bg-accent/50 transition-colors',
-        !isCurrentMonth && 'bg-muted/30'
+        'relative min-h-28 cursor-pointer p-2',
+        'border-border/50 border-r border-b',
+        'transition-zen',
+        !isCurrentMonth && 'bg-muted/20',
+        isHovered && isCurrentMonth && 'bg-accent/30'
       )}
     >
-      <div className="mb-1 flex items-center justify-center">
-        <span
+      {/* Subtle hover glow */}
+      <motion.div
+        className="pointer-events-none absolute inset-0 opacity-0"
+        animate={{ opacity: isHovered ? 1 : 0 }}
+        transition={{ duration: 0.2 }}
+        style={{
+          background:
+            'radial-gradient(circle at 50% 30%, oklch(0.55 0.1 155 / 0.08) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Day number */}
+      <div className="relative mb-2 flex items-center justify-center">
+        <motion.span
+          animate={{
+            scale: isTodayDate ? [1, 1.05, 1] : 1,
+          }}
+          transition={{
+            duration: 2,
+            repeat: isTodayDate ? Infinity : 0,
+            ease: 'easeInOut',
+          }}
           className={cn(
-            'flex h-7 w-7 items-center justify-center rounded-full text-sm',
-            isTodayDate && 'bg-primary text-primary-foreground font-bold',
-            !isCurrentMonth && !isTodayDate && 'text-muted-foreground'
+            'flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium',
+            'transition-zen',
+            isTodayDate && 'bg-primary text-primary-foreground shadow-zen',
+            !isCurrentMonth && !isTodayDate && 'text-muted-foreground/60'
           )}
         >
           {dayNumber}
-        </span>
+        </motion.span>
       </div>
-      <div className="space-y-0.5 overflow-hidden">
+
+      {/* Events */}
+      <div className="relative space-y-1">
         {visibleEvents.map((event, idx) => (
           <EventChip
             key={event.id}
@@ -206,7 +254,13 @@ function DayCell({
           />
         ))}
         {hiddenCount > 0 && (
-          <div className="text-muted-foreground px-1.5 text-xs">+{hiddenCount} more</div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-muted-foreground px-2 text-xs font-medium"
+          >
+            +{hiddenCount} more
+          </motion.div>
         )}
       </div>
     </motion.div>
@@ -214,8 +268,41 @@ function DayCell({
 }
 
 /**
- * Month view calendar component.
- * Displays a full month grid with events.
+ * Navigation button with zen styling.
+ */
+function NavButton({
+  onClick,
+  direction,
+  label,
+}: {
+  onClick: () => void;
+  direction: 'prev' | 'next';
+  label: string;
+}) {
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className={cn(
+        'rounded-xl p-2.5',
+        'bg-card hover:bg-accent',
+        'shadow-zen hover:shadow-zen-lg',
+        'transition-zen focus-zen'
+      )}
+      aria-label={label}
+    >
+      {direction === 'prev' ? (
+        <ChevronLeft className="h-5 w-5" />
+      ) : (
+        <ChevronRight className="h-5 w-5" />
+      )}
+    </motion.button>
+  );
+}
+
+/**
+ * Month view calendar component with zen aesthetic.
  */
 export function MonthView({
   events,
@@ -228,10 +315,7 @@ export function MonthView({
 }: MonthViewProps) {
   const [direction, setDirection] = useState(0);
 
-  // Generate calendar dates for the month
   const calendarDates = useMemo(() => getMonthCalendarDates(currentDate), [currentDate]);
-
-  // Group events by date
   const eventsByDate = useMemo(() => groupEventsByDate(events), [events]);
 
   const handlePreviousMonth = () => {
@@ -247,67 +331,70 @@ export function MonthView({
   const monthKey = `${currentDate.getUTCFullYear()}-${currentDate.getUTCMonth()}`;
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header with navigation */}
-      <div className="border-border flex items-center justify-between border-b px-4 py-3">
-        <h2 className="text-xl font-semibold">{formatMonthYear(currentDate, timezone)}</h2>
+    <div className="flex h-full flex-col overflow-hidden">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between px-6 py-4"
+      >
+        <motion.h2
+          key={monthKey}
+          initial={{ opacity: 0, x: direction * 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="text-2xl font-semibold tracking-tight"
+        >
+          {formatMonthYear(currentDate, timezone)}
+        </motion.h2>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handlePreviousMonth}
-            className={cn(
-              'hover:bg-accent rounded-md p-2 transition-colors',
-              'focus:ring-ring focus:ring-2 focus:outline-none'
-            )}
-            aria-label="Previous month"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button
-            onClick={handleNextMonth}
-            className={cn(
-              'hover:bg-accent rounded-md p-2 transition-colors',
-              'focus:ring-ring focus:ring-2 focus:outline-none'
-            )}
-            aria-label="Next month"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
+          <NavButton onClick={handlePreviousMonth} direction="prev" label="Previous month" />
+          <NavButton onClick={handleNextMonth} direction="next" label="Next month" />
         </div>
-      </div>
+      </motion.div>
 
       {/* Weekday headers */}
-      <div className="border-border bg-muted/50 grid grid-cols-7 border-b">
-        {WEEKDAYS.map((day) => (
-          <div key={day} className="text-muted-foreground py-2 text-center text-sm font-medium">
+      <div className="border-border/50 bg-muted/30 grid grid-cols-7 border-b">
+        {WEEKDAYS.map((day, index) => (
+          <motion.div
+            key={day}
+            initial={{ opacity: 0, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+            className="text-muted-foreground py-3 text-center text-sm font-medium"
+          >
             {day}
-          </div>
+          </motion.div>
         ))}
       </div>
 
       {/* Calendar grid */}
       <div className="flex-1 overflow-auto">
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={monthKey}
-            initial={{ x: direction * 50, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction * -50, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            custom={direction}
+            variants={gridVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
             className="grid grid-cols-7"
           >
             {isLoading
-              ? // Loading skeleton
-                Array.from({ length: 42 }).map((_, index) => (
-                  <div
+              ? Array.from({ length: 42 }).map((_, index) => (
+                  <motion.div
                     key={index}
-                    className="border-border min-h-24 animate-pulse border-r border-b p-1"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: index * 0.01 }}
+                    className="border-border/50 min-h-28 border-r border-b p-2"
                   >
-                    <div className="bg-muted mx-auto mb-1 h-7 w-7 rounded-full" />
+                    <div className="bg-muted mx-auto mb-2 h-8 w-8 animate-pulse rounded-full" />
                     <div className="space-y-1">
-                      <div className="bg-muted h-4 rounded" />
-                      <div className="bg-muted h-4 w-3/4 rounded" />
+                      <div className="bg-muted h-6 animate-pulse rounded-lg" />
+                      <div className="bg-muted h-6 w-3/4 animate-pulse rounded-lg" />
                     </div>
-                  </div>
+                  </motion.div>
                 ))
               : calendarDates.map((date, index) => {
                   const dateKey = date.toISOString().split('T')[0];
