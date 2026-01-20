@@ -1208,3 +1208,30 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (6 warnings, pre-existing)
+
+## 2026-01-20: REQ-4-029 - Bulk photo actions
+
+**Completed**: Multi-select and bulk operations for photos
+
+**Features**:
+- Selection mode toggle button in header
+- PhotoGrid supports selection mode with checkbox overlays
+- Selected photos show ring highlight
+- BulkActionBar component with:
+  - Selected count display
+  - Select All / Deselect All buttons
+  - Bulk Enable button
+  - Bulk Disable button
+  - Bulk Album assignment dropdown
+  - Bulk Delete with confirmation
+  - Exit selection mode button
+- All bulk operations use optimistic updates
+- Parallel API calls for efficient bulk processing
+
+**Files modified**:
+- app/(dashboard)/photos/page.tsx (PhotoGrid selection support, BulkActionBar, bulk handlers)
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (10 warnings, pre-existing)

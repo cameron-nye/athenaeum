@@ -25,6 +25,8 @@ import {
   ChevronDown,
   FolderPlus,
   Check,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PhotoUpload } from '@/components/photos/PhotoUpload';
@@ -81,10 +83,16 @@ function PhotoGrid({
   photos,
   onPhotoClick,
   onToggleEnabled,
+  selectionMode,
+  selectedIds,
+  onToggleSelection,
 }: {
   photos: Photo[];
   onPhotoClick: (index: number) => void;
   onToggleEnabled: (id: string, enabled: boolean) => void;
+  selectionMode: boolean;
+  selectedIds: Set<string>;
+  onToggleSelection: (id: string) => void;
 }) {
   const [loadedImages, setLoadedImages] = useState<Set<string>>(new Set());
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -112,6 +120,17 @@ function PhotoGrid({
     setLoadedImages((prev) => new Set([...prev, photoId]));
   }, []);
 
+  const handleClick = useCallback(
+    (photo: Photo, index: number) => {
+      if (selectionMode) {
+        onToggleSelection(photo.id);
+      } else {
+        onPhotoClick(index);
+      }
+    },
+    [selectionMode, onToggleSelection, onPhotoClick]
+  );
+
   return (
     <motion.div
       variants={containerVariants}
@@ -119,62 +138,106 @@ function PhotoGrid({
       animate="visible"
       className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
     >
-      {photos.map((photo, index) => (
-        <motion.div key={photo.id} variants={itemVariants} className="group relative aspect-square">
-          {/* Skeleton */}
-          {!loadedImages.has(photo.id) && (
-            <div className="animate-shimmer absolute inset-0 rounded-lg bg-neutral-200 dark:bg-neutral-700" />
-          )}
+      {photos.map((photo, index) => {
+        const isSelected = selectedIds.has(photo.id);
+        return (
+          <motion.div
+            key={photo.id}
+            variants={itemVariants}
+            className="group relative aspect-square"
+          >
+            {/* Skeleton */}
+            {!loadedImages.has(photo.id) && (
+              <div className="animate-shimmer absolute inset-0 rounded-lg bg-neutral-200 dark:bg-neutral-700" />
+            )}
 
-          {/* Image */}
-          <button type="button" onClick={() => onPhotoClick(index)} className="h-full w-full">
-            <img
-              ref={(el) => {
-                if (el) observerRef.current?.observe(el);
-              }}
-              data-src={getThumbnailUrl(photo.storage_path)}
-              src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
-              alt={photo.filename}
-              onLoad={() => handleImageLoad(photo.id)}
-              className={cn(
-                'h-full w-full rounded-lg object-cover transition-opacity duration-300',
-                loadedImages.has(photo.id) ? 'opacity-100' : 'opacity-0',
-                !photo.enabled && 'opacity-50 grayscale'
-              )}
-            />
-          </button>
-
-          {/* Overlay */}
-          <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-
-          {/* Actions */}
-          <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+            {/* Image */}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleEnabled(photo.id, !photo.enabled);
-              }}
-              className={cn(
-                'rounded-full p-1.5 backdrop-blur-sm transition-colors',
-                photo.enabled
-                  ? 'bg-white/80 text-neutral-700 hover:bg-white'
-                  : 'bg-amber-500/80 text-white hover:bg-amber-500'
-              )}
-              title={photo.enabled ? 'Disable photo' : 'Enable photo'}
+              onClick={() => handleClick(photo, index)}
+              className="h-full w-full"
             >
-              {photo.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+              <img
+                ref={(el) => {
+                  if (el) observerRef.current?.observe(el);
+                }}
+                data-src={getThumbnailUrl(photo.storage_path)}
+                src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                alt={photo.filename}
+                onLoad={() => handleImageLoad(photo.id)}
+                className={cn(
+                  'h-full w-full rounded-lg object-cover transition-all duration-300',
+                  loadedImages.has(photo.id) ? 'opacity-100' : 'opacity-0',
+                  !photo.enabled && 'opacity-50 grayscale',
+                  selectionMode && isSelected && 'ring-primary-500 ring-4 ring-offset-2'
+                )}
+              />
             </button>
-          </div>
 
-          {/* Disabled badge */}
-          {!photo.enabled && (
-            <div className="absolute top-2 left-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">
-              Hidden
-            </div>
-          )}
-        </motion.div>
-      ))}
+            {/* Selection checkbox overlay */}
+            {selectionMode && (
+              <div className="absolute top-2 left-2">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleSelection(photo.id);
+                  }}
+                  className={cn(
+                    'rounded-md p-0.5 transition-colors',
+                    isSelected
+                      ? 'bg-primary-500 text-white'
+                      : 'bg-white/80 text-neutral-600 hover:bg-white'
+                  )}
+                >
+                  {isSelected ? (
+                    <CheckSquare className="h-5 w-5" />
+                  ) : (
+                    <Square className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Overlay */}
+            <div
+              className={cn(
+                'pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-t from-black/50 via-transparent to-transparent transition-opacity',
+                selectionMode ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'
+              )}
+            />
+
+            {/* Actions - only show when not in selection mode */}
+            {!selectionMode && (
+              <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleEnabled(photo.id, !photo.enabled);
+                  }}
+                  className={cn(
+                    'rounded-full p-1.5 backdrop-blur-sm transition-colors',
+                    photo.enabled
+                      ? 'bg-white/80 text-neutral-700 hover:bg-white'
+                      : 'bg-amber-500/80 text-white hover:bg-amber-500'
+                  )}
+                  title={photo.enabled ? 'Disable photo' : 'Enable photo'}
+                >
+                  {photo.enabled ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                </button>
+              </div>
+            )}
+
+            {/* Disabled badge */}
+            {!photo.enabled && !selectionMode && (
+              <div className="absolute top-2 left-2 rounded-full bg-amber-500 px-2 py-0.5 text-xs font-medium text-white">
+                Hidden
+              </div>
+            )}
+          </motion.div>
+        );
+      })}
     </motion.div>
   );
 }
@@ -624,11 +687,208 @@ function CreateAlbumDialog({
   );
 }
 
+// Bulk action bar component
+function BulkActionBar({
+  selectedCount,
+  totalCount,
+  onSelectAll,
+  onDeselectAll,
+  onBulkDelete,
+  onBulkEnable,
+  onBulkDisable,
+  onBulkAssignAlbum,
+  albums,
+  onExit,
+  isProcessing,
+}: {
+  selectedCount: number;
+  totalCount: number;
+  onSelectAll: () => void;
+  onDeselectAll: () => void;
+  onBulkDelete: () => void;
+  onBulkEnable: () => void;
+  onBulkDisable: () => void;
+  onBulkAssignAlbum: (album: string | null) => void;
+  albums: string[];
+  onExit: () => void;
+  isProcessing: boolean;
+}) {
+  const [showAlbumDropdown, setShowAlbumDropdown] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowAlbumDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="sticky top-0 z-50 mb-4 flex items-center justify-between gap-4 rounded-lg border border-neutral-200 bg-white p-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+    >
+      <div className="flex items-center gap-4">
+        <div className="text-sm font-medium text-neutral-700 dark:text-neutral-200">
+          {selectedCount} of {totalCount} selected
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onSelectAll}
+            disabled={isProcessing}
+            className="rounded px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          >
+            Select All
+          </button>
+          <button
+            type="button"
+            onClick={onDeselectAll}
+            disabled={isProcessing}
+            className="rounded px-2 py-1 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          >
+            Deselect All
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        {/* Bulk enable/disable */}
+        <button
+          type="button"
+          onClick={onBulkEnable}
+          disabled={isProcessing || selectedCount === 0}
+          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-green-600 hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-green-400 dark:hover:bg-green-900/20"
+          title="Enable selected"
+        >
+          <Eye className="h-4 w-4" />
+          Enable
+        </button>
+        <button
+          type="button"
+          onClick={onBulkDisable}
+          disabled={isProcessing || selectedCount === 0}
+          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-amber-600 hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-400 dark:hover:bg-amber-900/20"
+          title="Disable selected"
+        >
+          <EyeOff className="h-4 w-4" />
+          Disable
+        </button>
+
+        {/* Album dropdown */}
+        <div ref={dropdownRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setShowAlbumDropdown(!showAlbumDropdown)}
+            disabled={isProcessing || selectedCount === 0}
+            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-neutral-600 hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          >
+            <Folder className="h-4 w-4" />
+            Album
+            <ChevronDown className="h-3 w-3" />
+          </button>
+          <AnimatePresence>
+            {showAlbumDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="absolute top-full right-0 z-50 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    onBulkAssignAlbum(null);
+                    setShowAlbumDropdown(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                >
+                  Remove from Album
+                </button>
+                {albums.length > 0 && (
+                  <div className="my-1 border-t border-neutral-200 dark:border-neutral-700" />
+                )}
+                {albums.map((album) => (
+                  <button
+                    key={album}
+                    type="button"
+                    onClick={() => {
+                      onBulkAssignAlbum(album);
+                      setShowAlbumDropdown(false);
+                    }}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                  >
+                    {album}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Delete */}
+        {showConfirmDelete ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-neutral-600 dark:text-neutral-300">Delete?</span>
+            <button
+              type="button"
+              onClick={() => {
+                onBulkDelete();
+                setShowConfirmDelete(false);
+              }}
+              disabled={isProcessing}
+              className="rounded bg-red-600 px-2 py-1 text-sm text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Yes'}
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowConfirmDelete(false)}
+              className="rounded bg-neutral-200 px-2 py-1 text-sm text-neutral-700 hover:bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-200"
+            >
+              No
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowConfirmDelete(true)}
+            disabled={isProcessing || selectedCount === 0}
+            className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 dark:text-red-400 dark:hover:bg-red-900/20"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </button>
+        )}
+
+        {/* Exit selection mode */}
+        <button
+          type="button"
+          onClick={onExit}
+          className="ml-2 rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-100 dark:hover:bg-neutral-700"
+          title="Exit selection mode"
+        >
+          <X className="h-5 w-5" />
+        </button>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function PhotosPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
   const [showCreateAlbum, setShowCreateAlbum] = useState(false);
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkProcessing, setIsBulkProcessing] = useState(false);
 
   const { data, error, isLoading, mutate } = useSWR<{ photos: Photo[] }>('/api/photos', fetcher);
 
@@ -714,6 +974,146 @@ export default function PhotosPage() {
     [selectedIndex, photos.length]
   );
 
+  // Selection mode handlers
+  const handleToggleSelection = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(photos.map((p) => p.id)));
+  }, [photos]);
+
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleExitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+
+    // Optimistic update
+    mutate({ photos: allPhotos.filter((p) => !selectedIds.has(p.id)) }, false);
+
+    try {
+      // Delete photos in parallel
+      await Promise.all(
+        Array.from(selectedIds).map((id) => fetch(`/api/photos/${id}`, { method: 'DELETE' }))
+      );
+      setSelectedIds(new Set());
+      mutate();
+    } catch {
+      mutate(); // Revert on error
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  }, [selectedIds, allPhotos, mutate]);
+
+  const handleBulkEnable = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+
+    // Optimistic update
+    mutate(
+      {
+        photos: allPhotos.map((p) => (selectedIds.has(p.id) ? { ...p, enabled: true } : p)),
+      },
+      false
+    );
+
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          fetch(`/api/photos/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: true }),
+          })
+        )
+      );
+      mutate();
+    } catch {
+      mutate();
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  }, [selectedIds, allPhotos, mutate]);
+
+  const handleBulkDisable = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+    setIsBulkProcessing(true);
+
+    // Optimistic update
+    mutate(
+      {
+        photos: allPhotos.map((p) => (selectedIds.has(p.id) ? { ...p, enabled: false } : p)),
+      },
+      false
+    );
+
+    try {
+      await Promise.all(
+        Array.from(selectedIds).map((id) =>
+          fetch(`/api/photos/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: false }),
+          })
+        )
+      );
+      mutate();
+    } catch {
+      mutate();
+    } finally {
+      setIsBulkProcessing(false);
+    }
+  }, [selectedIds, allPhotos, mutate]);
+
+  const handleBulkAssignAlbum = useCallback(
+    async (album: string | null) => {
+      if (selectedIds.size === 0) return;
+      setIsBulkProcessing(true);
+
+      // Optimistic update
+      mutate(
+        {
+          photos: allPhotos.map((p) => (selectedIds.has(p.id) ? { ...p, album } : p)),
+        },
+        false
+      );
+
+      try {
+        await Promise.all(
+          Array.from(selectedIds).map((id) =>
+            fetch(`/api/photos/${id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ album }),
+            })
+          )
+        );
+        mutate();
+      } catch {
+        mutate();
+      } finally {
+        setIsBulkProcessing(false);
+      }
+    },
+    [selectedIds, allPhotos, mutate]
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-50 to-white dark:from-neutral-900 dark:to-neutral-950">
       {/* Header */}
@@ -742,6 +1142,18 @@ export default function PhotosPage() {
                 onSelectAlbum={setSelectedAlbum}
                 onCreateAlbum={() => setShowCreateAlbum(true)}
               />
+
+              {/* Select button */}
+              {photos.length > 0 && !selectionMode && (
+                <button
+                  type="button"
+                  onClick={() => setSelectionMode(true)}
+                  className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  Select
+                </button>
+              )}
 
               <motion.button
                 type="button"
@@ -839,12 +1251,34 @@ export default function PhotosPage() {
           </motion.div>
         )}
 
+        {/* Bulk action bar */}
+        <AnimatePresence>
+          {selectionMode && (
+            <BulkActionBar
+              selectedCount={selectedIds.size}
+              totalCount={photos.length}
+              onSelectAll={handleSelectAll}
+              onDeselectAll={handleDeselectAll}
+              onBulkDelete={handleBulkDelete}
+              onBulkEnable={handleBulkEnable}
+              onBulkDisable={handleBulkDisable}
+              onBulkAssignAlbum={handleBulkAssignAlbum}
+              albums={albums}
+              onExit={handleExitSelectionMode}
+              isProcessing={isBulkProcessing}
+            />
+          )}
+        </AnimatePresence>
+
         {/* Photo grid */}
         {!isLoading && !error && photos.length > 0 && (
           <PhotoGrid
             photos={photos}
             onPhotoClick={setSelectedIndex}
             onToggleEnabled={handleToggleEnabled}
+            selectionMode={selectionMode}
+            selectedIds={selectedIds}
+            onToggleSelection={handleToggleSelection}
           />
         )}
 

@@ -395,7 +395,7 @@
         "Bulk enable/disable selected",
         "Bulk assign to album"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-030",
