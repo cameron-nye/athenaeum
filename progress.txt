@@ -1131,3 +1131,23 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (5 warnings, all pre-existing)
+
+## 2026-01-20: REQ-4-033 - Add photos to realtime subscription
+
+**Completed**: Photos now update in real-time on display
+
+**Changes**:
+- Added PhotoRecord interface to RealtimeProvider
+- Added onPhotosChange callback to RealtimeProviderProps
+- Subscribed to 'photos' table changes in channel
+- Connected handlePhotoChange from DisplayContext to RealtimeProvider
+- Added photoCount to DebugOverlay
+
+**Files modified**:
+- components/display/RealtimeProvider.tsx
+- components/display/DebugOverlay.tsx
+- app/(display)/[displayId]/DisplayClient.tsx
+
+**Verification**:
+- typecheck: pass
+- lint: pass (5 warnings, pre-existing)

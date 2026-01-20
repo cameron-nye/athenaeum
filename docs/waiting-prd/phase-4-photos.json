@@ -445,7 +445,7 @@
         "Deleted photos removed from slideshow",
         "Disabled photos excluded from slideshow"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-034",

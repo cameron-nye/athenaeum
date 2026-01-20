@@ -19,6 +19,7 @@ interface DebugOverlayProps {
   lastUpdated?: string | null;
   eventCount?: number;
   calendarSourceCount?: number;
+  photoCount?: number;
 }
 
 export function DebugOverlay({
@@ -28,6 +29,7 @@ export function DebugOverlay({
   lastUpdated,
   eventCount = 0,
   calendarSourceCount = 0,
+  photoCount = 0,
 }: DebugOverlayProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [memoryInfo, setMemoryInfo] = useState<{
@@ -162,7 +164,7 @@ export function DebugOverlay({
             </div>
 
             {/* Data Counts */}
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
               <div>
                 <span className="text-gray-400">Events:</span>{' '}
                 <span className="font-mono">{eventCount}</span>
@@ -170,6 +172,10 @@ export function DebugOverlay({
               <div>
                 <span className="text-gray-400">Calendars:</span>{' '}
                 <span className="font-mono">{calendarSourceCount}</span>
+              </div>
+              <div>
+                <span className="text-gray-400">Photos:</span>{' '}
+                <span className="font-mono">{photoCount}</span>
               </div>
             </div>
 

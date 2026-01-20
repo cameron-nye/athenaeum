@@ -25,6 +25,7 @@ export interface RealtimeProviderProps {
   householdId: string;
   onEventsChange?: (event: RealtimeEvent<EventRecord>) => void;
   onCalendarSourcesChange?: (event: RealtimeEvent<CalendarSourceRecord>) => void;
+  onPhotosChange?: (event: RealtimeEvent<PhotoRecord>) => void;
   onStatusChange?: (status: RealtimeStatus) => void;
   onError?: (error: Error) => void;
   children: React.ReactNode;
@@ -59,12 +60,28 @@ interface CalendarSourceRecord {
   created_at: string;
 }
 
+interface PhotoRecord {
+  id: string;
+  household_id: string;
+  uploaded_by: string | null;
+  storage_path: string;
+  filename: string;
+  width: number | null;
+  height: number | null;
+  taken_at: string | null;
+  album: string | null;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 const RECONNECT_DELAYS = [1000, 2000, 5000, 10000, 30000]; // Exponential backoff
 
 export function RealtimeProvider({
   householdId,
   onEventsChange,
   onCalendarSourcesChange,
+  onPhotosChange,
   onStatusChange,
   onError,
   children,
@@ -81,15 +98,17 @@ export function RealtimeProvider({
   // Store callbacks in refs to avoid dependency issues
   const onEventsChangeRef = useRef(onEventsChange);
   const onCalendarSourcesChangeRef = useRef(onCalendarSourcesChange);
+  const onPhotosChangeRef = useRef(onPhotosChange);
   const onErrorRef = useRef(onError);
   const onStatusChangeRef = useRef(onStatusChange);
 
   useEffect(() => {
     onEventsChangeRef.current = onEventsChange;
     onCalendarSourcesChangeRef.current = onCalendarSourcesChange;
+    onPhotosChangeRef.current = onPhotosChange;
     onErrorRef.current = onError;
     onStatusChangeRef.current = onStatusChange;
-  }, [onEventsChange, onCalendarSourcesChange, onError, onStatusChange]);
+  }, [onEventsChange, onCalendarSourcesChange, onPhotosChange, onError, onStatusChange]);
 
   const updateStatus = useCallback((newStatus: RealtimeStatus) => {
     statusRef.current = newStatus;
@@ -176,6 +195,23 @@ export function RealtimeProvider({
             eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
             old: payload.old as CalendarSourceRecord | null,
             new: payload.new as CalendarSourceRecord | null,
+          });
+        }
+      );
+
+      // Subscribe to photos table changes (REQ-4-033)
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'photos',
+        },
+        (payload) => {
+          onPhotosChangeRef.current?.({
+            eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
+            old: payload.old as PhotoRecord | null,
+            new: payload.new as PhotoRecord | null,
           });
         }
       );

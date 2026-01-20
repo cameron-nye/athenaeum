@@ -93,8 +93,14 @@ function DisplayContent({
   householdId: string;
   householdName: string;
 }) {
-  const { state, handleEventChange, handleCalendarSourceChange, setError, refreshData } =
-    useDisplayContext();
+  const {
+    state,
+    handleEventChange,
+    handleCalendarSourceChange,
+    handlePhotoChange,
+    setError,
+    refreshData,
+  } = useDisplayContext();
 
   // Apply theme from settings (REQ-3-013)
   useTheme(state.settings.theme);
@@ -179,6 +185,7 @@ function DisplayContent({
       householdId={householdId}
       onEventsChange={handleEventChange}
       onCalendarSourcesChange={handleCalendarSourceChange}
+      onPhotosChange={handlePhotoChange}
       onStatusChange={setRealtimeStatus}
       onError={(err) => setError(err.message)}
     >
@@ -196,6 +203,7 @@ function DisplayContent({
         lastUpdated={state.lastUpdated}
         eventCount={state.events.length}
         calendarSourceCount={state.calendarSources.length}
+        photoCount={state.photos.length}
       />
     </RealtimeProvider>
   );
