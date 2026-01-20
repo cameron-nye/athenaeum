@@ -289,7 +289,7 @@
         "Click to select",
         "Common chore icons included (broom, dishes, etc.)"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-022",

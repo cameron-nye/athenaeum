@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { parseRRuleToText } from '@/lib/chores/recurrence';
 import { RecurrenceSelector } from '@/components/chores/RecurrenceSelector';
+import { IconSelector } from '@/components/chores/IconSelector';
 import { UserAvatar } from '@/components/ui/UserAvatar';
 
 interface ChoreUser {
@@ -520,23 +521,12 @@ function ChoreEditModal({
             />
           </div>
 
-          <div className="flex gap-4">
-            <div className="flex-1">
+          <div className="flex items-end gap-4">
+            <div>
               <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Icon
               </label>
-              <input
-                type="text"
-                value={icon}
-                onChange={(e) => setIcon(e.target.value)}
-                maxLength={4}
-                className={cn(
-                  'w-20 rounded-xl border bg-white px-4 py-2.5 dark:bg-gray-900',
-                  'border-gray-200 dark:border-gray-700',
-                  'focus:border-transparent focus:ring-2 focus:ring-indigo-500',
-                  'text-center text-xl text-gray-900 dark:text-white'
-                )}
-              />
+              <IconSelector value={icon || null} onChange={setIcon} />
             </div>
 
             <div className="flex-1">

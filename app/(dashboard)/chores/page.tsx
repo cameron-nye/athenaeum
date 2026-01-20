@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { IconSelector } from '@/components/chores/IconSelector';
 
 interface ChoreAssignment {
   id: string;
@@ -488,21 +489,9 @@ function ChoreCreateModal({ onClose, onCreated }: { onClose: () => void; onCreat
           {/* Icon */}
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Icon (emoji)
+              Icon
             </label>
-            <input
-              type="text"
-              value={icon}
-              onChange={(e) => setIcon(e.target.value)}
-              placeholder="e.g., 🧹"
-              maxLength={4}
-              className={cn(
-                'w-20 rounded-xl border bg-white px-4 py-2.5 dark:bg-gray-900',
-                'border-gray-200 dark:border-gray-700',
-                'focus:border-transparent focus:ring-2 focus:ring-indigo-500',
-                'text-center text-xl text-gray-900 placeholder-gray-400 dark:text-white'
-              )}
-            />
+            <IconSelector value={icon || null} onChange={setIcon} />
           </div>
 
           {/* Points */}

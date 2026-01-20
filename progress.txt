@@ -1258,3 +1258,31 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (305 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-021 - Create chore icon selector component
+
+**Completed**: Emoji icon selector with categories and search
+
+**Features**:
+- 70 chore-related emojis in 7 categories
+- Categories: Cleaning, Kitchen, Laundry, Outdoor, Pets, General, More
+- Category filter tabs
+- Search input (placeholder for keyword search)
+- 8x8 grid layout with hover animations
+- Selected icon highlighted with ring
+- Click to select, dropdown closes
+- Current selection shown at bottom
+
+**Files created**:
+- components/chores/IconSelector.tsx
+- components/chores/IconSelector.test.tsx (13 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (ChoreCreateModal uses IconSelector)
+- app/(dashboard)/chores/[id]/page.tsx (ChoreEditModal uses IconSelector)
+- docs/prd.json (marked REQ-5-021 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (318 tests)
+- lint: pass (1 pre-existing warning)
