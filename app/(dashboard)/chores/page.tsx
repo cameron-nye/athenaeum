@@ -23,6 +23,7 @@ import {
   ListTodo,
   LayoutGrid,
   ClipboardCheck,
+  History,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IconSelector } from '@/components/chores/IconSelector';
@@ -335,6 +336,19 @@ export default function ChoresPage() {
             >
               <ClipboardCheck className="h-5 w-5" />
               <span className="hidden sm:inline">My Chores</span>
+            </Link>
+            <Link
+              href="/chores/history"
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/30',
+                'text-green-700 dark:text-green-300',
+                'font-medium',
+                'transition-all duration-200 hover:bg-green-100 dark:hover:bg-green-900/50'
+              )}
+            >
+              <History className="h-5 w-5" />
+              <span className="hidden sm:inline">History</span>
             </Link>
             <button
               onClick={handleAddChore}

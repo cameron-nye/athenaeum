@@ -1427,3 +1427,31 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (362 tests)
 - lint: pass (warnings only in test mocks)
+
+## 2026-01-20: REQ-5-023 - Create chore completion history
+
+**Completed**: Chore completion history page with filters
+
+**Features**:
+- Page at /chores/history showing completed assignments
+- Filter by household member (Everyone, specific members)
+- Filter by date range (Last 7 days, 30 days, 90 days, All time)
+- Grouped by completion date (Today, Yesterday, specific dates)
+- Stats badges (total completed, total points earned)
+- User avatar next to each completed chore
+- Points badges on each completion
+- Back link to main chores page
+- Link to History page from main chores header
+
+**Files created**:
+- app/(dashboard)/chores/history/page.tsx
+- app/(dashboard)/chores/history/page.test.tsx (12 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added History link)
+- docs/prd.json (marked REQ-5-023 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (374 tests)
+- lint: pass (warnings only in test mocks)

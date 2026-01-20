@@ -314,7 +314,7 @@
         "Shows completion date and chore",
         "Useful for accountability"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-024",
