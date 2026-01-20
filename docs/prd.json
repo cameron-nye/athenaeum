@@ -223,7 +223,7 @@
         "Quick complete button",
         "Accessible from navigation"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-017",

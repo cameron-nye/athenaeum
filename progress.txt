@@ -1339,3 +1339,32 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (330 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-016 - Create my chores view
+
+**Completed**: Dedicated page for current user's pending chores
+
+**Features**:
+- Page at /chores/my showing only user's pending assignments
+- Separate sections for overdue and upcoming
+- Overdue items shown prominently with red styling
+- Today's items highlighted with blue styling
+- Quick stats badges (overdue count, due today count)
+- "Done" button for quick completion
+- Points badges on assignments
+- Empty state when all caught up
+- Back link to all chores
+- "My Chores" link added to main chores page header
+
+**Files created**:
+- app/(dashboard)/chores/my/page.tsx
+- app/(dashboard)/chores/my/page.test.tsx (11 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added My Chores link)
+- docs/prd.json (marked REQ-5-016 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (341 tests)
+- lint: pass (1 pre-existing warning)

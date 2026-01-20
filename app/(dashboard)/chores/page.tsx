@@ -8,6 +8,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
 import {
@@ -21,6 +22,7 @@ import {
   Sparkles,
   ListTodo,
   LayoutGrid,
+  ClipboardCheck,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IconSelector } from '@/components/chores/IconSelector';
@@ -310,19 +312,34 @@ export default function ChoresPage() {
             </div>
           </div>
 
-          <button
-            onClick={handleAddChore}
-            className={cn(
-              'flex items-center gap-2 rounded-xl px-4 py-2.5',
-              'bg-gradient-to-r from-indigo-500 to-purple-500',
-              'hover:from-indigo-600 hover:to-purple-600',
-              'font-medium text-white shadow-md shadow-indigo-500/25',
-              'transition-all duration-300 hover:scale-105'
-            )}
-          >
-            <Plus className="h-5 w-5" />
-            <span className="hidden sm:inline">Add Chore</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/chores/my"
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'border border-indigo-200 bg-indigo-50 dark:border-indigo-800 dark:bg-indigo-900/30',
+                'text-indigo-700 dark:text-indigo-300',
+                'font-medium',
+                'transition-all duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-900/50'
+              )}
+            >
+              <ClipboardCheck className="h-5 w-5" />
+              <span className="hidden sm:inline">My Chores</span>
+            </Link>
+            <button
+              onClick={handleAddChore}
+              className={cn(
+                'flex items-center gap-2 rounded-xl px-4 py-2.5',
+                'bg-gradient-to-r from-indigo-500 to-purple-500',
+                'hover:from-indigo-600 hover:to-purple-600',
+                'font-medium text-white shadow-md shadow-indigo-500/25',
+                'transition-all duration-300 hover:scale-105'
+              )}
+            >
+              <Plus className="h-5 w-5" />
+              <span className="hidden sm:inline">Add Chore</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* Tab Toggle */}
