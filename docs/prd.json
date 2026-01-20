@@ -197,7 +197,7 @@
         "Filter by family member",
         "Filter by date range"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-015",

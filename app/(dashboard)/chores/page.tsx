@@ -3,6 +3,7 @@
 /**
  * Chores dashboard page showing all household chores.
  * REQ-5-007: Create chores dashboard page
+ * REQ-5-014: Create assignments list view (tab toggle)
  */
 
 import { useState, useCallback } from 'react';
@@ -18,9 +19,12 @@ import {
   ChevronRight,
   Loader2,
   Sparkles,
+  ListTodo,
+  LayoutGrid,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IconSelector } from '@/components/chores/IconSelector';
+import { AssignmentsView } from '@/components/chores/AssignmentsView';
 
 interface ChoreAssignment {
   id: string;
@@ -259,9 +263,12 @@ function EmptyState({ onAddChore }: { onAddChore: () => void }) {
   );
 }
 
+type ViewTab = 'chores' | 'assignments';
+
 export default function ChoresPage() {
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [activeTab, setActiveTab] = useState<ViewTab>('chores');
 
   const { data, error, isLoading, mutate } = useSWR<{ chores: Chore[] }>('/api/chores', fetcher, {
     revalidateOnFocus: true,
@@ -289,7 +296,7 @@ export default function ChoresPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="mb-8 flex items-center justify-between"
+          className="mb-6 flex items-center justify-between"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/25">
@@ -318,50 +325,115 @@ export default function ChoresPage() {
           </button>
         </motion.div>
 
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          </div>
-        )}
-
-        {/* Error state */}
-        {error && (
-          <div className="py-16 text-center">
-            <p className="text-red-500 dark:text-red-400">
-              Failed to load chores. Please try again.
-            </p>
-            <button onClick={() => mutate()} className="mt-4 text-indigo-500 hover:text-indigo-600">
-              Retry
+        {/* Tab Toggle */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 dark:border-gray-700 dark:bg-gray-800">
+            <button
+              onClick={() => setActiveTab('chores')}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium',
+                'transition-all duration-200',
+                activeTab === 'chores'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              )}
+            >
+              <LayoutGrid className="h-4 w-4" />
+              Chores
+            </button>
+            <button
+              onClick={() => setActiveTab('assignments')}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium',
+                'transition-all duration-200',
+                activeTab === 'assignments'
+                  ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300'
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+              )}
+            >
+              <ListTodo className="h-4 w-4" />
+              Assignments
             </button>
           </div>
-        )}
+        </motion.div>
 
-        {/* Empty state */}
-        {!isLoading && !error && chores.length === 0 && <EmptyState onAddChore={handleAddChore} />}
+        {/* Content based on active tab */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'chores' ? (
+            <motion.div
+              key="chores-view"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {/* Loading state */}
+              {isLoading && (
+                <div className="flex items-center justify-center py-16">
+                  <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+                </div>
+              )}
 
-        {/* Chores list */}
-        {!isLoading && !error && chores.length > 0 && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="space-y-4"
-          >
-            <AnimatePresence mode="popLayout">
-              {chores.map((chore) => (
-                <ChoreCard
-                  key={chore.id}
-                  chore={chore}
-                  onClick={() => handleChoreClick(chore.id)}
-                />
-              ))}
-            </AnimatePresence>
-          </motion.div>
-        )}
+              {/* Error state */}
+              {error && (
+                <div className="py-16 text-center">
+                  <p className="text-red-500 dark:text-red-400">
+                    Failed to load chores. Please try again.
+                  </p>
+                  <button
+                    onClick={() => mutate()}
+                    className="mt-4 text-indigo-500 hover:text-indigo-600"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!isLoading && !error && chores.length === 0 && (
+                <EmptyState onAddChore={handleAddChore} />
+              )}
+
+              {/* Chores list */}
+              {!isLoading && !error && chores.length > 0 && (
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="space-y-4"
+                >
+                  <AnimatePresence mode="popLayout">
+                    {chores.map((chore) => (
+                      <ChoreCard
+                        key={chore.id}
+                        chore={chore}
+                        onClick={() => handleChoreClick(chore.id)}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="assignments-view"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <AssignmentsView />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Create chore modal placeholder */}
+      {/* Create chore modal */}
       <AnimatePresence>
         {showCreateModal && (
           <ChoreCreateModal

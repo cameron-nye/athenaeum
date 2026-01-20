@@ -1307,3 +1307,35 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (318 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-014 - Create assignments list view
+
+**Completed**: Full-featured assignments list view with filters and grouping
+
+**Features**:
+- Tab toggle between "Chores" and "Assignments" views on main chores page
+- Family member filter dropdown (Everyone, My Chores, specific members, Unassigned)
+- Date range filter (Today, Next 7 Days, Next 30 Days, All Time)
+- Grouping by day or week with formatted headers
+- Show/hide completed toggle
+- Clear filters button when filters active
+- Assignment cards with:
+  - Completion checkbox with toggle
+  - Chore icon, title, points badge
+  - Due date with overdue highlighting
+  - Assignee avatar
+- Smooth framer-motion animations throughout
+- Empty state for no assignments
+
+**Files created**:
+- components/chores/AssignmentsView.tsx
+- components/chores/AssignmentsView.test.tsx (12 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/page.tsx (added tab toggle, imports)
+- docs/prd.json (marked REQ-5-014 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (330 tests)
+- lint: pass (1 pre-existing warning)
