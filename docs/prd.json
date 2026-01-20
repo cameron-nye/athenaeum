@@ -207,7 +207,7 @@
         "Sets up watchdog cron for crash recovery",
         "Script is executable and documented"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-015",
@@ -219,7 +219,7 @@
         "Logs restart events",
         "Runs via cron every 5 minutes"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-016",
@@ -470,7 +470,7 @@
         "Troubleshooting section",
         "Screenshots or photos if helpful"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-035",

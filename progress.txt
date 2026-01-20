@@ -940,3 +940,46 @@ To complete manually:
 **Verification**:
 - typecheck: pass
 - lint: pass
+
+## 2026-01-20: REQ-3-014 + REQ-3-015 - Pi kiosk and watchdog scripts
+
+**Completed**: Created Raspberry Pi deployment scripts
+
+**scripts/pi-setup.sh features**:
+- Takes display URL as argument
+- Installs chromium-browser, unclutter, xdotool
+- Disables screen blanking via xorg.conf
+- Creates kiosk.sh launcher script with Chromium flags
+- Configures autostart via .desktop file
+- Sets up auto-login and startx
+- Configures cron for watchdog (5-min) and daily reboot (3:30 AM)
+- Includes troubleshooting tips
+
+**scripts/pi-watchdog.sh features**:
+- Checks if Chromium process is running
+- Checks if Chromium window exists (xdotool)
+- Monitors memory usage (restarts if >1.5GB)
+- Logs all restart events with timestamps
+- Log rotation when >1MB
+- Designed for cron execution
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+- Scripts are executable
+
+## 2026-01-20: REQ-3-034 - Pi installation documentation
+
+**Completed**: Created comprehensive Raspberry Pi setup guide
+
+**File**: docs/raspberry-pi-setup.md
+
+**Contents**:
+- Hardware requirements (Pi 4 recommended, SD card, HDMI)
+- Software requirements (Raspberry Pi OS, Chromium)
+- Quick setup (3-step process using setup script)
+- Manual setup alternative
+- Troubleshooting section (black screen, invalid token, crashes, WiFi)
+- Maintenance section (logs, updates, settings)
+- Advanced config (resolution, portrait mode, multiple displays)
+- Security notes
