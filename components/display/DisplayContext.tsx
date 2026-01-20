@@ -35,6 +35,24 @@ export interface DisplayWidgets {
   upcomingEvents: boolean;
 }
 
+export interface SlideshowSettings {
+  enabled: boolean;
+  interval: number; // seconds
+  order: 'random' | 'sequential';
+  kenBurnsEnabled: boolean;
+  showPhotoInfo: boolean;
+  albumFilter: string | null;
+}
+
+export interface Photo {
+  id: string;
+  storage_path: string;
+  filename: string;
+  taken_at: string | null;
+  album: string | null;
+  enabled: boolean;
+}
+
 export interface DisplaySettings {
   theme: 'light' | 'dark' | 'auto';
   layout: 'calendar' | 'agenda' | 'split';
@@ -43,11 +61,14 @@ export interface DisplaySettings {
   ambientAnimationEnabled: boolean;
   widgetsEnabled: DisplayWidgets;
   scheduledReloadTime: string; // HH:mm format
+  slideshow: SlideshowSettings;
+  displayMode: 'calendar' | 'photos' | 'auto';
 }
 
 export interface DisplayState {
   events: CalendarEvent[];
   calendarSources: CalendarSource[];
+  photos: Photo[];
   settings: DisplaySettings;
   lastUpdated: string | null;
   isLoading: boolean;
@@ -61,6 +82,10 @@ type DisplayAction =
   | { type: 'DELETE_EVENT'; payload: string }
   | { type: 'SET_CALENDAR_SOURCES'; payload: CalendarSource[] }
   | { type: 'UPDATE_CALENDAR_SOURCE'; payload: CalendarSource }
+  | { type: 'SET_PHOTOS'; payload: Photo[] }
+  | { type: 'ADD_PHOTO'; payload: Photo }
+  | { type: 'UPDATE_PHOTO'; payload: Photo }
+  | { type: 'DELETE_PHOTO'; payload: string }
   | { type: 'SET_SETTINGS'; payload: DisplaySettings }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
@@ -70,15 +95,26 @@ interface DisplayContextValue {
   state: DisplayState;
   setEvents: (events: CalendarEvent[]) => void;
   setCalendarSources: (sources: CalendarSource[]) => void;
+  setPhotos: (photos: Photo[]) => void;
   setSettings: (settings: DisplaySettings) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   handleEventChange: (event: RealtimeEvent<CalendarEvent & { id: string }>) => void;
   handleCalendarSourceChange: (event: RealtimeEvent<CalendarSource & { id: string }>) => void;
+  handlePhotoChange: (event: RealtimeEvent<Photo & { id: string }>) => void;
   refreshData: () => void;
 }
 
 const DisplayContext = createContext<DisplayContextValue | null>(null);
+
+const DEFAULT_SLIDESHOW_SETTINGS: SlideshowSettings = {
+  enabled: true,
+  interval: 10,
+  order: 'random',
+  kenBurnsEnabled: true,
+  showPhotoInfo: true,
+  albumFilter: null,
+};
 
 const DEFAULT_SETTINGS: DisplaySettings = {
   theme: 'auto',
@@ -92,11 +128,14 @@ const DEFAULT_SETTINGS: DisplaySettings = {
     upcomingEvents: true,
   },
   scheduledReloadTime: '03:00',
+  slideshow: DEFAULT_SLIDESHOW_SETTINGS,
+  displayMode: 'auto',
 };
 
 const initialState: DisplayState = {
   events: [],
   calendarSources: [],
+  photos: [],
   settings: DEFAULT_SETTINGS,
   lastUpdated: null,
   isLoading: true,
@@ -149,6 +188,34 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         lastUpdated: new Date().toISOString(),
       };
 
+    case 'SET_PHOTOS':
+      return {
+        ...state,
+        photos: action.payload,
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'ADD_PHOTO':
+      return {
+        ...state,
+        photos: [...state.photos, action.payload],
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'UPDATE_PHOTO':
+      return {
+        ...state,
+        photos: state.photos.map((p) => (p.id === action.payload.id ? action.payload : p)),
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'DELETE_PHOTO':
+      return {
+        ...state,
+        photos: state.photos.filter((p) => p.id !== action.payload),
+        lastUpdated: new Date().toISOString(),
+      };
+
     case 'SET_SETTINGS':
       return {
         ...state,
@@ -188,6 +255,10 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
 
   const setCalendarSources = useCallback((sources: CalendarSource[]) => {
     dispatch({ type: 'SET_CALENDAR_SOURCES', payload: sources });
+  }, []);
+
+  const setPhotos = useCallback((photos: Photo[]) => {
+    dispatch({ type: 'SET_PHOTOS', payload: photos });
   }, []);
 
   const setSettings = useCallback((settings: DisplaySettings) => {
@@ -231,6 +302,31 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const handlePhotoChange = useCallback((event: RealtimeEvent<Photo & { id: string }>) => {
+    switch (event.eventType) {
+      case 'INSERT':
+        if (event.new && event.new.enabled) {
+          dispatch({ type: 'ADD_PHOTO', payload: event.new });
+        }
+        break;
+      case 'UPDATE':
+        if (event.new) {
+          if (event.new.enabled) {
+            dispatch({ type: 'UPDATE_PHOTO', payload: event.new });
+          } else {
+            // Photo disabled, remove from slideshow
+            dispatch({ type: 'DELETE_PHOTO', payload: event.new.id });
+          }
+        }
+        break;
+      case 'DELETE':
+        if (event.old?.id) {
+          dispatch({ type: 'DELETE_PHOTO', payload: event.old.id });
+        }
+        break;
+    }
+  }, []);
+
   const refreshData = useCallback(() => {
     dispatch({ type: 'REFRESH_TIMESTAMP' });
   }, []);
@@ -241,11 +337,13 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
         state,
         setEvents,
         setCalendarSources,
+        setPhotos,
         setSettings,
         setLoading,
         setError,
         handleEventChange,
         handleCalendarSourceChange,
+        handlePhotoChange,
         refreshData,
       }}
     >
@@ -270,6 +368,11 @@ export function useDisplayEvents() {
 export function useDisplayCalendarSources() {
   const { state } = useDisplayContext();
   return state.calendarSources;
+}
+
+export function useDisplayPhotos() {
+  const { state } = useDisplayContext();
+  return state.photos;
 }
 
 export function useDisplaySettings() {

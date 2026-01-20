@@ -15,7 +15,7 @@
         "enabled defaults to true",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-002",
@@ -30,7 +30,7 @@
         "DELETE policy allows deleting own household's photos",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-003",
@@ -42,7 +42,7 @@
         "File size limit set (e.g., 10MB)",
         "Allowed MIME types: image/jpeg, image/png, image/webp, image/gif"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-004",
@@ -56,7 +56,7 @@
         "Folder structure: photos/{household_id}/{filename}",
         "Migration applies without errors"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-005",
@@ -71,7 +71,7 @@
         "Empty state for no photos",
         "Pagination or infinite scroll for many photos"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-006",
@@ -87,7 +87,7 @@
         "Validates file size before upload",
         "Shows error messages for invalid files"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-007",
@@ -103,7 +103,7 @@
         "Returns created photo object",
         "Handles errors gracefully"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-008",
@@ -116,7 +116,7 @@
         "Transforms applied via URL parameters",
         "Thumbnails cached by Supabase"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-009",
@@ -124,7 +124,7 @@
       "description": "Create animated modal to view full-size photo",
       "acceptance_criteria": [
         "Modal component exists",
-        "Modal animates in with fade + scale (opacity 0→1, scale 0.95→1)",
+        "Modal animates in with fade + scale (opacity 0\u21921, scale 0.95\u21921)",
         "Backdrop has blur effect and fades in",
         "Shows full-size image",
         "Image crossfades when navigating (300ms)",
@@ -135,7 +135,7 @@
         "Close button",
         "Exit animation using AnimatePresence"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-010",
@@ -149,7 +149,7 @@
         "Shows success message",
         "Refreshes photo grid after deletion"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-011",
@@ -161,7 +161,7 @@
         "Disabled photos shown with overlay in grid",
         "Disabled photos excluded from slideshow"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-012",
@@ -190,7 +190,7 @@
         "Randomized or sequential order option",
         "Transitions are buttery smooth at 60fps"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-014",
@@ -202,7 +202,7 @@
         "Cleans up old preloaded images",
         "Reduces visible loading time between slides"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-015",
@@ -215,14 +215,14 @@
         "Quality set to 85%",
         "Progressive JPEG format"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-016",
       "title": "Implement Ken Burns effect",
       "description": "Add elegant slow pan/zoom animation to slideshow",
       "acceptance_criteria": [
-        "CSS animation for slow zoom/pan (scale 1.0→1.1 or similar)",
+        "CSS animation for slow zoom/pan (scale 1.0\u21921.1 or similar)",
         "Different start/end positions per image (randomized)",
         "Smooth animation using CSS transform (GPU accelerated)",
         "Animation duration matches slide interval (10s default)",
@@ -230,7 +230,7 @@
         "Combined with crossfade for elegant photo transitions",
         "Effect feels cinematic and calming"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-017",
@@ -267,7 +267,7 @@
         "Settings include: showPhotoInfo (date, filename)",
         "Settings stored in displays.settings JSON"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-020",
@@ -283,7 +283,7 @@
         "Uses soft pastel colors matching theme",
         "Typography readable but not distracting"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-021",
@@ -294,7 +294,7 @@
         "Shows calendar or placeholder",
         "Logs warning for debugging"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-022",
@@ -409,7 +409,7 @@
         "Skeleton uses soft pastel colors",
         "No layout shift when images load"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-031",
@@ -421,7 +421,7 @@
         "Success/error status per file",
         "Cancel upload option"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-032",

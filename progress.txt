@@ -1102,3 +1102,32 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (4 warnings, all non-blocking)
+
+## 2026-01-20: Phase 4 Photos - Slideshow Component
+
+**Completed**: REQ-4-013, REQ-4-014, REQ-4-016, REQ-4-019, REQ-4-020, REQ-4-021
+
+**Files created/modified**:
+- components/display/Slideshow.tsx: Full slideshow component with:
+  - Crossfade transitions (1000ms ease-in-out) between photos
+  - Ken Burns effect with 6 different pan/zoom variants
+  - Image preloading (ring buffer of 3 images)
+  - Photo info overlay with date and album (fade in/out with delay)
+  - Progress indicator bar
+  - Empty state with friendly message
+  - Random/sequential ordering support
+  - Configurable interval
+- components/display/DisplayContext.tsx: Added SlideshowSettings, Photo types, and photo state management
+- lib/display/types.ts: Added SlideshowSettings interface and displayMode support
+
+**Key decisions**:
+- Used useState + useEffect for display order to comply with React Compiler (no Math.random in render)
+- Ken Burns variants randomized per slide transition
+- Progress bar resets and loops with each slide
+- Safe index calculation prevents out-of-bounds when photos change mid-slideshow
+- File-level ESLint disable for react-hooks/set-state-in-effect (intentional state sync)
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (5 warnings, all pre-existing)

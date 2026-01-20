@@ -13,6 +13,17 @@ export interface DisplayWidgets {
   upcomingEvents: boolean;
 }
 
+export interface SlideshowSettings {
+  enabled: boolean;
+  interval: number; // seconds
+  order: 'random' | 'sequential';
+  kenBurnsEnabled: boolean;
+  showPhotoInfo: boolean;
+  albumFilter: string | null;
+}
+
+export type DisplayMode = 'calendar' | 'photos' | 'auto';
+
 export interface DisplaySettings {
   theme: DisplayTheme;
   layout: DisplayLayout;
@@ -22,7 +33,18 @@ export interface DisplaySettings {
   burnInPreventionEnabled: boolean;
   ambientAnimationEnabled: boolean;
   use24HourTime: boolean;
+  slideshow: SlideshowSettings;
+  displayMode: DisplayMode;
 }
+
+export const DEFAULT_SLIDESHOW_SETTINGS: SlideshowSettings = {
+  enabled: true,
+  interval: 10,
+  order: 'random',
+  kenBurnsEnabled: true,
+  showPhotoInfo: true,
+  albumFilter: null,
+};
 
 export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   theme: 'auto',
@@ -37,6 +59,8 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
   burnInPreventionEnabled: true,
   ambientAnimationEnabled: true,
   use24HourTime: false,
+  slideshow: DEFAULT_SLIDESHOW_SETTINGS,
+  displayMode: 'auto',
 };
 
 export interface Display {
@@ -71,6 +95,8 @@ export function parseDisplaySettings(raw: Record<string, unknown> | null): Displ
   const burnInPreventionEnabled = validateBoolean(raw.burnInPreventionEnabled, true);
   const ambientAnimationEnabled = validateBoolean(raw.ambientAnimationEnabled, true);
   const use24HourTime = validateBoolean(raw.use24HourTime, false);
+  const slideshow = validateSlideshow(raw.slideshow);
+  const displayMode = validateDisplayMode(raw.displayMode);
 
   return {
     theme,
@@ -81,6 +107,8 @@ export function parseDisplaySettings(raw: Record<string, unknown> | null): Displ
     burnInPreventionEnabled,
     ambientAnimationEnabled,
     use24HourTime,
+    slideshow,
+    displayMode,
   };
 }
 
@@ -130,6 +158,41 @@ function validateBoolean(value: unknown, defaultValue: boolean): boolean {
     return value;
   }
   return defaultValue;
+}
+
+function validateSlideshow(value: unknown): SlideshowSettings {
+  if (typeof value !== 'object' || value === null) {
+    return { ...DEFAULT_SLIDESHOW_SETTINGS };
+  }
+
+  const obj = value as Record<string, unknown>;
+  return {
+    enabled: typeof obj.enabled === 'boolean' ? obj.enabled : DEFAULT_SLIDESHOW_SETTINGS.enabled,
+    interval: validateNumber(obj.interval, DEFAULT_SLIDESHOW_SETTINGS.interval, 3, 120),
+    order:
+      obj.order === 'random' || obj.order === 'sequential'
+        ? obj.order
+        : DEFAULT_SLIDESHOW_SETTINGS.order,
+    kenBurnsEnabled:
+      typeof obj.kenBurnsEnabled === 'boolean'
+        ? obj.kenBurnsEnabled
+        : DEFAULT_SLIDESHOW_SETTINGS.kenBurnsEnabled,
+    showPhotoInfo:
+      typeof obj.showPhotoInfo === 'boolean'
+        ? obj.showPhotoInfo
+        : DEFAULT_SLIDESHOW_SETTINGS.showPhotoInfo,
+    albumFilter:
+      typeof obj.albumFilter === 'string'
+        ? obj.albumFilter
+        : DEFAULT_SLIDESHOW_SETTINGS.albumFilter,
+  };
+}
+
+function validateDisplayMode(value: unknown): DisplayMode {
+  if (value === 'calendar' || value === 'photos' || value === 'auto') {
+    return value;
+  }
+  return DEFAULT_DISPLAY_SETTINGS.displayMode;
 }
 
 /**
