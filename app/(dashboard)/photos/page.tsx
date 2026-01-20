@@ -22,6 +22,9 @@ import {
   Calendar,
   Folder,
   Loader2,
+  ChevronDown,
+  FolderPlus,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PhotoUpload } from '@/components/photos/PhotoUpload';
@@ -183,6 +186,8 @@ function PhotoModal({
   onNavigate,
   onDelete,
   onToggleEnabled,
+  albums,
+  onAssignAlbum,
 }: {
   photos: Photo[];
   currentIndex: number;
@@ -190,10 +195,13 @@ function PhotoModal({
   onNavigate: (direction: 'prev' | 'next') => void;
   onDelete: (id: string) => void;
   onToggleEnabled: (id: string, enabled: boolean) => void;
+  albums: string[];
+  onAssignAlbum: (id: string, album: string | null) => void;
 }) {
   const photo = photos[currentIndex];
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAlbumPicker, setShowAlbumPicker] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -301,6 +309,60 @@ function PhotoModal({
             </div>
 
             <div className="flex items-center gap-2">
+              {/* Album picker */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowAlbumPicker(!showAlbumPicker)}
+                  className="rounded-lg p-2 text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+                  title="Assign to album"
+                >
+                  <Folder className="h-5 w-5" />
+                </button>
+                <AnimatePresence>
+                  {showAlbumPicker && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="absolute right-0 bottom-full mb-2 w-48 rounded-lg border border-white/20 bg-neutral-800/95 py-1 shadow-lg backdrop-blur"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onAssignAlbum(photo.id, null);
+                          setShowAlbumPicker(false);
+                        }}
+                        className={cn(
+                          'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-white/10',
+                          photo.album === null && 'text-primary-400'
+                        )}
+                      >
+                        {photo.album === null && <Check className="h-4 w-4" />}
+                        <span className={photo.album === null ? '' : 'pl-6'}>No Album</span>
+                      </button>
+                      {albums.map((album) => (
+                        <button
+                          key={album}
+                          type="button"
+                          onClick={() => {
+                            onAssignAlbum(photo.id, album);
+                            setShowAlbumPicker(false);
+                          }}
+                          className={cn(
+                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-white/10',
+                            photo.album === album && 'text-primary-400'
+                          )}
+                        >
+                          {photo.album === album && <Check className="h-4 w-4" />}
+                          <span className={photo.album === album ? '' : 'pl-6'}>{album}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <button
                 type="button"
                 onClick={() => onToggleEnabled(photo.id, !photo.enabled)}
@@ -361,13 +423,249 @@ function PhotoModal({
   );
 }
 
+// Album filter dropdown component
+function AlbumFilter({
+  albums,
+  selectedAlbum,
+  onSelectAlbum,
+  onCreateAlbum,
+}: {
+  albums: string[];
+  selectedAlbum: string | null;
+  onSelectAlbum: (album: string | null) => void;
+  onCreateAlbum: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={dropdownRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm transition-colors hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700"
+      >
+        <Folder className="h-4 w-4 text-neutral-500" />
+        <span className="text-neutral-700 dark:text-neutral-200">
+          {selectedAlbum || 'All Photos'}
+        </span>
+        <ChevronDown
+          className={cn('h-4 w-4 text-neutral-500 transition-transform', isOpen && 'rotate-180')}
+        />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute top-full left-0 z-50 mt-1 w-48 rounded-lg border border-neutral-200 bg-white py-1 shadow-lg dark:border-neutral-700 dark:bg-neutral-800"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                onSelectAlbum(null);
+                setIsOpen(false);
+              }}
+              className={cn(
+                'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700',
+                selectedAlbum === null &&
+                  'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+              )}
+            >
+              {selectedAlbum === null && <Check className="h-4 w-4" />}
+              <span className={selectedAlbum === null ? '' : 'pl-6'}>All Photos</span>
+            </button>
+
+            {albums.length > 0 && (
+              <div className="my-1 border-t border-neutral-200 dark:border-neutral-700" />
+            )}
+
+            {albums.map((album) => (
+              <button
+                key={album}
+                type="button"
+                onClick={() => {
+                  onSelectAlbum(album);
+                  setIsOpen(false);
+                }}
+                className={cn(
+                  'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-700',
+                  selectedAlbum === album &&
+                    'bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
+                )}
+              >
+                {selectedAlbum === album && <Check className="h-4 w-4" />}
+                <span className={selectedAlbum === album ? '' : 'pl-6'}>{album}</span>
+              </button>
+            ))}
+
+            <div className="my-1 border-t border-neutral-200 dark:border-neutral-700" />
+
+            <button
+              type="button"
+              onClick={() => {
+                onCreateAlbum();
+                setIsOpen(false);
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+            >
+              <FolderPlus className="h-4 w-4" />
+              New Album
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// Create album dialog inner content (resets when key changes)
+function CreateAlbumDialogContent({
+  onClose,
+  onCreate,
+}: {
+  onClose: () => void;
+  onCreate: (name: string) => void;
+}) {
+  const [name, setName] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => inputRef.current?.focus(), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (name.trim()) {
+      onCreate(name.trim());
+      onClose();
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-800"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h3 className="mb-4 text-lg font-semibold text-neutral-900 dark:text-white">
+        Create New Album
+      </h3>
+      <form onSubmit={handleSubmit}>
+        <input
+          ref={inputRef}
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Album name"
+          className="focus:border-primary-500 focus:ring-primary-500 mb-4 w-full rounded-lg border border-neutral-200 bg-white px-4 py-2 text-neutral-900 placeholder-neutral-400 focus:ring-1 focus:outline-none dark:border-neutral-600 dark:bg-neutral-700 dark:text-white dark:placeholder-neutral-500"
+        />
+        <div className="flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-50 dark:border-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-700"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={!name.trim()}
+            className="bg-primary-600 hover:bg-primary-700 rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Create
+          </button>
+        </div>
+      </form>
+    </motion.div>
+  );
+}
+
+// Create album dialog component
+function CreateAlbumDialog({
+  isOpen,
+  onClose,
+  onCreate,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  onCreate: (name: string) => void;
+}) {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          onClick={onClose}
+        >
+          <CreateAlbumDialogContent onClose={onClose} onCreate={onCreate} />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
 export default function PhotosPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [selectedAlbum, setSelectedAlbum] = useState<string | null>(null);
+  const [showCreateAlbum, setShowCreateAlbum] = useState(false);
 
   const { data, error, isLoading, mutate } = useSWR<{ photos: Photo[] }>('/api/photos', fetcher);
 
-  const photos = data?.photos || [];
+  const allPhotos = data?.photos || [];
+
+  // Get unique album names
+  const albums = Array.from(new Set(allPhotos.filter((p) => p.album).map((p) => p.album!)));
+
+  // Filter photos by selected album
+  const photos = selectedAlbum ? allPhotos.filter((p) => p.album === selectedAlbum) : allPhotos;
+
+  // Handle creating new album (just stores the name, actual assignment happens later)
+  const handleCreateAlbum = useCallback((name: string) => {
+    // Albums are created implicitly when assigning photos to them
+    // For now, we'll just switch to showing that album (empty until photos are added)
+    setSelectedAlbum(name);
+  }, []);
+
+  // Handle assigning photo to album
+  const handleAssignAlbum = useCallback(
+    async (id: string, album: string | null) => {
+      // Optimistic update
+      mutate({ photos: allPhotos.map((p) => (p.id === id ? { ...p, album } : p)) }, false);
+
+      try {
+        await fetch(`/api/photos/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ album }),
+        });
+        mutate(); // Refetch to get accurate album list
+      } catch {
+        mutate(); // Revert on error
+      }
+    },
+    [allPhotos, mutate]
+  );
 
   const handleUploadComplete = useCallback(() => {
     mutate();
@@ -379,7 +677,7 @@ export default function PhotosPage() {
       // Optimistic update
       mutate(
         {
-          photos: photos.map((p) => (p.id === id ? { ...p, enabled } : p)),
+          photos: allPhotos.map((p) => (p.id === id ? { ...p, enabled } : p)),
         },
         false
       );
@@ -395,14 +693,14 @@ export default function PhotosPage() {
         mutate();
       }
     },
-    [photos, mutate]
+    [allPhotos, mutate]
   );
 
   const handleDelete = useCallback(
     (id: string) => {
-      mutate({ photos: photos.filter((p) => p.id !== id) }, false);
+      mutate({ photos: allPhotos.filter((p) => p.id !== id) }, false);
     },
-    [photos, mutate]
+    [allPhotos, mutate]
   );
 
   const handleNavigate = useCallback(
@@ -437,6 +735,14 @@ export default function PhotosPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Album filter */}
+              <AlbumFilter
+                albums={albums}
+                selectedAlbum={selectedAlbum}
+                onSelectAlbum={setSelectedAlbum}
+                onCreateAlbum={() => setShowCreateAlbum(true)}
+              />
+
               <motion.button
                 type="button"
                 onClick={() => setShowUpload(!showUpload)}
@@ -552,9 +858,18 @@ export default function PhotosPage() {
               onNavigate={handleNavigate}
               onDelete={handleDelete}
               onToggleEnabled={handleToggleEnabled}
+              albums={albums}
+              onAssignAlbum={handleAssignAlbum}
             />
           )}
         </AnimatePresence>
+
+        {/* Create album dialog */}
+        <CreateAlbumDialog
+          isOpen={showCreateAlbum}
+          onClose={() => setShowCreateAlbum(false)}
+          onCreate={handleCreateAlbum}
+        />
       </main>
     </div>
   );

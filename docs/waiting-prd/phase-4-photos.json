@@ -174,7 +174,7 @@
         "Can filter grid by album",
         "Album selector on slideshow settings"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-4-013",

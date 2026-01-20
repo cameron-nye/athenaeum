@@ -1176,3 +1176,35 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (5 warnings, pre-existing)
+
+## 2026-01-20: REQ-4-012 - Album management
+
+**Completed**: Album organization for photos
+
+**Features - Photos page (app/(dashboard)/photos/page.tsx)**:
+- AlbumFilter dropdown: filter photos by album or show all
+- CreateAlbumDialog: create new albums with animated modal
+- Album picker in PhotoModal: assign photos to albums
+- handleAssignAlbum: optimistic update with API PATCH
+- Albums created implicitly when photos assigned
+
+**Features - Display settings (app/(dashboard)/settings/displays/[id]/DisplaySettingsClient.tsx)**:
+- Display Mode selector: 'Always Calendar', 'Always Photos', 'Auto (Smart Switch)'
+- Slideshow Settings section with:
+  - Enable/disable toggle
+  - Slide interval (seconds)
+  - Photo order (random/sequential)
+  - Album filter dropdown
+  - Ken Burns effect toggle
+  - Show photo info toggle
+- Fetches available albums from household's photos
+
+**Key decisions**:
+- CreateAlbumDialogContent extracted as separate component to reset state when dialog opens (React Compiler compliant)
+- Albums fetched dynamically from unique album values in photos table
+- Album filter uses select element in display settings
+
+**Verification**:
+- typecheck: pass
+- test: pass (240 tests)
+- lint: pass (6 warnings, pre-existing)

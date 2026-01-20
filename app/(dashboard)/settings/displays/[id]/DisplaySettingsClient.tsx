@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   Copy,
   Check,
+  Image as ImageIcon,
+  Folder,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
@@ -25,6 +27,7 @@ import {
   type DisplaySettings,
   type DisplayTheme,
   type DisplayLayout,
+  type DisplayMode,
 } from '@/lib/display/types';
 
 interface DisplayData {
@@ -33,6 +36,7 @@ interface DisplayData {
   auth_token: string;
   settings: DisplaySettings;
   last_seen_at: string | null;
+  household_id: string;
 }
 
 function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> }) {
@@ -52,11 +56,12 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
   // Form state
   const [name, setName] = useState('');
   const [settings, setSettings] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS);
+  const [albums, setAlbums] = useState<string[]>([]);
 
   const fetchDisplay = useCallback(async () => {
     const { data, error: fetchError } = await supabase
       .from('displays')
-      .select('id, name, auth_token, settings, last_seen_at')
+      .select('id, name, auth_token, settings, last_seen_at, household_id')
       .eq('id', id)
       .single();
 
@@ -70,6 +75,22 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
     };
   }, [supabase, id]);
 
+  const fetchAlbums = useCallback(
+    async (householdId: string) => {
+      const { data } = await supabase
+        .from('photos')
+        .select('album')
+        .eq('household_id', householdId)
+        .not('album', 'is', null);
+
+      if (data) {
+        const uniqueAlbums = Array.from(new Set(data.map((p) => p.album as string)));
+        setAlbums(uniqueAlbums.sort());
+      }
+    },
+    [supabase]
+  );
+
   useEffect(() => {
     let mounted = true;
 
@@ -81,6 +102,8 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
           setName(data.name);
           setSettings(data.settings);
           setIsLoading(false);
+          // Fetch albums for this household
+          fetchAlbums(data.household_id);
         }
       } catch (err) {
         if (mounted) {
@@ -95,7 +118,7 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
     return () => {
       mounted = false;
     };
-  }, [fetchDisplay]);
+  }, [fetchDisplay, fetchAlbums]);
 
   const handleSave = async () => {
     if (!display) return;
@@ -176,6 +199,16 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
     setSettings((prev) => ({
       ...prev,
       widgetsEnabled: { ...prev.widgetsEnabled, [widget]: enabled },
+    }));
+  };
+
+  const updateSlideshow = <K extends keyof DisplaySettings['slideshow']>(
+    key: K,
+    value: DisplaySettings['slideshow'][K]
+  ) => {
+    setSettings((prev) => ({
+      ...prev,
+      slideshow: { ...prev.slideshow, [key]: value },
     }));
   };
 
@@ -292,6 +325,151 @@ function DisplaySettingsContent({ params }: { params: Promise<{ id: string }> })
                 {layout.charAt(0).toUpperCase() + layout.slice(1)}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Display Mode */}
+        <div className="bg-card border-border rounded-lg border p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <ImageIcon className="text-primary h-5 w-5" />
+            <h2 className="text-foreground font-medium">Display Mode</h2>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {(['calendar', 'photos', 'auto'] as DisplayMode[]).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => updateSetting('displayMode', mode)}
+                className={`rounded-lg border px-4 py-2 transition-colors ${
+                  settings.displayMode === mode
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                {mode === 'calendar'
+                  ? 'Always Calendar'
+                  : mode === 'photos'
+                    ? 'Always Photos'
+                    : 'Auto (Smart Switch)'}
+              </button>
+            ))}
+          </div>
+          <p className="text-muted-foreground mt-2 text-sm">
+            Auto switches to photos when no events are upcoming
+          </p>
+        </div>
+
+        {/* Slideshow Settings */}
+        <div className="bg-card border-border rounded-lg border p-6">
+          <div className="mb-4 flex items-center gap-3">
+            <ImageIcon className="text-primary h-5 w-5" />
+            <h2 className="text-foreground font-medium">Slideshow Settings</h2>
+          </div>
+          <div className="space-y-4">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={settings.slideshow.enabled}
+                onChange={(e) => updateSlideshow('enabled', e.target.checked)}
+                className="h-5 w-5 rounded"
+              />
+              <span>Enable Slideshow</span>
+            </label>
+
+            {settings.slideshow.enabled && (
+              <>
+                <div>
+                  <label className="text-muted-foreground mb-2 block text-sm">
+                    Slide Interval (seconds)
+                  </label>
+                  <input
+                    type="number"
+                    min={3}
+                    max={120}
+                    value={settings.slideshow.interval}
+                    onChange={(e) => updateSlideshow('interval', Number(e.target.value))}
+                    className="bg-background border-input focus:ring-ring w-24 rounded-lg border px-3 py-2 focus:ring-2 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-muted-foreground mb-2 block text-sm">Photo Order</label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => updateSlideshow('order', 'random')}
+                      className={`rounded-lg border px-4 py-2 transition-colors ${
+                        settings.slideshow.order === 'random'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      Random
+                    </button>
+                    <button
+                      onClick={() => updateSlideshow('order', 'sequential')}
+                      className={`rounded-lg border px-4 py-2 transition-colors ${
+                        settings.slideshow.order === 'sequential'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      Sequential
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-muted-foreground mb-2 flex items-center gap-2 text-sm">
+                    <Folder className="h-4 w-4" />
+                    Album Filter
+                  </label>
+                  <select
+                    value={settings.slideshow.albumFilter || ''}
+                    onChange={(e) => updateSlideshow('albumFilter', e.target.value || null)}
+                    className="bg-background border-input focus:ring-ring w-full max-w-xs rounded-lg border px-3 py-2 focus:ring-2 focus:outline-none"
+                  >
+                    <option value="">All Photos</option>
+                    {albums.map((album) => (
+                      <option key={album} value={album}>
+                        {album}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    Show only photos from a specific album
+                  </p>
+                </div>
+
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.slideshow.kenBurnsEnabled}
+                    onChange={(e) => updateSlideshow('kenBurnsEnabled', e.target.checked)}
+                    className="h-5 w-5 rounded"
+                  />
+                  <div>
+                    <span>Ken Burns Effect</span>
+                    <p className="text-muted-foreground text-sm">
+                      Slow pan and zoom for cinematic feel
+                    </p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={settings.slideshow.showPhotoInfo}
+                    onChange={(e) => updateSlideshow('showPhotoInfo', e.target.checked)}
+                    className="h-5 w-5 rounded"
+                  />
+                  <div>
+                    <span>Show Photo Info</span>
+                    <p className="text-muted-foreground text-sm">
+                      Display date and album on photos
+                    </p>
+                  </div>
+                </label>
+              </>
+            )}
           </div>
         </div>
 
