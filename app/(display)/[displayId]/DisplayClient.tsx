@@ -4,11 +4,13 @@
  * Display Client Component
  * REQ-3-005: Client-side wrapper for display with real-time updates
  * REQ-3-010: Real-time event updates with smooth animations
+ * REQ-3-013: Theme support with smooth transitions
  * REQ-3-016: Scheduled page reload
  * REQ-3-029: Heartbeat mechanism
  */
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
+import type { DisplayTheme } from '@/lib/display/types';
 import { DisplayProvider, useDisplayContext } from '@/components/display/DisplayContext';
 import { RealtimeProvider } from '@/components/display/RealtimeProvider';
 import { DisplayCalendar } from '@/components/display/Calendar';
@@ -42,6 +44,44 @@ interface DisplayClientProps {
   householdName: string;
 }
 
+/**
+ * Hook for applying theme to document (REQ-3-013)
+ * Handles light/dark/auto themes with smooth CSS transitions
+ */
+function useTheme(themeSetting: DisplayTheme) {
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+
+  useEffect(() => {
+    // Resolve 'auto' to system preference
+    const getResolvedTheme = (): 'light' | 'dark' => {
+      if (themeSetting === 'auto') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return themeSetting;
+    };
+
+    const applyTheme = (theme: 'light' | 'dark') => {
+      document.documentElement.classList.remove('light', 'dark');
+      document.documentElement.classList.add(theme);
+      setResolvedTheme(theme);
+    };
+
+    applyTheme(getResolvedTheme());
+
+    // Listen for system preference changes when in auto mode
+    if (themeSetting === 'auto') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (e: MediaQueryListEvent) => {
+        applyTheme(e.matches ? 'dark' : 'light');
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
+  }, [themeSetting]);
+
+  return resolvedTheme;
+}
+
 function DisplayContent({
   displayId,
   householdId,
@@ -53,6 +93,9 @@ function DisplayContent({
 }) {
   const { state, handleEventChange, handleCalendarSourceChange, setError, refreshData } =
     useDisplayContext();
+
+  // Apply theme from settings (REQ-3-013)
+  useTheme(state.settings.theme);
 
   const heartbeatIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const reloadTimeoutRef = useRef<NodeJS.Timeout | null>(null);

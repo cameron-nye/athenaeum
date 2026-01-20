@@ -921,3 +921,22 @@ To complete manually:
 **Verification**:
 - typecheck: pass
 - lint: pass
+
+## 2026-01-20: REQ-3-013 - Theme support with smooth transitions
+
+**Completed**: Added theme application from settings with CSS transitions
+
+**Features**:
+- useTheme hook in DisplayClient
+- Applies theme class to document.documentElement
+- Handles 'auto' by detecting system preference via matchMedia
+- Listens for system preference changes when in auto mode
+- CSS transitions already defined (500ms ease-in-out)
+- Works with Tailwind dark mode classes
+
+**Files changed**:
+- app/(display)/[displayId]/DisplayClient.tsx (added useTheme hook)
+
+**Verification**:
+- typecheck: pass
+- lint: pass
