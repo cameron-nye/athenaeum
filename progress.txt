@@ -847,3 +847,77 @@ To complete manually:
 - typecheck: pass
 - test: pass (240 tests)
 - lint: pass (1 warning in existing code)
+
+## 2026-01-20: REQ-3-002 - Display device authentication
+
+**Completed**: Page-level token authentication in [displayId]/page.tsx
+
+**Notes**:
+- Token validation implemented at page level rather than middleware
+- All acceptance criteria satisfied:
+  - Checks display_token cookie
+  - Validates against displays.auth_token
+  - Returns notFound() if invalid/missing
+  - Updates last_seen_at on each request
+  - Fetches household data
+
+**Files**: app/(display)/[displayId]/page.tsx (already exists)
+
+## 2026-01-20: REQ-3-012 - Display settings editor page
+
+**Completed**: Created display settings editor UI
+
+**Features**:
+- Page at app/(dashboard)/settings/displays/[id]/page.tsx
+- Edit display name
+- Theme selector (light/dark/auto)
+- Layout selector (calendar/agenda/split)
+- Widget toggles (clock, upcoming events, weather placeholder)
+- Time format selector (12h/24h)
+- Scheduled reload time picker
+- Visual effects toggles (burn-in prevention, ambient animation)
+- Save button with loading state
+- Success/error feedback
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-030 - QR code generator for display setup
+
+**Completed**: Added QR code modal to displays page
+
+**Features**:
+- Installed qrcode.react library
+- QR code button next to copy URL button
+- Modal with QR code and setup URL
+- Instructions for scanning with phone
+- Animated modal open/close
+
+**Files changed**:
+- package.json (added qrcode.react)
+- app/(dashboard)/settings/displays/page.tsx (added QR code modal)
+
+**Verification**:
+- typecheck: pass
+- lint: pass
+
+## 2026-01-20: REQ-3-031 - Token regeneration/invalidation
+
+**Completed**: Added token regeneration feature to display settings page
+
+**Features**:
+- Security section showing current setup URL
+- Copy URL button
+- Regenerate Token button
+- Confirmation modal warning about disconnection
+- Immediate token update in database
+- Display shows new setup URL after regeneration
+- Success message with instructions
+
+**Files changed**:
+- app/(dashboard)/settings/displays/[id]/page.tsx (added security section)
+
+**Verification**:
+- typecheck: pass
+- lint: pass

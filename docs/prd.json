@@ -30,7 +30,7 @@
         "Updates last_seen_at on each request",
         "Fetches household data for valid display"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-003",
@@ -174,7 +174,7 @@
         "Save button updates displays.settings",
         "Changes reflected on display"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-013",
@@ -415,7 +415,7 @@
         "Scannable by phone to verify URL",
         "Clear instructions for Pi setup"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-031",
@@ -428,7 +428,7 @@
         "New setup URL provided",
         "Display shows error until re-paired"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-3-032",

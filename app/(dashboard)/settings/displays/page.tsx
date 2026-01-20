@@ -9,7 +9,8 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Monitor, Plus, Trash2, Clock, Copy, Check } from 'lucide-react';
+import { Monitor, Plus, Trash2, Clock, Copy, Check, QrCode } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { createClient } from '@/lib/supabase/client';
 
 interface Display {
@@ -54,6 +55,7 @@ function DisplaysPageContent() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showQrForDisplay, setShowQrForDisplay] = useState<string | null>(null);
   const router = useRouter();
 
   const supabase = createClient();
@@ -340,11 +342,63 @@ function DisplaysPageContent() {
                         <Copy className="h-5 w-5" />
                       )}
                     </button>
+                    <button
+                      onClick={() => setShowQrForDisplay(display.id)}
+                      className="text-muted-foreground hover:text-foreground p-2 transition-colors"
+                      aria-label="Show QR code"
+                    >
+                      <QrCode className="h-5 w-5" />
+                    </button>
                   </div>
 
                   <p className="text-muted-foreground mt-2 text-xs">
-                    Navigate to this URL on your Raspberry Pi to set up the display
+                    Navigate to this URL on your Raspberry Pi or scan the QR code
                   </p>
+
+                  {/* QR Code Modal */}
+                  <AnimatePresence>
+                    {showQrForDisplay === display.id && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="bg-background/80 fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm"
+                        onClick={() => setShowQrForDisplay(null)}
+                      >
+                        <motion.div
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0.9, opacity: 0 }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="bg-card border-border mx-4 w-full max-w-sm rounded-lg border p-6 shadow-lg"
+                        >
+                          <h3 className="text-foreground mb-4 text-center text-lg font-medium">
+                            Setup QR Code
+                          </h3>
+                          <p className="text-muted-foreground mb-4 text-center text-sm">
+                            Scan this code with your phone to verify the setup URL
+                          </p>
+                          <div className="flex justify-center rounded-lg bg-white p-4">
+                            <QRCodeSVG
+                              value={setupUrl}
+                              size={200}
+                              level="M"
+                              includeMargin={false}
+                            />
+                          </div>
+                          <p className="text-muted-foreground mt-4 text-center font-mono text-xs break-all">
+                            {setupUrl}
+                          </p>
+                          <button
+                            onClick={() => setShowQrForDisplay(null)}
+                            className="text-muted-foreground hover:text-foreground mt-4 w-full py-2 text-sm"
+                          >
+                            Close
+                          </button>
+                        </motion.div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 <div className="mt-4">
