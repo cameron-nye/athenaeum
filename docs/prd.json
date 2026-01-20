@@ -169,7 +169,7 @@
         "Generates RRULE string from selection",
         "Parses RRULE for display"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-013",

@@ -6,7 +6,7 @@
  * REQ-5-010: Create chore delete functionality
  */
 
-import { useState, useCallback, use } from 'react';
+import { useState, useCallback, use, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import useSWR from 'swr';
@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { parseRRuleToText } from '@/lib/chores/recurrence';
+import { RecurrenceSelector } from '@/components/chores/RecurrenceSelector';
 
 interface ChoreUser {
   id: string;
@@ -665,7 +666,7 @@ function AssignModal({
 }) {
   const [assignedTo, setAssignedTo] = useState<string>('');
   const [dueDate, setDueDate] = useState(new Date().toISOString().split('T')[0]);
-  const [recurrenceType, setRecurrenceType] = useState<string>('none');
+  const [recurrenceRule, setRecurrenceRule] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -675,6 +676,12 @@ function AssignModal({
   }>('/api/household/members', fetcher);
 
   const members = membersData?.members ?? [];
+
+  // Parse dueDate string into Date for RecurrenceSelector
+  const startDate = useMemo(() => {
+    const parsed = new Date(dueDate + 'T00:00:00');
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  }, [dueDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -686,26 +693,6 @@ function AssignModal({
 
     setIsSubmitting(true);
     setError(null);
-
-    // Generate simple RRULE based on recurrence type
-    let recurrenceRule = null;
-    if (recurrenceType !== 'none') {
-      const dtstart = `DTSTART:${dueDate.replace(/-/g, '')}T000000Z`;
-      switch (recurrenceType) {
-        case 'daily':
-          recurrenceRule = `${dtstart}\nRRULE:FREQ=DAILY`;
-          break;
-        case 'weekly':
-          recurrenceRule = `${dtstart}\nRRULE:FREQ=WEEKLY`;
-          break;
-        case 'biweekly':
-          recurrenceRule = `${dtstart}\nRRULE:FREQ=WEEKLY;INTERVAL=2`;
-          break;
-        case 'monthly':
-          recurrenceRule = `${dtstart}\nRRULE:FREQ=MONTHLY`;
-          break;
-      }
-    }
 
     try {
       const res = await fetch('/api/chores/assignments', {
@@ -744,7 +731,7 @@ function AssignModal({
         initial={{ scale: 0.95, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.95, y: 20 }}
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
+        className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-white">Assign Chore</h2>
@@ -792,28 +779,12 @@ function AssignModal({
             />
           </div>
 
-          {/* Recurrence */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-              Repeat
-            </label>
-            <select
-              value={recurrenceType}
-              onChange={(e) => setRecurrenceType(e.target.value)}
-              className={cn(
-                'w-full rounded-xl border bg-white px-4 py-2.5 dark:bg-gray-900',
-                'border-gray-200 dark:border-gray-700',
-                'focus:border-transparent focus:ring-2 focus:ring-indigo-500',
-                'text-gray-900 dark:text-white'
-              )}
-            >
-              <option value="none">Does not repeat</option>
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="biweekly">Every 2 weeks</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </div>
+          {/* Recurrence - using new component */}
+          <RecurrenceSelector
+            value={recurrenceRule}
+            startDate={startDate}
+            onChange={setRecurrenceRule}
+          />
 
           {error && <p className="text-sm text-red-500 dark:text-red-400">{error}</p>}
 

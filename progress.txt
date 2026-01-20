@@ -1144,3 +1144,90 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (273 tests)
 - lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-018, REQ-5-019, REQ-5-020, REQ-5-031 - Chores display integration
+
+**Completed**: Integrated chores into the Pi wall display with realtime updates
+
+**REQ-5-018: Display chore list component**:
+- Created components/display/ChoreList.tsx
+- Shows today's, overdue, and upcoming chores
+- Visual status indicators (overdue=red, today=primary, upcoming=gray)
+- User initials avatar for assignees
+- Points badges for incomplete chores
+- Smooth framer-motion animations
+
+**REQ-5-019: Display layout integration**:
+- Added chores widget toggle to DisplayWidgets type
+- Updated display grid layout with chores area
+- Chores positioned below sidebar in right column
+- ChoreList receives assignments from DisplayContext
+- Toggleable via settings.widgetsEnabled.chores
+
+**REQ-5-020: Realtime subscription**:
+- Added chore_assignments subscription to RealtimeProvider
+- ChoreAssignmentRecord type for database row
+- Handle INSERT (triggers timestamp refresh)
+- Handle UPDATE (preserves chore/user data from existing state)
+- Handle DELETE (removes by ID)
+- DisplayContext actions for ADD/UPDATE/DELETE
+
+**REQ-5-031: Seed data**:
+- 9 sample chores with icons and points
+- Second user (Alex) for assignment variety
+- 10 sample assignments with various states:
+  - 2 overdue (dishes yesterday, bathroom 3 days ago)
+  - 3 today (trash, dog feed completed, dishes)
+  - 2 tomorrow (vacuum, laundry unassigned)
+  - 1 day after (clean kitchen)
+  - 1 weekend (mow lawn)
+  - 1 next week (dust furniture)
+- Various recurrence patterns: daily, weekly, biweekly
+
+**Files created**:
+- components/display/ChoreList.tsx
+
+**Files modified**:
+- lib/display/types.ts (added chores to DisplayWidgets)
+- lib/display/types.test.ts (updated tests for chores widget)
+- components/display/DisplayContext.tsx (ChoreAssignment type, actions, handlers)
+- components/display/RealtimeProvider.tsx (chore_assignments subscription)
+- components/display/Calendar.tsx (added ChoreList import and rendering)
+- app/(display)/[displayId]/page.tsx (fetch chore assignments)
+- app/(display)/[displayId]/DisplayClient.tsx (pass chore handlers)
+- app/globals.css (display-chores grid area)
+- supabase/seed.sql (chores and assignments seed data)
+- docs/prd.json (marked 4 requirements completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (273 tests)
+- lint: pass (1 pre-existing warning)
+
+## 2026-01-20: REQ-5-012 - Create recurrence selector component
+
+**Completed**: Full-featured recurrence selector with RRULE integration
+
+**Features**:
+- Controlled component deriving state from value prop
+- Dropdown: None, Daily, Weekly, Biweekly, Monthly
+- Weekly: 7 day-of-week buttons (Mon-Sun)
+- Monthly: 31 day-of-month buttons (1-31)
+- Expandable "Customize schedule" toggle
+- Generates RRULE via lib/chores/recurrence.ts
+- Parses existing RRULE for editing
+- Human-readable preview text
+- Framer Motion animations
+
+**Files created**:
+- components/chores/RecurrenceSelector.tsx
+- components/chores/RecurrenceSelector.test.tsx (14 tests)
+
+**Files modified**:
+- app/(dashboard)/chores/[id]/page.tsx (AssignModal uses RecurrenceSelector)
+- docs/prd.json (marked REQ-5-012 completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (287 tests)
+- lint: pass (1 pre-existing warning)
