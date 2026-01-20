@@ -1,1 +1,16 @@
-{}
+{
+  "crons": [
+    {
+      "path": "/api/cron/sync",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/webhooks",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/photos",
+      "schedule": "0 */6 * * *"
+    }
+  ]
+}

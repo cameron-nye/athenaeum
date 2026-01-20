@@ -1,6 +1,27 @@
 import { OAuth2Client, Credentials } from 'google-auth-library';
 
 /**
+ * Google OAuth scopes
+ * REQ-4-022: Add Google Photos OAuth scope
+ */
+export const GOOGLE_SCOPES = {
+  // Calendar scopes
+  CALENDAR_READONLY: 'https://www.googleapis.com/auth/calendar.readonly',
+  CALENDAR_EVENTS_READONLY: 'https://www.googleapis.com/auth/calendar.events.readonly',
+  // Google Photos scopes
+  PHOTOS_READONLY: 'https://www.googleapis.com/auth/photoslibrary.readonly',
+} as const;
+
+// Default scopes for calendar integration
+export const CALENDAR_SCOPES = [GOOGLE_SCOPES.CALENDAR_READONLY];
+
+// Scopes for Google Photos integration
+export const PHOTOS_SCOPES = [GOOGLE_SCOPES.PHOTOS_READONLY];
+
+// Combined scopes if user wants both
+export const ALL_SCOPES = [...CALENDAR_SCOPES, ...PHOTOS_SCOPES];
+
+/**
  * Google OAuth2 configuration from environment variables
  */
 function getOAuthConfig() {
@@ -43,20 +64,29 @@ export function createOAuth2ClientWithTokens(tokens: Credentials): OAuth2Client 
  * Generates the Google OAuth2 authorization URL.
  *
  * @param state - CSRF protection state parameter
- * @param scopes - OAuth scopes to request (defaults to calendar.readonly)
+ * @param scopes - OAuth scopes to request (defaults to CALENDAR_SCOPES)
  * @returns The authorization URL to redirect the user to
  */
 export function generateAuthUrl(state: string, scopes?: string[]): string {
   const client = createOAuth2Client();
 
-  const defaultScopes = ['https://www.googleapis.com/auth/calendar.readonly'];
-
   return client.generateAuthUrl({
     access_type: 'offline', // Get refresh token
-    scope: scopes ?? defaultScopes,
+    scope: scopes ?? CALENDAR_SCOPES,
     state,
     prompt: 'consent', // Force consent to get refresh token every time
   });
+}
+
+/**
+ * Generates OAuth URL specifically for Google Photos.
+ * REQ-4-022: Separate consent for Photos
+ *
+ * @param state - CSRF protection state parameter
+ * @returns The authorization URL for Google Photos consent
+ */
+export function generatePhotosAuthUrl(state: string): string {
+  return generateAuthUrl(state, PHOTOS_SCOPES);
 }
 
 /**

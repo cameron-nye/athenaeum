@@ -1357,3 +1357,75 @@ This requirement cannot be completed automatically as it requires:
 - typecheck: pass
 - test: pass (262 tests)
 - lint: pass (10 warnings, all pre-existing)
+
+## 2026-01-20: REQ-4-022 through REQ-4-027 - Google Photos Integration
+
+**Completed**: Full Google Photos OAuth flow, album sync, and background job
+
+**REQ-4-026 - photo_sources table**:
+- supabase/migrations/20260120200000_create_photo_sources.sql
+  - Columns: id, household_id, provider, album_id, album_name, tokens (encrypted), last_synced_at, enabled
+  - UNIQUE constraint on (household_id, provider, album_id)
+- supabase/migrations/20260120200100_photo_sources_rls.sql
+  - SELECT/INSERT/UPDATE/DELETE scoped to user's household
+
+**REQ-4-022 - Google Photos OAuth scope**:
+- lib/google/auth.ts
+  - Added GOOGLE_SCOPES constant with all scopes
+  - Added PHOTOS_SCOPES constant for photoslibrary.readonly
+  - Added generatePhotosAuthUrl() function for separate OAuth flow
+
+**REQ-4-023 - Album list fetch**:
+- lib/google/photos.ts
+  - fetchGooglePhotosAlbums(): Fetches albums with pagination
+  - Returns id, title, coverPhotoBaseUrl, mediaItemsCount
+  - Handles token refresh via callback
+- lib/google/photos.test.ts (12 tests for error categorization and URL generation)
+
+**REQ-4-024 - Album sync**:
+- lib/google/photos.ts
+  - fetchPhotosFromAlbum() / fetchAllPhotosFromAlbum(): Fetch media items
+  - downloadPhoto(): Download photo buffer with dimensions
+  - getPhotoDownloadUrl(): Generate download URL with size params
+- app/api/photos/sources/sync/route.ts
+  - POST endpoint to trigger album sync
+  - Downloads new photos, uploads to Supabase Storage
+  - Creates photos table records with metadata
+
+**REQ-4-025 - Google Photos connection page**:
+- app/(dashboard)/photos/google/page.tsx
+  - Album selection UI with thumbnails
+  - Connect/disconnect albums
+  - Manual sync trigger
+- app/api/google/photos/auth/route.ts - OAuth initiation
+- app/api/google/photos/callback/route.ts - OAuth callback
+- app/api/photos/sources/route.ts - GET/PATCH photo sources
+
+**REQ-4-027 - Cron job**:
+- app/api/cron/photos/route.ts
+  - Syncs enabled sources that are stale (>24 hours)
+  - Token refresh callback for expired tokens
+  - Disables sources on auth revocation
+- vercel.json: Added photos cron (every 6 hours)
+
+**Files created**:
+- supabase/migrations/20260120200000_create_photo_sources.sql
+- supabase/migrations/20260120200100_photo_sources_rls.sql
+- lib/google/photos.ts
+- lib/google/photos.test.ts
+- app/(dashboard)/photos/google/page.tsx
+- app/api/google/photos/auth/route.ts
+- app/api/google/photos/callback/route.ts
+- app/api/photos/sources/route.ts
+- app/api/photos/sources/sync/route.ts
+- app/api/cron/photos/route.ts
+
+**Files modified**:
+- lib/google/auth.ts (added GOOGLE_SCOPES, PHOTOS_SCOPES, generatePhotosAuthUrl)
+- vercel.json (added photos cron)
+- docs/prd.json (marked REQ-4-022 through REQ-4-027 as completed)
+
+**Verification**:
+- typecheck: pass
+- test: pass (274 tests)
+- lint: pass (11 warnings, all pre-existing or acceptable)
