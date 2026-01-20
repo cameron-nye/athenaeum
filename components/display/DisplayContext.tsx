@@ -33,6 +33,26 @@ export interface DisplayWidgets {
   clock: boolean;
   weather: boolean;
   upcomingEvents: boolean;
+  chores: boolean;
+}
+
+export interface ChoreAssignment {
+  id: string;
+  chore_id: string;
+  due_date: string;
+  assigned_to: string | null;
+  completed_at: string | null;
+  chore: {
+    id: string;
+    title: string;
+    icon: string | null;
+    points: number;
+  };
+  user?: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 export interface DisplaySettings {
@@ -48,6 +68,7 @@ export interface DisplaySettings {
 export interface DisplayState {
   events: CalendarEvent[];
   calendarSources: CalendarSource[];
+  choreAssignments: ChoreAssignment[];
   settings: DisplaySettings;
   lastUpdated: string | null;
   isLoading: boolean;
@@ -61,20 +82,37 @@ type DisplayAction =
   | { type: 'DELETE_EVENT'; payload: string }
   | { type: 'SET_CALENDAR_SOURCES'; payload: CalendarSource[] }
   | { type: 'UPDATE_CALENDAR_SOURCE'; payload: CalendarSource }
+  | { type: 'SET_CHORE_ASSIGNMENTS'; payload: ChoreAssignment[] }
+  | { type: 'ADD_CHORE_ASSIGNMENT'; payload: ChoreAssignment }
+  | { type: 'UPDATE_CHORE_ASSIGNMENT'; payload: ChoreAssignment }
+  | { type: 'DELETE_CHORE_ASSIGNMENT'; payload: string }
   | { type: 'SET_SETTINGS'; payload: DisplaySettings }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'REFRESH_TIMESTAMP' };
 
+// Database record type for realtime updates (without joined data)
+export interface ChoreAssignmentRecord {
+  id: string;
+  chore_id: string;
+  assigned_to: string | null;
+  due_date: string;
+  recurrence_rule: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
 interface DisplayContextValue {
   state: DisplayState;
   setEvents: (events: CalendarEvent[]) => void;
   setCalendarSources: (sources: CalendarSource[]) => void;
+  setChoreAssignments: (assignments: ChoreAssignment[]) => void;
   setSettings: (settings: DisplaySettings) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   handleEventChange: (event: RealtimeEvent<CalendarEvent & { id: string }>) => void;
   handleCalendarSourceChange: (event: RealtimeEvent<CalendarSource & { id: string }>) => void;
+  handleChoreAssignmentChange: (event: RealtimeEvent<ChoreAssignmentRecord>) => void;
   refreshData: () => void;
 }
 
@@ -90,6 +128,7 @@ const DEFAULT_SETTINGS: DisplaySettings = {
     clock: true,
     weather: false,
     upcomingEvents: true,
+    chores: true,
   },
   scheduledReloadTime: '03:00',
 };
@@ -97,6 +136,7 @@ const DEFAULT_SETTINGS: DisplaySettings = {
 const initialState: DisplayState = {
   events: [],
   calendarSources: [],
+  choreAssignments: [],
   settings: DEFAULT_SETTINGS,
   lastUpdated: null,
   isLoading: true,
@@ -149,6 +189,43 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         lastUpdated: new Date().toISOString(),
       };
 
+    case 'SET_CHORE_ASSIGNMENTS':
+      return {
+        ...state,
+        choreAssignments: action.payload,
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'ADD_CHORE_ASSIGNMENT':
+      return {
+        ...state,
+        choreAssignments: [...state.choreAssignments, action.payload],
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'UPDATE_CHORE_ASSIGNMENT':
+      return {
+        ...state,
+        choreAssignments: state.choreAssignments.map((a) =>
+          a.id === action.payload.id
+            ? {
+                ...action.payload,
+                // Preserve existing chore/user data if the update doesn't have it
+                chore: action.payload.chore.title ? action.payload.chore : a.chore,
+                user: action.payload.user || a.user,
+              }
+            : a
+        ),
+        lastUpdated: new Date().toISOString(),
+      };
+
+    case 'DELETE_CHORE_ASSIGNMENT':
+      return {
+        ...state,
+        choreAssignments: state.choreAssignments.filter((a) => a.id !== action.payload),
+        lastUpdated: new Date().toISOString(),
+      };
+
     case 'SET_SETTINGS':
       return {
         ...state,
@@ -188,6 +265,10 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
 
   const setCalendarSources = useCallback((sources: CalendarSource[]) => {
     dispatch({ type: 'SET_CALENDAR_SOURCES', payload: sources });
+  }, []);
+
+  const setChoreAssignments = useCallback((assignments: ChoreAssignment[]) => {
+    dispatch({ type: 'SET_CHORE_ASSIGNMENTS', payload: assignments });
   }, []);
 
   const setSettings = useCallback((settings: DisplaySettings) => {
@@ -231,6 +312,42 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
     []
   );
 
+  const handleChoreAssignmentChange = useCallback((event: RealtimeEvent<ChoreAssignmentRecord>) => {
+    switch (event.eventType) {
+      case 'INSERT':
+        // For INSERT, we don't have the joined chore/user data
+        // The page will need to refresh to get complete data
+        // For now, trigger a timestamp refresh to indicate data changed
+        dispatch({ type: 'REFRESH_TIMESTAMP' });
+        break;
+      case 'UPDATE':
+        // For UPDATE, we can update the mutable fields (completed_at, due_date, assigned_to)
+        // but we keep the existing chore/user data since those likely didn't change
+        if (event.new) {
+          const updated = event.new;
+          dispatch({
+            type: 'UPDATE_CHORE_ASSIGNMENT',
+            payload: {
+              id: updated.id,
+              chore_id: updated.chore_id,
+              due_date: updated.due_date,
+              assigned_to: updated.assigned_to,
+              completed_at: updated.completed_at,
+              // Placeholder chore - the reducer will merge with existing data
+              chore: { id: updated.chore_id, title: '', icon: null, points: 0 },
+              user: null,
+            },
+          });
+        }
+        break;
+      case 'DELETE':
+        if (event.old?.id) {
+          dispatch({ type: 'DELETE_CHORE_ASSIGNMENT', payload: event.old.id });
+        }
+        break;
+    }
+  }, []);
+
   const refreshData = useCallback(() => {
     dispatch({ type: 'REFRESH_TIMESTAMP' });
   }, []);
@@ -241,11 +358,13 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
         state,
         setEvents,
         setCalendarSources,
+        setChoreAssignments,
         setSettings,
         setLoading,
         setError,
         handleEventChange,
         handleCalendarSourceChange,
+        handleChoreAssignmentChange,
         refreshData,
       }}
     >
@@ -270,6 +389,11 @@ export function useDisplayEvents() {
 export function useDisplayCalendarSources() {
   const { state } = useDisplayContext();
   return state.calendarSources;
+}
+
+export function useDisplayChoreAssignments() {
+  const { state } = useDisplayContext();
+  return state.choreAssignments;
 }
 
 export function useDisplaySettings() {

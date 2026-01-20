@@ -11,6 +11,7 @@ export interface DisplayWidgets {
   clock: boolean;
   weather: boolean;
   upcomingEvents: boolean;
+  chores: boolean;
 }
 
 export interface DisplaySettings {
@@ -31,6 +32,7 @@ export const DEFAULT_DISPLAY_SETTINGS: DisplaySettings = {
     clock: true,
     weather: false, // disabled by default until weather feature exists
     upcomingEvents: true,
+    chores: true,
   },
   refreshInterval: 5,
   scheduledReloadTime: '03:00',
@@ -108,6 +110,7 @@ function validateWidgets(value: unknown): DisplayWidgets {
     clock: typeof obj.clock === 'boolean' ? obj.clock : true,
     weather: typeof obj.weather === 'boolean' ? obj.weather : false,
     upcomingEvents: typeof obj.upcomingEvents === 'boolean' ? obj.upcomingEvents : true,
+    chores: typeof obj.chores === 'boolean' ? obj.chores : true,
   };
 }
 

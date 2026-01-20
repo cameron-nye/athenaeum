@@ -3,16 +3,24 @@
 /**
  * Display Calendar Component
  * REQ-3-006: Calendar view optimized for 1080p wall display with smooth animations
+ * REQ-5-019: Integrate chores into display layout
  */
 
 import { DateTimeHeader } from './DateTimeHeader';
 import { TodayEvents } from './TodayEvents';
 import { UpcomingEvents } from './UpcomingEvents';
-import type { CalendarEvent, CalendarSource, DisplaySettings } from './DisplayContext';
+import { ChoreList } from './ChoreList';
+import type {
+  CalendarEvent,
+  CalendarSource,
+  ChoreAssignment,
+  DisplaySettings,
+} from './DisplayContext';
 
 export interface DisplayCalendarProps {
   events: CalendarEvent[];
   calendarSources: CalendarSource[];
+  choreAssignments: ChoreAssignment[];
   settings: DisplaySettings;
   householdName?: string;
   timezone?: string;
@@ -21,6 +29,7 @@ export interface DisplayCalendarProps {
 export function DisplayCalendar({
   events,
   calendarSources,
+  choreAssignments,
   settings,
   householdName,
   timezone,
@@ -47,6 +56,12 @@ export function DisplayCalendar({
           use24Hour={use24HourTime}
           timezone={timezone}
         />
+      )}
+
+      {settings.widgetsEnabled.chores && (
+        <div className="display-chores bg-card/50 rounded-2xl p-6">
+          <ChoreList assignments={choreAssignments} />
+        </div>
       )}
     </div>
   );

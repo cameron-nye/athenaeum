@@ -44,12 +44,14 @@ describe('parseDisplaySettings', () => {
         clock: false,
         weather: true,
         upcomingEvents: false,
+        chores: false,
       },
     });
     expect(result.widgetsEnabled).toEqual({
       clock: false,
       weather: true,
       upcomingEvents: false,
+      chores: false,
     });
   });
 
@@ -61,6 +63,7 @@ describe('parseDisplaySettings', () => {
       clock: false,
       weather: false,
       upcomingEvents: true,
+      chores: true,
     });
   });
 

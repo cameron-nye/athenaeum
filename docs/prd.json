@@ -251,7 +251,7 @@
         "Large, readable typography",
         "Color-coded by status or assignee"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-019",
@@ -263,7 +263,7 @@
         "Toggleable in display settings",
         "Responsive to available space"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-020",
@@ -276,7 +276,7 @@
         "Completed chores update on display",
         "Changes from dashboard visible within seconds"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-021",
@@ -413,7 +413,7 @@
         "Various recurrence patterns represented",
         "Some completed, some pending"
       ],
-      "completed": false
+      "completed": true
     },
     {
       "id": "REQ-5-032",

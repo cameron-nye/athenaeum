@@ -4,6 +4,7 @@
  * Supabase Realtime Provider for Display
  * REQ-3-008: Handle real-time subscriptions for display updates
  * REQ-3-033: Graceful reconnection handling
+ * REQ-5-020: Add chores to realtime subscription
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react';
@@ -25,6 +26,7 @@ export interface RealtimeProviderProps {
   householdId: string;
   onEventsChange?: (event: RealtimeEvent<EventRecord>) => void;
   onCalendarSourcesChange?: (event: RealtimeEvent<CalendarSourceRecord>) => void;
+  onChoreAssignmentsChange?: (event: RealtimeEvent<ChoreAssignmentRecord>) => void;
   onStatusChange?: (status: RealtimeStatus) => void;
   onError?: (error: Error) => void;
   children: React.ReactNode;
@@ -59,12 +61,23 @@ interface CalendarSourceRecord {
   created_at: string;
 }
 
+interface ChoreAssignmentRecord {
+  id: string;
+  chore_id: string;
+  assigned_to: string | null;
+  due_date: string;
+  recurrence_rule: string | null;
+  completed_at: string | null;
+  created_at: string;
+}
+
 const RECONNECT_DELAYS = [1000, 2000, 5000, 10000, 30000]; // Exponential backoff
 
 export function RealtimeProvider({
   householdId,
   onEventsChange,
   onCalendarSourcesChange,
+  onChoreAssignmentsChange,
   onStatusChange,
   onError,
   children,
@@ -81,15 +94,17 @@ export function RealtimeProvider({
   // Store callbacks in refs to avoid dependency issues
   const onEventsChangeRef = useRef(onEventsChange);
   const onCalendarSourcesChangeRef = useRef(onCalendarSourcesChange);
+  const onChoreAssignmentsChangeRef = useRef(onChoreAssignmentsChange);
   const onErrorRef = useRef(onError);
   const onStatusChangeRef = useRef(onStatusChange);
 
   useEffect(() => {
     onEventsChangeRef.current = onEventsChange;
     onCalendarSourcesChangeRef.current = onCalendarSourcesChange;
+    onChoreAssignmentsChangeRef.current = onChoreAssignmentsChange;
     onErrorRef.current = onError;
     onStatusChangeRef.current = onStatusChange;
-  }, [onEventsChange, onCalendarSourcesChange, onError, onStatusChange]);
+  }, [onEventsChange, onCalendarSourcesChange, onChoreAssignmentsChange, onError, onStatusChange]);
 
   const updateStatus = useCallback((newStatus: RealtimeStatus) => {
     statusRef.current = newStatus;
@@ -176,6 +191,23 @@ export function RealtimeProvider({
             eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
             old: payload.old as CalendarSourceRecord | null,
             new: payload.new as CalendarSourceRecord | null,
+          });
+        }
+      );
+
+      // Subscribe to chore_assignments table changes (REQ-5-020)
+      channel.on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'chore_assignments',
+        },
+        (payload) => {
+          onChoreAssignmentsChangeRef.current?.({
+            eventType: payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE',
+            old: payload.old as ChoreAssignmentRecord | null,
+            new: payload.new as ChoreAssignmentRecord | null,
           });
         }
       );

@@ -571,14 +571,15 @@
   animation: burn-in-shift 180s ease-in-out infinite;
 }
 
-/* Display grid layout (REQ-3-025) */
+/* Display grid layout (REQ-3-025, REQ-5-019) */
 .display-grid {
   display: grid;
   grid-template-columns: 1fr 350px;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto 1fr auto;
   grid-template-areas:
     'header header'
-    'main sidebar';
+    'main sidebar'
+    'main chores';
   gap: 2rem;
   padding: 2rem;
   height: 100%;
@@ -596,4 +597,10 @@
 .display-sidebar {
   grid-area: sidebar;
   overflow-y: auto;
+}
+
+.display-chores {
+  grid-area: chores;
+  overflow-y: auto;
+  max-height: 400px;
 }

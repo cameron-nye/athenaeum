@@ -21,6 +21,25 @@ import { DebugOverlay } from '@/components/display/DebugOverlay';
 import type { RealtimeStatus } from '@/components/display/RealtimeProvider';
 import type { DisplaySettings } from '@/lib/display/types';
 
+interface ChoreAssignment {
+  id: string;
+  chore_id: string;
+  due_date: string;
+  assigned_to: string | null;
+  completed_at: string | null;
+  chore: {
+    id: string;
+    title: string;
+    icon: string | null;
+    points: number;
+  };
+  user?: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 interface DisplayClientProps {
   displayId: string;
   initialEvents: Array<{
@@ -41,6 +60,7 @@ interface DisplayClientProps {
     provider: string;
     enabled: boolean;
   }>;
+  initialChoreAssignments: ChoreAssignment[];
   initialSettings: DisplaySettings;
   householdId: string;
   householdName: string;
@@ -93,8 +113,14 @@ function DisplayContent({
   householdId: string;
   householdName: string;
 }) {
-  const { state, handleEventChange, handleCalendarSourceChange, setError, refreshData } =
-    useDisplayContext();
+  const {
+    state,
+    handleEventChange,
+    handleCalendarSourceChange,
+    handleChoreAssignmentChange,
+    setError,
+    refreshData,
+  } = useDisplayContext();
 
   // Apply theme from settings (REQ-3-013)
   useTheme(state.settings.theme);
@@ -179,12 +205,14 @@ function DisplayContent({
       householdId={householdId}
       onEventsChange={handleEventChange}
       onCalendarSourcesChange={handleCalendarSourceChange}
+      onChoreAssignmentsChange={handleChoreAssignmentChange}
       onStatusChange={setRealtimeStatus}
       onError={(err) => setError(err.message)}
     >
       <DisplayCalendar
         events={state.events}
         calendarSources={state.calendarSources}
+        choreAssignments={state.choreAssignments}
         settings={state.settings}
         householdName={householdName}
       />
@@ -204,27 +232,33 @@ function DisplayContent({
 function DisplayInitializer({
   initialEvents,
   initialCalendarSources,
+  initialChoreAssignments,
   initialSettings,
   children,
 }: {
   initialEvents: DisplayClientProps['initialEvents'];
   initialCalendarSources: DisplayClientProps['initialCalendarSources'];
+  initialChoreAssignments: DisplayClientProps['initialChoreAssignments'];
   initialSettings: DisplaySettings;
   children: React.ReactNode;
 }) {
-  const { setEvents, setCalendarSources, setSettings, setLoading } = useDisplayContext();
+  const { setEvents, setCalendarSources, setChoreAssignments, setSettings, setLoading } =
+    useDisplayContext();
 
   useEffect(() => {
     setEvents(initialEvents);
     setCalendarSources(initialCalendarSources);
+    setChoreAssignments(initialChoreAssignments);
     setSettings(initialSettings);
     setLoading(false);
   }, [
     initialEvents,
     initialCalendarSources,
+    initialChoreAssignments,
     initialSettings,
     setEvents,
     setCalendarSources,
+    setChoreAssignments,
     setSettings,
     setLoading,
   ]);
@@ -236,6 +270,7 @@ export function DisplayClient({
   displayId,
   initialEvents,
   initialCalendarSources,
+  initialChoreAssignments,
   initialSettings,
   householdId,
   householdName,
@@ -245,6 +280,7 @@ export function DisplayClient({
       <DisplayInitializer
         initialEvents={initialEvents}
         initialCalendarSources={initialCalendarSources}
+        initialChoreAssignments={initialChoreAssignments}
         initialSettings={initialSettings}
       >
         <DisplayContent
