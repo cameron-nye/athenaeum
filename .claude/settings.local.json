@@ -28,7 +28,12 @@
       "Bash(npm run test:*)",
       "Skill(frontend-design)",
       "mcp__plugin_supabase_supabase__list_projects",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "WebFetch(domain:ui.shadcn.com)",
+      "WebFetch(domain:motion-primitives.com)",
+      "Bash(npx shadcn@latest add:*)",
+      "Bash(npx motion-primitives@latest add:*)",
+      "Bash(yes:*)"
     ]
   }
 }

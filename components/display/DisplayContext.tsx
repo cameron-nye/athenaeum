@@ -36,12 +36,26 @@ export interface DisplayWidgets {
   chores: boolean;
 }
 
+export type DisplayView = 'calendar' | 'chores' | 'photos' | 'settings';
+
+export interface HouseholdMember {
+  id: string;
+  display_name: string | null;
+  avatar_url: string | null;
+}
+
+export interface CompletionFlowState {
+  assignmentId: string;
+  step: 'confirm' | 'who';
+}
+
 export interface ChoreAssignment {
   id: string;
   chore_id: string;
   due_date: string;
   assigned_to: string | null;
   completed_at: string | null;
+  completed_by?: string | null;
   chore: {
     id: string;
     title: string;
@@ -49,6 +63,11 @@ export interface ChoreAssignment {
     points: number;
   };
   user?: {
+    id: string;
+    display_name: string | null;
+    avatar_url: string | null;
+  } | null;
+  completer?: {
     id: string;
     display_name: string | null;
     avatar_url: string | null;
@@ -73,6 +92,14 @@ export interface DisplayState {
   lastUpdated: string | null;
   isLoading: boolean;
   error: string | null;
+  // View navigation
+  activeView: DisplayView;
+  // Household members for completion tracking
+  householdMembers: HouseholdMember[];
+  // Filter state
+  selectedMemberFilter: string | null;
+  // Completion flow state
+  completionFlow: CompletionFlowState | null;
 }
 
 type DisplayAction =
@@ -89,7 +116,13 @@ type DisplayAction =
   | { type: 'SET_SETTINGS'; payload: DisplaySettings }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'REFRESH_TIMESTAMP' };
+  | { type: 'REFRESH_TIMESTAMP' }
+  | { type: 'SET_ACTIVE_VIEW'; payload: DisplayView }
+  | { type: 'SET_HOUSEHOLD_MEMBERS'; payload: HouseholdMember[] }
+  | { type: 'SET_MEMBER_FILTER'; payload: string | null }
+  | { type: 'START_COMPLETION_FLOW'; payload: { assignmentId: string } }
+  | { type: 'ADVANCE_COMPLETION_FLOW' }
+  | { type: 'CANCEL_COMPLETION_FLOW' };
 
 // Database record type for realtime updates (without joined data)
 export interface ChoreAssignmentRecord {
@@ -114,6 +147,16 @@ interface DisplayContextValue {
   handleCalendarSourceChange: (event: RealtimeEvent<CalendarSource & { id: string }>) => void;
   handleChoreAssignmentChange: (event: RealtimeEvent<ChoreAssignmentRecord>) => void;
   refreshData: () => void;
+  // View navigation
+  setActiveView: (view: DisplayView) => void;
+  // Household members
+  setHouseholdMembers: (members: HouseholdMember[]) => void;
+  // Filter
+  setMemberFilter: (memberId: string | null) => void;
+  // Completion flow
+  startCompletionFlow: (assignmentId: string) => void;
+  advanceCompletionFlow: () => void;
+  cancelCompletionFlow: () => void;
 }
 
 const DisplayContext = createContext<DisplayContextValue | null>(null);
@@ -141,6 +184,10 @@ const initialState: DisplayState = {
   lastUpdated: null,
   isLoading: true,
   error: null,
+  activeView: 'calendar',
+  householdMembers: [],
+  selectedMemberFilter: null,
+  completionFlow: null,
 };
 
 function displayReducer(state: DisplayState, action: DisplayAction): DisplayState {
@@ -251,6 +298,49 @@ function displayReducer(state: DisplayState, action: DisplayAction): DisplayStat
         lastUpdated: new Date().toISOString(),
       };
 
+    case 'SET_ACTIVE_VIEW':
+      return {
+        ...state,
+        activeView: action.payload,
+      };
+
+    case 'SET_HOUSEHOLD_MEMBERS':
+      return {
+        ...state,
+        householdMembers: action.payload,
+      };
+
+    case 'SET_MEMBER_FILTER':
+      return {
+        ...state,
+        selectedMemberFilter: action.payload,
+      };
+
+    case 'START_COMPLETION_FLOW':
+      return {
+        ...state,
+        completionFlow: {
+          assignmentId: action.payload.assignmentId,
+          step: 'confirm',
+        },
+      };
+
+    case 'ADVANCE_COMPLETION_FLOW':
+      if (!state.completionFlow) return state;
+      return {
+        ...state,
+        completionFlow: {
+          ...state.completionFlow,
+          step: 'who',
+        },
+      };
+
+    case 'CANCEL_COMPLETION_FLOW':
+      return {
+        ...state,
+        completionFlow: null,
+      };
+
     default:
       return state;
   }
@@ -352,6 +442,30 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'REFRESH_TIMESTAMP' });
   }, []);
 
+  const setActiveView = useCallback((view: DisplayView) => {
+    dispatch({ type: 'SET_ACTIVE_VIEW', payload: view });
+  }, []);
+
+  const setHouseholdMembers = useCallback((members: HouseholdMember[]) => {
+    dispatch({ type: 'SET_HOUSEHOLD_MEMBERS', payload: members });
+  }, []);
+
+  const setMemberFilter = useCallback((memberId: string | null) => {
+    dispatch({ type: 'SET_MEMBER_FILTER', payload: memberId });
+  }, []);
+
+  const startCompletionFlow = useCallback((assignmentId: string) => {
+    dispatch({ type: 'START_COMPLETION_FLOW', payload: { assignmentId } });
+  }, []);
+
+  const advanceCompletionFlow = useCallback(() => {
+    dispatch({ type: 'ADVANCE_COMPLETION_FLOW' });
+  }, []);
+
+  const cancelCompletionFlow = useCallback(() => {
+    dispatch({ type: 'CANCEL_COMPLETION_FLOW' });
+  }, []);
+
   return (
     <DisplayContext.Provider
       value={{
@@ -366,6 +480,12 @@ export function DisplayProvider({ children }: { children: ReactNode }) {
         handleCalendarSourceChange,
         handleChoreAssignmentChange,
         refreshData,
+        setActiveView,
+        setHouseholdMembers,
+        setMemberFilter,
+        startCompletionFlow,
+        advanceCompletionFlow,
+        cancelCompletionFlow,
       }}
     >
       {children}
@@ -407,5 +527,32 @@ export function useDisplayStatus() {
     isLoading: state.isLoading,
     error: state.error,
     lastUpdated: state.lastUpdated,
+  };
+}
+
+export function useDisplayView() {
+  const { state, setActiveView } = useDisplayContext();
+  return {
+    activeView: state.activeView,
+    setActiveView,
+  };
+}
+
+export function useHouseholdMembers() {
+  const { state, setHouseholdMembers } = useDisplayContext();
+  return {
+    members: state.householdMembers,
+    setMembers: setHouseholdMembers,
+  };
+}
+
+export function useCompletionFlow() {
+  const { state, startCompletionFlow, advanceCompletionFlow, cancelCompletionFlow } =
+    useDisplayContext();
+  return {
+    flow: state.completionFlow,
+    start: startCompletionFlow,
+    advance: advanceCompletionFlow,
+    cancel: cancelCompletionFlow,
   };
 }
