@@ -5,7 +5,10 @@
  * REQ-3-005: Client-side wrapper for display with real-time updates
  * REQ-3-010: Real-time event updates with smooth animations
  * REQ-3-013: Theme support with smooth transitions
+ * REQ-3-014: Burn-in prevention with pixel shift
+ * REQ-3-015: Automatic recovery from errors
  * REQ-3-016: Scheduled page reload
+ * REQ-3-017: Memory monitoring for long-running displays
  * REQ-3-029: Heartbeat mechanism
  */
 
@@ -18,6 +21,9 @@ import { LoadingSkeleton } from '@/components/display/LoadingSkeleton';
 import { ErrorState } from '@/components/display/ErrorState';
 import { OfflineIndicator } from '@/components/display/OfflineIndicator';
 import { DebugOverlay } from '@/components/display/DebugOverlay';
+import { usePixelShift } from '@/hooks/usePixelShift';
+import { useHealthCheck } from '@/hooks/useHealthCheck';
+import { useMemoryMonitor } from '@/hooks/useMemoryMonitor';
 import type { RealtimeStatus } from '@/components/display/RealtimeProvider';
 import type { DisplaySettings } from '@/lib/display/types';
 
@@ -125,6 +131,27 @@ function DisplayContent({
   // Apply theme from settings (REQ-3-013)
   useTheme(state.settings.theme);
 
+  // Pixel shift for burn-in prevention (REQ-3-014)
+  const pixelOffset = usePixelShift();
+
+  // Health check for automatic recovery (REQ-3-015)
+  useHealthCheck(
+    useCallback(() => {
+      // Reload the page on persistent failures
+      window.location.reload();
+    }, []),
+    { enabled: true }
+  );
+
+  // Memory monitoring to prevent crashes (REQ-3-017)
+  useMemoryMonitor(
+    useCallback(() => {
+      // Reload page if memory usage is too high
+      window.location.reload();
+    }, []),
+    { enabled: true }
+  );
+
   // Track realtime status for debug overlay
   const [realtimeStatus, setRealtimeStatus] = useState<RealtimeStatus>('connecting');
 
@@ -209,13 +236,22 @@ function DisplayContent({
       onStatusChange={setRealtimeStatus}
       onError={(err) => setError(err.message)}
     >
-      <DisplayCalendar
-        events={state.events}
-        calendarSources={state.calendarSources}
-        choreAssignments={state.choreAssignments}
-        settings={state.settings}
-        householdName={householdName}
-      />
+      {/* Pixel shift wrapper for burn-in prevention (REQ-3-014) */}
+      <div
+        className="h-full w-full"
+        style={{
+          transform: `translate(${pixelOffset.x}px, ${pixelOffset.y}px)`,
+          transition: 'transform 2s ease-in-out',
+        }}
+      >
+        <DisplayCalendar
+          events={state.events}
+          calendarSources={state.calendarSources}
+          choreAssignments={state.choreAssignments}
+          settings={state.settings}
+          householdName={householdName}
+        />
+      </div>
       <OfflineIndicator />
       <DebugOverlay
         displayId={displayId}
