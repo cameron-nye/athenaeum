@@ -298,6 +298,35 @@
       0 0 40px oklch(0.55 0.1 155 / 0.1);
   }
 
+  /* Glow pulse animation for buttons */
+  @keyframes glow-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 8px oklch(0.55 0.1 155 / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 16px oklch(0.55 0.1 155 / 0.6);
+    }
+  }
+
+  .glow-pulse {
+    animation: glow-pulse 3s ease-in-out infinite;
+  }
+
+  .dark .glow-pulse {
+    animation: glow-pulse-dark 3s ease-in-out infinite;
+  }
+
+  @keyframes glow-pulse-dark {
+    0%,
+    100% {
+      box-shadow: 0 0 8px oklch(0.7 0.12 155 / 0.4);
+    }
+    50% {
+      box-shadow: 0 0 16px oklch(0.7 0.12 155 / 0.6);
+    }
+  }
+
   /* Zen shadow - very soft, diffused */
   .shadow-zen {
     box-shadow:
