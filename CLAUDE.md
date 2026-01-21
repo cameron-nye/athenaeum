@@ -14,7 +14,8 @@ npm run test         # Vitest
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md) - Tech stack, data model, API structure
+<!-- - [Architecture](ARCHITECTURE.md) - Tech stack, data model, API structure -->
+
 - [Testing](.claude/docs/testing.md)
 - [Git Workflow](.claude/docs/git-workflow.md)
 - [Browser Automation](.claude/docs/browser-automation.md)
