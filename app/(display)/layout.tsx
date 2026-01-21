@@ -2,14 +2,18 @@
  * Display Route Layout
  * REQ-3-001: Full-screen layout for Raspberry Pi wall displays
  *
- * - Full-screen with no navigation chrome
+ * - Full-screen with no navigation chrome (NO AppShell)
  * - Soft pastel color palette (not harsh black/white)
  * - Dark mode uses warm neutral-800/900
  * - Light mode uses warm neutral-50/100
  * - Overflow hidden to prevent scrolling
+ * - Includes DisplayModeProvider for brightness/mode control
+ * - Includes FilterProvider for family member filtering
  */
 
 import type { Metadata, Viewport } from 'next';
+import { DisplayModeProvider } from '@/contexts/DisplayModeContext';
+import { FilterProvider } from '@/contexts/FilterContext';
 
 export const metadata: Metadata = {
   title: 'Athenaeum Display',
@@ -31,8 +35,12 @@ export const viewport: Viewport = {
 
 export default function DisplayLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="display-root bg-background text-foreground h-screen w-screen overflow-hidden">
-      {children}
-    </div>
+    <FilterProvider>
+      <DisplayModeProvider enableIdleDetection>
+        <div className="display-root bg-background text-foreground h-screen w-screen overflow-hidden">
+          {children}
+        </div>
+      </DisplayModeProvider>
+    </FilterProvider>
   );
 }
